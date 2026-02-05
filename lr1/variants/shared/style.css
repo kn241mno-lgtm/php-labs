@@ -4,28 +4,28 @@
  * Used by: all lr1 variants (v1, v2, ... v15)
  */
 
-/* Import global base styles */
+/* Import global base styles (includes CSS variables) */
 @import '../../../shared/css/base.css';
 
 /* ===== LR1 Specific: Page Background ===== */
 body {
   padding: 40px;
-  background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+  background: linear-gradient(135deg, var(--color-primary-bg) 0%, var(--color-bg-alt) 100%);
   min-height: 100vh;
 }
+
+/* Navigation bar */
 .nav {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #fff;
+  background: white;
   border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   padding: 18px 24px 12px 24px;
   margin: 40px auto 30px auto;
   width: fit-content;
-  position: static;
 }
-
 .nav-center {
   display: flex;
   justify-content: center;
@@ -33,7 +33,7 @@ body {
 }
 .nav label {
   font-size: 15px;
-  color: #374151;
+  color: var(--color-text-secondary);
   margin-right: 8px;
 }
 .nav select {
@@ -41,28 +41,20 @@ body {
   padding: 4px 10px;
   margin-right: 10px;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
-  background: #f1f5f9;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-input);
 }
 .nav select:focus {
-  outline: 2px solid #6366f1;
-}
-.nav .lab-switch {
-  margin-right: 16px;
-}
-.nav .variant-switch {
-  margin-right: 16px;
+  outline: 2px solid var(--color-primary-light);
 }
 .nav-variant {
   font-weight: 600;
-  color: #4f46e5;
+  color: var(--color-primary);
   margin-right: 16px;
 }
+
 @media (max-width: 600px) {
   .nav {
-    left: 0;
-    right: 0;
-    top: 0;
     border-radius: 0;
     padding: 10px 5px;
     flex-direction: column;
@@ -74,130 +66,19 @@ body {
     align-items: stretch;
   }
 }
-.card {
-  background: white;
-  padding: 50px;
-  border-radius: 20px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
-/* Container classes */
-.container-500 {
-  max-width: 500px;
-  margin: 0 auto;
-}
-.container-400 {
-  max-width: 400px;
-  margin: 0 auto;
-}
-.content-wrapper {
-  max-width: 900px;
-  margin: 0 auto;
-}
 
 /* Navigation button */
 .nav-button {
   margin-right: 18px;
   padding: 4px 14px;
   font-size: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  background: #f1f5f9;
+  background: var(--color-bg-input);
 }
 .nav-button:hover {
-  background: #e2e8f0;
-}
-
-/* Number display */
-.number {
-  font-size: 64px;
-  font-weight: bold;
-  text-align: center;
-  color: #4f46e5;
-  letter-spacing: 8px;
-}
-
-/* Digits container and individual digit */
-.digits {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 20px 0;
-}
-.digit {
-  width: 50px;
-  height: 50px;
-  background: #e0e7ff;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  color: #4338ca;
-}
-
-/* Large digit display (task5) */
-.digit-large {
-  font-size: 120px;
-  font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Result blocks */
-.result {
-  font-size: 24px;
-  color: #2d3748;
-  background: #e2e8f0;
-  padding: 15px;
-  border-radius: 8px;
-  margin-top: 20px;
-}
-.result-row {
-  padding: 15px;
-  background: #f8fafc;
-  border-radius: 8px;
-  margin: 10px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.result-value {
-  font-size: 20px;
-  font-weight: bold;
-  color: #059669;
-}
-
-/* Function display (monospace) */
-.func {
-  font-family: monospace;
-  color: #666;
-  font-size: 12px;
-}
-
-/* Info text */
-.info {
-  color: #718096;
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-/* Hint text */
-.hint {
-  text-align: center;
-  color: #666;
-  opacity: 0.8;
-}
-
-/* Emoji display */
-.emoji {
-  font-size: 48px;
-}
-.emoji-large {
-  font-size: 80px;
-  margin-bottom: 20px;
+  background: var(--color-bg-hover);
 }
 
 /* Time display */
@@ -206,19 +87,12 @@ body {
   font-weight: bold;
 }
 
-/* Result text (task4, task5) */
-.result-text {
-  font-size: 36px;
-  margin-top: 20px;
-  color: #333;
-}
-
 /* Poem container */
 .poem {
   background: white;
   padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   max-width: 500px;
   font-family: Georgia, serif;
   font-size: 18px;
@@ -229,7 +103,7 @@ body {
 /* Task 7 - Chessboard */
 .chessboard {
   border-collapse: collapse;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-lg);
   border: 4px solid #5d4037;
   margin: 0 auto;
 }
@@ -239,12 +113,12 @@ body {
   border: 1px solid #5d4037;
 }
 .params {
-  color: #333;
+  color: var(--color-text);
   background: rgba(255, 255, 255, 0.1);
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin-bottom: 20px;
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 /* Task 7 - Circles (fixed position elements) */
@@ -253,22 +127,22 @@ body {
   top: 20px;
   left: 20px;
   color: white;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   background: rgba(0, 0, 0, 0.3);
   padding: 10px 15px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 .circles-counter {
   position: fixed;
   top: 20px;
   right: 20px;
   color: white;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-sans);
   font-size: 18px;
   background: rgba(0, 0, 0, 0.3);
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 .circles-info {
   position: fixed;
@@ -276,111 +150,9 @@ body {
   left: 50%;
   transform: translateX(-50%);
   color: rgba(255, 255, 255, 0.7);
-  font-family: Arial, sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   text-align: center;
-}
-
-/* Not implemented placeholder */
-.not-implemented {
-  padding: 40px;
-  text-align: center;
-  font-size: 22px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* ===== Test Status Bar ===== */
-.test-status-bar {
-  padding: 15px 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.test-status-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.test-status-icon {
-  font-size: 24px;
-}
-.test-status-text {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f2937;
-}
-.test-status-details {
-  display: flex;
-  gap: 8px;
-}
-.test-badge {
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
-}
-.test-badge-passed {
-  background: #d1fae5;
-  color: #065f46;
-}
-.test-badge-failed {
-  background: #fee2e2;
-  color: #991b1b;
-}
-.test-badge-total {
-  background: #e0e7ff;
-  color: #3730a3;
-}
-
-/* Test details (collapsible) */
-.test-details {
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 10px 15px;
-  margin-bottom: 20px;
-}
-.test-details summary {
-  cursor: pointer;
-  font-size: 14px;
-  color: #4b5563;
-  padding: 5px 0;
-}
-.test-details summary:hover {
-  color: #1f2937;
-}
-.test-list {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-}
-.test-list li {
-  padding: 6px 10px;
-  margin: 4px 0;
-  border-radius: 4px;
-  font-size: 13px;
-}
-.test-item-passed {
-  background: #ecfdf5;
-  color: #065f46;
-}
-.test-item-passed span {
-  color: #10b981;
-}
-.test-item-failed {
-  background: #fef2f2;
-  color: #991b1b;
-}
-.test-item-failed span {
-  color: #ef4444;
-}
-.test-error {
-  color: #9ca3af;
-  font-size: 11px;
 }
 
 /* ===== Test Modal ===== */
@@ -402,7 +174,7 @@ body {
 }
 .test-modal-content {
   background: white;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   width: 100%;
   max-width: 700px;
   max-height: 90vh;
@@ -414,31 +186,31 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   background: white;
-  border-radius: 16px 16px 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 .test-modal-header h2 {
   margin: 0;
   font-size: 20px;
-  color: #1f2937;
+  color: var(--color-text);
 }
 .test-modal-close {
-  background: #f3f4f6;
+  background: var(--color-bg-alt);
   border: none;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 18px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--color-text-muted);
   transition: background 0.2s, color 0.2s;
 }
 .test-modal-close:hover {
-  background: #e5e7eb;
-  color: #1f2937;
+  background: var(--color-bg-hover);
+  color: var(--color-text);
 }
 .test-modal-content .test-list {
   padding: 16px 24px 24px;
@@ -455,8 +227,8 @@ body.modal-open {
 
 /* Header details button */
 .header-btn-details {
-  background: #f3f4f6;
-  color: #4b5563;
+  background: var(--color-bg-alt);
+  color: var(--color-text-muted);
   font-size: 13px;
   padding: 4px 10px;
 }
@@ -469,18 +241,18 @@ body.modal-open {
 }
 .header-variant-label {
   font-weight: 600;
-  color: #4f46e5;
+  color: var(--color-primary);
 }
 .header-task-select {
   padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
   font-size: 14px;
-  color: #374151;
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 .header-task-select:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--color-primary-light);
 }
