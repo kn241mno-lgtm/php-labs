@@ -3,7 +3,7 @@
  * Imports base.css for CSS variables
  */
 
-@import '../../shared/css/base.css';
+@import 'shared/css/base.css';
 
 /* ===== Forms ===== */
 .demo-form {
