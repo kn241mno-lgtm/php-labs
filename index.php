@@ -1,7 +1,7 @@
 <?php
 /**
  * Home Page - Variant Selection
- * After selecting variant → redirect to variant page
+ * After selecting variant → show info page with links to demo & assignment
  */
 
 // Dev reload support
@@ -9,33 +9,31 @@ require_once __DIR__ . '/shared/helpers/dev_reload.php';
 handleDevReloadRequest();
 
 $variants = [];
-for ($i = 1; $i <= 15; $i++) {
+for ($i = 1; $i <= 30; $i++) {
     $variants["v{$i}"] = "Варіант {$i}";
 }
 
 $selectedVariant = $_GET['variant'] ?? '';
-
-// If variant selected, redirect to variant page
-if ($selectedVariant && preg_match('/^v\d+$/', $selectedVariant)) {
-    // Find first available lab for this variant
-    $labs = ['lr1', 'lr2', 'lr3', 'lr4', 'lr6'];
-    foreach ($labs as $lab) {
-        $path = __DIR__ . "/{$lab}/variants/{$selectedVariant}/index.php";
-        if (file_exists($path)) {
-            header("Location: /{$lab}/variants/{$selectedVariant}/index.php");
-            exit;
-        }
-    }
-    // No lab found for this variant
-    $error = "Для {$variants[$selectedVariant]} поки немає доступних лабораторних.";
+$variantNumber = 0;
+if ($selectedVariant && preg_match('/^v(\d+)$/', $selectedVariant, $m)) {
+    $variantNumber = (int)$m[1];
 }
+
+// Labs configuration
+$labs = [
+    'lr1' => 'Лабораторна 1 — Базові конструкції PHP',
+    'lr2' => 'Лабораторна 2 — Масиви та рядки',
+    'lr3' => 'Лабораторна 3 — ООП',
+    'lr4' => 'Лабораторна 4 — MVC',
+    'lr6' => 'Лабораторна 6 — Laravel',
+];
 ?>
 <!DOCTYPE html>
 <html lang="uk">
 
 <head>
     <meta charset="UTF-8">
-    <title>PHP Labs — Вибір варіанту</title>
+    <title>PHP Labs — <?= $variantNumber ? "Варіант {$variantNumber}" : 'Вибір варіанту' ?></title>
     <link rel="stylesheet" href="shared/css/base.css">
     <style>
     body {
@@ -53,7 +51,7 @@ if ($selectedVariant && preg_match('/^v\d+$/', $selectedVariant)) {
         box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
         padding: 50px 40px;
         text-align: center;
-        max-width: 400px;
+        max-width: 600px;
         width: 100%;
     }
 
@@ -110,35 +108,114 @@ if ($selectedVariant && preg_match('/^v\d+$/', $selectedVariant)) {
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
     }
 
-    .error {
-        background: #fef2f2;
-        color: #991b1b;
-        padding: 12px 16px;
-        border-radius: 8px;
+    .back-link {
+        display: inline-block;
         margin-bottom: 20px;
+        color: #6366f1;
+        text-decoration: none;
         font-size: 14px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .lab-list {
+        text-align: left;
+        margin-top: 20px;
+    }
+
+    .lab-item {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .lab-item h3 {
+        margin: 0 0 8px 0;
+        color: #1f2937;
+        font-size: 16px;
+    }
+
+    .lab-links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .lab-links a {
+        font-size: 14px;
+        color: #6366f1;
+        text-decoration: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        background: #eef2ff;
+        transition: background 0.2s;
+    }
+
+    .lab-links a:hover {
+        background: #e0e7ff;
+    }
+
+    .lab-links .no-demo {
+        font-size: 14px;
+        color: #9ca3af;
+        padding: 4px 12px;
     }
     </style>
 </head>
 
 <body>
     <div class="main-card">
-        <h1>PHP Labs</h1>
-        <p class="subtitle">Серверні технології</p>
+        <?php if ($variantNumber >= 1 && $variantNumber <= 30): ?>
+            <a href="index.php" class="back-link">&larr; Назад до вибору варіанту</a>
+            <h1>Варіант <?= $variantNumber ?></h1>
+            <p class="subtitle">Лабораторні роботи для вашого варіанту</p>
 
-        <?php if (!empty($error)): ?>
-        <div class="error"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
+            <div class="lab-list">
+                <?php foreach ($labs as $labDir => $labName): ?>
+                    <?php
+                    $hasDemo = file_exists(__DIR__ . "/{$labDir}/demo/index.php");
+                    $hasAssignment = file_exists(__DIR__ . "/{$labDir}/assignment.md");
+                    $hasVariant = file_exists(__DIR__ . "/{$labDir}/variants/v{$variantNumber}.md");
+                    ?>
+                    <div class="lab-item">
+                        <h3><?= htmlspecialchars($labName) ?></h3>
+                        <div class="lab-links">
+                            <?php if ($hasDemo): ?>
+                                <a href="<?= $labDir ?>/demo/">Demo</a>
+                            <?php else: ?>
+                                <span class="no-demo">Demo недоступне</span>
+                            <?php endif; ?>
 
-        <form method="get" class="variant-form">
-            <select name="variant" required>
-                <option value="">Оберіть свій варіант...</option>
-                <?php foreach ($variants as $key => $name): ?>
-                <option value="<?= $key ?>"><?= $name ?></option>
+                            <?php if ($hasVariant): ?>
+                                <a href="<?= $labDir ?>/variants/v<?= $variantNumber ?>.md">Завдання (v<?= $variantNumber ?>.md)</a>
+                            <?php endif; ?>
+
+                            <?php if ($hasAssignment): ?>
+                                <a href="<?= $labDir ?>/assignment.md">Опис лаби</a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 <?php endforeach; ?>
-            </select>
-            <button type="submit" class="btn-go">Перейти</button>
-        </form>
+            </div>
+
+        <?php else: ?>
+            <h1>PHP Labs</h1>
+            <p class="subtitle">Серверні технології — 30 варіантів</p>
+
+            <form method="get" class="variant-form">
+                <select name="variant" required>
+                    <option value="">Оберіть свій варіант...</option>
+                    <?php foreach ($variants as $key => $name): ?>
+                    <option value="<?= $key ?>"><?= $name ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn-go">Перейти</button>
+            </form>
+        <?php endif; ?>
     </div>
     <?= devReloadScript() ?>
 </body>

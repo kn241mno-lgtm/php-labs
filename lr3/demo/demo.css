@@ -1,0 +1,254 @@
+/**
+ * Styles for LR3 demo pages (OOP lab)
+ * Imports base.css for CSS variables
+ */
+
+@import 'shared/css/base.css';
+
+/* ===== User Card Component ===== */
+.user-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.user-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-bg-alt);
+}
+.user-card-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: white;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.user-card-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.user-card-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+.user-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.user-card-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+}
+.user-card-field-label {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  min-width: 70px;
+}
+.user-card-field-value {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.user-card-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Avatar colors */
+.avatar-indigo { background: var(--color-primary); }
+.avatar-green { background: var(--color-success); }
+.avatar-amber { background: #d97706; }
+.avatar-rose { background: #e11d48; }
+
+/* Badge colors */
+.badge-new {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+.badge-constructor {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+.badge-clone {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+/* ===== Users Grid ===== */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 920px;
+}
+
+/* ===== Task Section Headers ===== */
+.task-header {
+  text-align: center;
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 920px;
+}
+.task-header h1 {
+  font-size: 28px;
+  color: var(--color-text);
+  margin: 0 0 8px;
+}
+.task-header p {
+  color: var(--color-text-muted);
+  font-size: 15px;
+  margin: 0;
+}
+
+/* ===== Code Block ===== */
+.code-block {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  padding: 20px 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+  width: 100%;
+  max-width: 920px;
+  white-space: pre;
+}
+.code-keyword { color: #cba6f7; }
+.code-class { color: #f9e2af; }
+.code-string { color: #a6e3a1; }
+.code-variable { color: #89b4fa; }
+.code-comment { color: #6c7086; font-style: italic; }
+.code-method { color: #89dceb; }
+.code-arrow { color: #f38ba8; }
+
+/* ===== Info Output Block ===== */
+.info-output {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  width: 100%;
+  max-width: 920px;
+}
+.info-output-header {
+  background: var(--color-bg-alt);
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+.info-output-body {
+  padding: 16px 20px;
+}
+.info-output-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin: 6px 0;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  border-left: 3px solid transparent;
+}
+.info-output-row:nth-child(1) { border-left-color: var(--color-primary); }
+.info-output-row:nth-child(2) { border-left-color: var(--color-success); }
+.info-output-row:nth-child(3) { border-left-color: #d97706; }
+.info-output-row:nth-child(4) { border-left-color: #e11d48; }
+.info-output-label {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  min-width: 50px;
+}
+.info-output-text {
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+/* ===== Section Divider ===== */
+.section-divider {
+  width: 100%;
+  max-width: 920px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 30px 0 20px;
+}
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+.section-divider-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* ===== Comparison (Task 4: Clone) ===== */
+.comparison-wrapper {
+  width: 100%;
+  max-width: 920px;
+}
+.comparison-arrow {
+  text-align: center;
+  font-size: 32px;
+  color: var(--color-text-hint);
+  padding: 10px 0;
+}
+
+/* ===== Task 1: Creating Objects ===== */
+.task1-body {
+  background: linear-gradient(135deg, var(--color-primary-bg) 0%, #ede9fe 100%);
+}
+
+/* ===== Task 2: getInfo() ===== */
+.task2-body {
+  background: linear-gradient(135deg, var(--color-success-bg) 0%, #d1fae5 100%);
+}
+
+/* ===== Task 3: Constructor ===== */
+.task3-body {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+/* ===== Task 4: Cloning ===== */
+.task4-body {
+  background: linear-gradient(135deg, #fce7f3 0%, #fecdd3 100%);
+}

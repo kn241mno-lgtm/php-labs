@@ -4,7 +4,7 @@
  */
 
 /* Import global base styles (includes CSS variables) */
-@import '../../shared/css/base.css';
+@import 'shared/css/base.css';
 
 /* Base body styles - inherits full-height layout from base.css */
 
