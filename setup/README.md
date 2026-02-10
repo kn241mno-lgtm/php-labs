@@ -51,6 +51,13 @@ irm get.scoop.sh | iex
 scoop install php git
 ```
 
+> Якщо з'явилась помилка `The remote name could not be resolved` для 7zip — зачекайте 5 хвилин і повторіть:
+> ```powershell
+> scoop install 7zip
+> scoop install git
+> ```
+> Якщо не допомагає — див. [troubleshooting/windows.md](../troubleshooting/windows.md#scoop-помилка-завантаження-7zip-або-інших-пакетів)
+
 3. **Закрийте** PowerShell та відкрийте **нове** вікно
 4. Перевірте:
 
