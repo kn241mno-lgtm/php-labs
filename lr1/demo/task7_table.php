@@ -4,6 +4,7 @@
  *
  * Демонстрація: цикли for, функції, генерація HTML/CSS
  */
+require_once __DIR__ . '/layout.php';
 
 /**
  * Генерує HTML таблицю n×n з випадковими кольорами
@@ -23,45 +24,16 @@ function generateColorTable(int $n): string
     return $html;
 }
 
-// Check if came from variant
-$fromVariant = $_GET['from'] ?? null;
-$variantUrl = null;
-if ($fromVariant && preg_match('/^v\d+$/', $fromVariant)) {
-    $variantUrl = "/lr1/variants/{$fromVariant}/task7_table.php";
-}
-$fromParam = $fromVariant ? '?from=' . htmlspecialchars($fromVariant) : '';
-
 // Параметри (demo)
 $n = 5;
 
 // Генеруємо таблицю
 $table = generateColorTable($n);
-?>
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <title>Завдання 7.1 — Кольорова таблиця</title>
-    <link rel="stylesheet" href="demo.css">
-</head>
-<body class="task7-table-body body-with-header">
-    <header class="header-fixed">
-        <div class="header-left">
-            <a href="/" class="header-btn">Головна</a>
-            <a href="index.php<?= $fromParam ?>" class="header-btn">← Демо</a>
-            <?php if ($variantUrl): ?>
-            <a href="<?= htmlspecialchars($variantUrl) ?>" class="header-btn header-btn-variant">← Варіант <?= htmlspecialchars(substr($fromVariant, 1)) ?></a>
-            <?php endif; ?>
-        </div>
-        <div class="header-center"></div>
-        <div class="header-right">Демо / Завд. 7.1</div>
-    </header>
 
-    <h1>🎨 Кольорова таблиця <?= $n ?>×<?= $n ?></h1>
-    <div class="params">generateColorTable(<?= $n ?>)</div>
+$content = '
+    <h1>🎨 Кольорова таблиця ' . $n . '×' . $n . '</h1>
+    <div class="params">generateColorTable(' . $n . ')</div>
+    ' . $table . '
+    <p class="info" style="color:rgba(255,255,255,0.8);margin-top:20px;">Оновіть сторінку для нових кольорів 🔄</p>';
 
-    <?= $table ?>
-
-    <p class="info" style="color:rgba(255,255,255,0.8);margin-top:20px;">Оновіть сторінку для нових кольорів 🔄</p>
-</body>
-</html>
+renderDemoLayout($content, 'Завдання 7.1', 'task7-table-body');

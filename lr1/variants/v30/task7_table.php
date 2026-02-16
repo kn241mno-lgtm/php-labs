@@ -2,8 +2,7 @@
 /**
  * Завдання 6.1: Смугаста таблиця 11x8
  */
-
-require_once dirname(__DIR__, 3) . '/shared/helpers/dev_reload.php';
+require_once __DIR__ . '/layout.php';
 
 function generateStripedTable(int $rows, int $cols, string $color1, string $color2): string
 {
@@ -26,30 +25,10 @@ $color1 = '#6366f1';
 $color2 = '#a5b4fc';
 
 $table = generateStripedTable($rows, $cols, $color1, $color2);
-?>
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <title>Завдання 6.1 — Смугаста таблиця</title>
-    <link rel="stylesheet" href="../../demo/demo.css">
-</head>
-<body class="task7-table-body body-with-header">
-    <header class="header-fixed">
-        <div class="header-left">
-            <a href="/" class="header-btn">Головна</a>
-            <a href="index.php" class="header-btn">← Варіант 30</a>
-            <a href="/lr1/demo/task7_table.php?from=v30" class="header-btn header-btn-demo">Demo</a>
-        </div>
-        <div class="header-center"></div>
-        <div class="header-right">В-30 / Завд. 6.1</div>
-    </header>
 
-    <h1>🎨 Смугаста таблиця <?= $rows ?>x<?= $cols ?></h1>
-    <div class="params">generateStripedTable(<?= $rows ?>, <?= $cols ?>)</div>
+$content = '
+    <h1>🎨 Смугаста таблиця ' . $rows . 'x' . $cols . '</h1>
+    <div class="params">generateStripedTable(' . $rows . ', ' . $cols . ')</div>
+    ' . $table;
 
-    <?= $table ?>
-
-    <?= devReloadScript() ?>
-</body>
-</html>
+renderVariantLayout($content, 'Завдання 6.1', 'task7-table-body');
