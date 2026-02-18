@@ -27,7 +27,7 @@ $color2 = '#a5b4fc';
 $table = generateStripedTable($rows, $cols, $color1, $color2);
 
 $content = '
-    <h1>🎨 Смугаста таблиця ' . $rows . 'x' . $cols . '</h1>
+    <h1>♟️ Смугаста таблиця ' . $rows . 'x' . $cols . '</h1>
     <div class="params">generateStripedTable(' . $rows . ', ' . $cols . ')</div>
     ' . $table;
 
