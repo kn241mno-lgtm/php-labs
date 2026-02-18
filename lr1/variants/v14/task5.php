@@ -1,6 +1,6 @@
 <?php
 /**
- * Завдання 4: Латинська літера — голосна чи приголосна (switch)
+ * Завдання 4: Тип символу (switch)
  *
  * Символ для перевірки: '''
  * Категорії: голосна / приголосна / спеціальний символ (ь, ')
@@ -8,14 +8,15 @@
  */
 require_once __DIR__ . '/layout.php';
 
-function isVowelOrConsonant(string $symbol): string
+function getSymbolType(string $symbol): string
 {
     switch (strtolower($symbol)) {
-        case 'a':
-        case 'e':
-        case 'i':
-        case 'o':
-        case 'u':
+        case 'а':
+        case 'е':
+        case 'і':
+        case 'о':
+        case 'у':
+        case 'и':
             return "голосна";
         case 'ь':
         case "'":
@@ -25,7 +26,7 @@ function isVowelOrConsonant(string $symbol): string
     }
 }
 
-// Вхідні дані (варіант 14)
+// Вхідні дані
 $symbol = "'";
 
 $result = getSymbolType($symbol);
