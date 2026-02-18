@@ -24,8 +24,8 @@ function daysInMonth(int $month, int $year = 2025): int
     return cal_days_in_month(CAL_GREGORIAN, $month, $year);
 }
 
-// Вхідні дані (варіант 30)
-$month = 9;
+// Вхідні дані (варіант 14)
+$month = 5;
 
 $season = determineSeason($month);
 $days = daysInMonth($month);
