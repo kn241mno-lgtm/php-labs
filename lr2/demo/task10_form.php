@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($login === '') {
         $errors[] = 'Логін не може бути порожнім';
     }
-    if (mb_strlen($password) < 4) {
+    if ((function_exists('mb_strlen') ? mb_strlen($password) : strlen($password)) < 4) {
         $errors[] = 'Пароль повинен бути не менше 4 символів';
     }
     if ($password !== $password2) {

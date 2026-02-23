@@ -17,7 +17,7 @@ function webPath(string $absolutePath): string
     $realFile = realpath($absolutePath);
     $realRoot = $docRoot ? realpath($docRoot) : false;
 
-    if ($realFile && $realRoot && str_starts_with($realFile, $realRoot)) {
+    if ($realFile && $realRoot && strpos($realFile, $realRoot) === 0) {
         return str_replace('\\', '/', substr($realFile, strlen($realRoot)));
     }
 
