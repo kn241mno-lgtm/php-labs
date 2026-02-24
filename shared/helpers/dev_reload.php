@@ -20,8 +20,8 @@ function isDev(): bool
 {
     // Dev mode if running on localhost or DEV env is set
     $host = $_SERVER['HTTP_HOST'] ?? '';
-    return str_contains($host, 'localhost')
-        || str_contains($host, '127.0.0.1')
+    return strpos($host, 'localhost') !== false
+        || strpos($host, '127.0.0.1') !== false
         || getenv('PHP_ENV') === 'development';
 }
 

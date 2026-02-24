@@ -41,7 +41,7 @@ function generatePassword(int $length = 12): string
 function checkPasswordStrength(string $password): array
 {
     $checks = [
-        'length' => ['label' => 'Довжина >= 8 символів', 'passed' => mb_strlen($password) >= 8],
+        'length' => ['label' => 'Довжина >= 8 символів', 'passed' => (function_exists('mb_strlen') ? mb_strlen($password) : strlen($password)) >= 8],
         'upper' => ['label' => 'Містить велику літеру', 'passed' => (bool)preg_match('/[A-Z]/', $password)],
         'lower' => ['label' => 'Містить малу літеру', 'passed' => (bool)preg_match('/[a-z]/', $password)],
         'digit' => ['label' => 'Містить цифру', 'passed' => (bool)preg_match('/[0-9]/', $password)],

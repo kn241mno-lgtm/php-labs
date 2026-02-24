@@ -70,7 +70,7 @@ class RegformController extends PageController
         $password = $data['password'] ?? '';
         if ($password === '') {
             $errors['password'] = "Пароль є обов'язковим.";
-        } elseif (mb_strlen($password) < 6) {
+        } elseif ((function_exists('mb_strlen') ? mb_strlen($password) : strlen($password)) < 6) {
             $errors['password'] = 'Пароль має бути не менше 6 символів.';
         }
 
@@ -92,7 +92,7 @@ class RegformController extends PageController
         }
 
         $about = trim($data['about'] ?? '');
-        if ($about !== '' && mb_strlen($about) > 500) {
+        if ($about !== '' && (function_exists('mb_strlen') ? mb_strlen($about) : strlen($about)) > 500) {
             $errors['about'] = 'Максимум 500 символів.';
         }
 

@@ -251,6 +251,10 @@
   padding: 0;
   overflow: hidden;
 }
+.task7-circles-body .content-wrapper {
+  max-width: none;
+  padding: 0;
+}
 .circle {
   box-shadow: 0 4px 20px rgba(255, 255, 0, 0.4);
   transition: transform 0.3s, box-shadow 0.3s;
@@ -262,7 +266,7 @@
 }
 .circles-func {
   position: fixed;
-  top: 20px;
+  top: 60px;
   left: 20px;
   color: white;
   font-family: var(--font-mono);
@@ -273,7 +277,7 @@
 }
 .circles-counter {
   position: fixed;
-  top: 20px;
+  top: 60px;
   right: 20px;
   color: white;
   font-family: var(--font-sans);

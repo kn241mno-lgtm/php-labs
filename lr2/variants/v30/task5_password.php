@@ -47,14 +47,14 @@ function generatePasswordWithoutLogin(int $length, string $login, int $maxAttemp
  */
 function containsLoginSubstring(string $password, string $login, int $minLength = 3): bool
 {
-    $loginLower = mb_strtolower($login);
-    $passwordLower = mb_strtolower($password);
-    $loginLen = mb_strlen($loginLower);
+    $loginLower = function_exists('mb_strtolower') ? mb_strtolower($login) : strtolower($login);
+    $passwordLower = function_exists('mb_strtolower') ? mb_strtolower($password) : strtolower($password);
+    $loginLen = function_exists('mb_strlen') ? mb_strlen($loginLower) : strlen($loginLower);
 
     for ($len = $minLength; $len <= $loginLen; $len++) {
         for ($start = 0; $start <= $loginLen - $len; $start++) {
-            $sub = mb_substr($loginLower, $start, $len);
-            if (str_contains($passwordLower, $sub)) {
+            $sub = function_exists('mb_substr') ? mb_substr($loginLower, $start, $len) : substr($loginLower, $start, $len);
+            if (strpos($passwordLower, $sub) !== false) {
                 return true;
             }
         }
@@ -65,7 +65,7 @@ function containsLoginSubstring(string $password, string $login, int $minLength 
 function checkPasswordStrength(string $password): array
 {
     $checks = [
-        'length' => ['label' => 'Довжина >= 8 символів', 'passed' => mb_strlen($password) >= 8],
+        'length' => ['label' => 'Довжина >= 8 символів', 'passed' => (function_exists('mb_strlen') ? mb_strlen($password) : strlen($password)) >= 8],
         'upper' => ['label' => 'Містить велику літеру', 'passed' => (bool)preg_match('/[A-Z]/', $password)],
         'lower' => ['label' => 'Містить малу літеру', 'passed' => (bool)preg_match('/[a-z]/', $password)],
         'digit' => ['label' => 'Містить цифру', 'passed' => (bool)preg_match('/[0-9]/', $password)],
