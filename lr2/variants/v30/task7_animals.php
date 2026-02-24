@@ -22,9 +22,6 @@ function generateAnimalName(array $syllables, int $count = 2): string
         $name .= $syllables[array_rand($syllables)];
     }
 
-    if (!function_exists('mb_strtoupper')) {
-        return $name;
-    }
     return mb_strtoupper(mb_substr($name, 0, 1)) . mb_substr($name, 1);
 }
 
