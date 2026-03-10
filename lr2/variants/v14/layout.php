@@ -1,6 +1,6 @@
 <?php
 /**
- * Shared layout template for LR2 Variant 30 task pages
+ * Shared layout template for LR2 Variant 14 task pages
  */
 
 require_once dirname(__DIR__, 3) . '/shared/helpers/dev_reload.php';
@@ -24,14 +24,14 @@ function renderVariantLayout(string $content, string $taskName, string $bodyClas
         'task11_calc.php' => 'Завдання 11',
     ];
 
-    $demoUrl = "/lr2/demo/{$currentTask}?from=v30";
+    $demoUrl = "/lr2/demo/{$currentTask}?from=v14";
     ?>
 <!DOCTYPE html>
 <html lang="uk">
 
 <head>
     <meta charset="UTF-8">
-    <title><?= htmlspecialchars($taskName) ?> — Варіант 30 ЛР2</title>
+    <title><?= htmlspecialchars($taskName) ?> — Варіант 14 ЛР2</title>
     <link rel="stylesheet" href="<?= webPath(dirname(__DIR__, 3) . '/shared/css/base.css') ?>">
     <link rel="stylesheet" href="<?= webPath(dirname(__DIR__, 2) . '/demo/demo.css') ?>">
 </head>
@@ -40,12 +40,12 @@ function renderVariantLayout(string $content, string $taskName, string $bodyClas
     <header class="header-fixed">
         <div class="header-left">
             <a href="/" class="header-btn">Головна</a>
-            <a href="index.php" class="header-btn">← Варіант 30</a>
+            <a href="index.php" class="header-btn">← Варіант 14</a>
             <a href="<?= htmlspecialchars($demoUrl) ?>" class="header-btn header-btn-demo">Demo</a>
         </div>
         <div class="header-center"></div>
         <div class="header-right">
-            <span class="header-variant-label">В-30</span>
+            <span class="header-variant-label">В-14</span>
             <select class="header-task-select" onchange="if(this.value) location.href=this.value">
                 <?php foreach ($variantTasks as $file => $name): ?>
                 <option value="<?= htmlspecialchars($file) ?>"

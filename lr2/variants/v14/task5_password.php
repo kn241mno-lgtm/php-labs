@@ -2,7 +2,7 @@
 /**
  * Завдання 5: Генератор паролів (без підрядка логіну)
  *
- * Варіант 30 (група C, Sub3): пароль без підрядка логіну (>= 3 символи)
+ * Варіант 14 (група C, Sub3): пароль без підрядка логіну (>= 3 символи)
  * Довжина: 16
  */
 require_once __DIR__ . '/layout.php';
@@ -97,7 +97,7 @@ function checkPasswordStrength(string $password): array
     ];
 }
 
-// Обробка (варіант 30)
+// Обробка (варіант 14)
 $action = $_POST['action'] ?? '';
 $genLength = (int)($_POST['gen_length'] ?? 16);
 $login = $_POST['login'] ?? 'teacher_math';

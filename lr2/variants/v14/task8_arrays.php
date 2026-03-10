@@ -2,7 +2,7 @@
 /**
  * Завдання 8: Операції з масивами
  *
- * Варіант 30 (група C): array_intersect + sort ascending
+ * Варіант 14 (група C): array_intersect + sort ascending
  * createArray(): довжина 3-6, значення 10-30
  */
 require_once __DIR__ . '/layout.php';
@@ -30,7 +30,7 @@ function intersectSorted(array $a, array $b): array
     return array_values($common);
 }
 
-// Генеруємо масиви (варіант 30)
+// Генеруємо масиви (варіант 14)
 $arr1 = createArray();
 $arr2 = createArray();
 

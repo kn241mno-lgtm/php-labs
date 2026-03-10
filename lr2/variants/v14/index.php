@@ -37,12 +37,12 @@ $demoUrl = '/lr2/demo/index.php?from=v30';
         </div>
         <div class="header-center"></div>
         <div class="header-right">
-            Варіант 30 ЛР2
+            Варіант 14 ЛР2
         </div>
     </header>
 
     <h1 class="index-title">
-        Варіант 30
+        Варіант 14
         <br><span class="index-subtitle">Лабораторна робота №2</span>
     </h1>
 
