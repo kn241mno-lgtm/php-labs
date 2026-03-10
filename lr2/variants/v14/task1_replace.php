@@ -2,7 +2,7 @@
 /**
  * Завдання 1: Пошук та заміна
  *
- * Варіант 30: "учням" → "студентам"
+ * Варіант 14: "у" → "о"
  */
 require_once __DIR__ . '/layout.php';
 
@@ -14,10 +14,10 @@ function findAndReplace(string $text, string $find, string $replace): string
     return str_replace($find, $replace, $text);
 }
 
-// Вхідні дані (варіант 30)
-$text = $_POST['text'] ?? 'Вчитель пояснив учням нову тему з математики і попросив учнів виконати домашнє завдання до понеділка';
-$find = $_POST['find'] ?? '';
-$replace = $_POST['replace'] ?? '';
+// Вхідні дані (варіант 14)
+$text = $_POST['text'] ?? 'Студенти нашого університету працюють над проєктами з програмування кожного семестру';
+$find = $_POST['find'] ?? 'у';
+$replace = $_POST['replace'] ?? 'о';
 $result = '';
 $submitted = isset($_POST['text']);
 
