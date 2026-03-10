@@ -1,6 +1,6 @@
 <?php
 /**
- * Variant 30 Index Page — LR2
+ * Variant 14 Index Page — LR2
  */
 
 require_once dirname(__DIR__, 3) . '/shared/templates/task_cards.php';
@@ -26,7 +26,7 @@ $demoUrl = '/lr2/demo/index.php?from=v30';
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Варіант 30 — ЛР2</title>
+    <title>Варіант 14 — ЛР2</title>
     <link rel="stylesheet" href="<?= webPath(dirname(__DIR__, 3) . '/shared/css/base.css') ?>">
     <link rel="stylesheet" href="<?= webPath(dirname(__DIR__, 2) . '/demo/demo.css') ?>">
 </head>
