@@ -26,7 +26,7 @@ class FolderController extends PageController
             if ($login === '' || $password === '') {
                 $error = 'Логін та пароль є обов\'язковими.';
             } elseif (!preg_match('/^[a-zA-Z0-9_]{1,64}$/', $login)) {
-                $error = 'Логін може містити лише латинські літери, цифри та _';
+                $error = 'Логін: 1-64 символи (латинські літери, цифри, _).';
             } else {
                 $userDir = $this->usersDir . '/' . $login;
 
@@ -75,7 +75,7 @@ class FolderController extends PageController
             if ($login === '' || $password === '') {
                 $error = 'Логін та пароль є обов\'язковими.';
             } elseif (!preg_match('/^[a-zA-Z0-9_]{1,64}$/', $login)) {
-                $error = 'Логін може містити лише латинські літери, цифри та _';
+                $error = 'Логін: 1-64 символи (латинські літери, цифри, _).';
             } else {
                 $userDir = $this->usersDir . '/' . $login;
 

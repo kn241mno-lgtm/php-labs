@@ -638,6 +638,11 @@ h3 {
     margin-top: 16px;
 }
 
+.form__fieldset {
+    border: none;
+    padding: 0;
+}
+
 .form__hint {
     display: block;
     color: #6b7280;

@@ -37,8 +37,7 @@ class UploadController extends PageController
                     $error = 'Дозволені формати: JPEG, PNG, GIF, WebP.';
                 }
             }
-            if ($error === '' && isset($file) && $file['error'] === UPLOAD_ERR_OK) {
-                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            if ($error === '' && isset($ext)) {
                 $safeName = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
                 $dest = $this->uploadDir . '/' . $safeName;
 
