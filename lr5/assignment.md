@@ -132,3 +132,7 @@ lr5/
 - [PHP MySQL Prepared](https://www.w3schools.com/php/php_mysql_prepared_statements.asp) — prepared statements
 - [PHP password_hash](https://www.php.net/manual/en/function.password-hash.php) — хешування паролів
 - [PDO Tutorial](https://www.php.net/manual/en/pdo.connections.php) — PDO підключення
+
+## Проблеми?
+
+Якщо при запуску з'являється помилка `could not find driver` — див. [PDO SQLite: "could not find driver"](../troubleshooting/pdo-sqlite-driver.md).
