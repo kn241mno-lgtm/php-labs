@@ -1,9 +1,8 @@
 <?php
 /**
- * Завдання 11: Калькулятор — результати обчислень
- *
- * Варіант 14: X = 8, Y = 4
- * sin(8)=0.9894, cos(8)=-0.1455, tg(8)=-6.7997, 8^4=4096, 8!=40320
+ * Завдання 11: Калькулятор функцій
+ * X = 2, Y = 7
+ * sin(2)=0.9093, cos(2)=-0.4161, tg(2)=-2.185, sin(2)/cos(2)=-2.185, 2^7=128, 2!=2
  */
 require_once __DIR__ . '/layout.php';
 
@@ -105,7 +104,7 @@ ob_start();
                     if (is_string($row['value'])) {
                         echo '<span class="demo-tag demo-tag-error">' . htmlspecialchars($row['value']) . '</span>';
                     } else {
-                        echo round($row['value'], 10);
+                        echo round($row['value'], 4);
                     }
                     ?>
                 </td>
@@ -125,11 +124,11 @@ require_once 'Function/func.php';
 $x = <?= $x ?>;
 $y = <?= $y ?>;
 
-my_sin($x)      = <?= is_string($results[0]['value']) ? $results[0]['value'] : round($results[0]['value'], 10) . "\n" ?>
-my_cos($x)      = <?= is_string($results[1]['value']) ? $results[1]['value'] : round($results[1]['value'], 10) . "\n" ?>
-my_tan($x)      = <?= is_string($results[2]['value']) ? $results[2]['value'] : round($results[2]['value'], 10) . "\n" ?>
-my_tg($x)       = <?= is_string($results[3]['value']) ? $results[3]['value'] : round($results[3]['value'], 10) . "\n" ?>
-my_pow($x, $y)  = <?= round($results[4]['value'], 10) . "\n" ?>
+my_sin($x)      = <?= round($results[0]['value'], 4) . "\n" ?>
+my_cos($x)      = <?= round($results[1]['value'], 4) . "\n" ?>
+my_tan($x)      = <?= round($results[2]['value'], 4) . "\n" ?>
+my_tg($x)       = <?= is_string($results[3]['value']) ? $results[3]['value'] : round($results[3]['value'], 4) . "\n" ?>
+my_pow($x, $y)  = <?= round($results[4]['value'], 4) . "\n" ?>
 my_factorial(<?= (int)$x ?>) = <?= $results[5]['value'] ?></div>
 </div>
 <?php

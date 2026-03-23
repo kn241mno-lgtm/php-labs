@@ -1,8 +1,7 @@
 <?php
 /**
- * Завдання 11: Калькулятор — форма введення
- *
- * Варіант 14: X = 8, Y = 4
+ * Завдання 11: Калькулятор функцій
+ * X = 2, Y = 7
  */
 require_once __DIR__ . '/layout.php';
 
@@ -16,11 +15,11 @@ ob_start();
         <div class="form-row">
             <div>
                 <label for="x">Значення X</label>
-                <input type="number" id="x" name="x" step="any" value="<?= htmlspecialchars($_GET['x'] ?? '8') ?>" placeholder="Введіть X" required>
+                <input type="number" id="x" name="x" step="any" value="<?= htmlspecialchars($_GET['x'] ?? '2') ?>" placeholder="Введіть X" required>
             </div>
             <div>
                 <label for="y">Значення Y</label>
-                <input type="number" id="y" name="y" step="any" value="<?= htmlspecialchars($_GET['y'] ?? '4') ?>" placeholder="Введіть Y" required>
+                <input type="number" id="y" name="y" step="any" value="<?= htmlspecialchars($_GET['y'] ?? '7') ?>" placeholder="Введіть Y" required>
             </div>
         </div>
         <button type="submit" class="btn-submit">Обчислити</button>
