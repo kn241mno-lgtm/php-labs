@@ -4,7 +4,7 @@ class Movie {
     public $director;
     public $year;
 
-    public function __construct(string $title, string $director, int $year) {
+    public function __construct($title, $director, $year) {
         $this->title = $title;
         $this->director = $director;
         $this->year = $year;
@@ -12,5 +12,11 @@ class Movie {
 
     public function getInfo() {
         return "Фільм: {$this->title}, Режисер: {$this->director}, Рік: {$this->year}";
+    }
+
+    public function __clone(): void {
+        $this->title = "Без назви";
+        $this->director = "";
+        $this->year = 0;
     }
 }

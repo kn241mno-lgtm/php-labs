@@ -2,16 +2,16 @@
 /**
  * Завдання 4: Клонування об'єктів
  *
- * Варіант 14: __clone() задає значення за замовчанням при копіюванні
+ * Варіант 14: _clone() — при копіюванні задає значення за замовчанням: title = "Без назви", director = "", year = 0
  */
 require_once __DIR__ . '/layout.php';
-require_once __DIR__ . '/Product.php';
+require_once __DIR__ . '/Movie.php';
 
-// Оригінальний об'єкт (через конструктор)
-$product3 = new Product('Рюкзак Osprey', 6800.00, 'Аксесуари');
+// Оригінальний об'єкт
+$movie3 = new Movie('Атлантида', 'Валентин Васянович', 2019);
 
-// Клонуємо — __clone() задає значення за замовчанням
-$product4 = clone $product3;
+// Клонування
+$movie4 = clone $movie3;
 
 ob_start();
 ?>
@@ -21,16 +21,18 @@ ob_start();
     <p>Метод <code>__clone()</code> задає значення за замовчанням при копіюванні об'єкта</p>
 </div>
 
-<div class="code-block"><span class="code-comment">// Метод __clone() — викликається автоматично при clone</span>
+<div class="code-block">
+<span class="code-comment">// Метод __clone()</span>
 <span class="code-keyword">public function</span> <span class="code-method">__clone</span>(): <span class="code-class">void</span>
 {
-    <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">name</span> = <span class="code-string">'Новий товар'</span>;
-    <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">price</span> = <span class="code-string">0.0</span>;
-    <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">category</span> = <span class="code-string">'Без категорії'</span>;
+    <span class="code-variable">$this</span><span class="code-arrow">-></span>title = <span class="code-string">'Без назви'</span>;
+    <span class="code-variable">$this</span><span class="code-arrow">-></span>director = <span class="code-string">''</span>;
+    <span class="code-variable">$this</span><span class="code-arrow">-></span>year = <span class="code-string">0</span>;
 }
 
 <span class="code-comment">// Створюємо 4-й об'єкт через clone</span>
-<span class="code-variable">$product4</span> = <span class="code-keyword">clone</span> <span class="code-variable">$product3</span>;</div>
+<span class="code-variable">$movie4</span> = <span class="code-keyword">clone</span> <span class="code-variable">$movie3</span>;
+</div>
 
 <div class="section-divider">
     <span class="section-divider-text">Оригінал vs Клон</span>
@@ -40,48 +42,48 @@ ob_start();
     <div class="users-grid">
         <div class="user-card">
             <div class="user-card-header">
-                <div class="user-card-avatar avatar-amber">Р</div>
+                <div class="user-card-avatar avatar-amber">М</div>
                 <div>
-                    <div class="user-card-name"><?= htmlspecialchars($product3->name) ?></div>
-                    <div class="user-card-label">$product3 <span class="user-card-badge badge-constructor">original</span></div>
+                    <div class="user-card-name"><?= htmlspecialchars($movie3->title) ?></div>
+                    <div class="user-card-label">$movie3</div>
                 </div>
             </div>
             <div class="user-card-body">
                 <div class="user-card-field">
-                    <span class="user-card-field-label">name</span>
-                    <span class="user-card-field-value"><?= htmlspecialchars($product3->name) ?></span>
+                    <span class="user-card-field-label">title</span>
+                    <span class="user-card-field-value"><?= htmlspecialchars($movie3->title) ?></span>
                 </div>
                 <div class="user-card-field">
-                    <span class="user-card-field-label">price</span>
-                    <span class="user-card-field-value"><?= $product3->price ?> грн</span>
+                    <span class="user-card-field-label">director</span>
+                    <span class="user-card-field-value"><?= htmlspecialchars($movie3->director) ?></span>
                 </div>
                 <div class="user-card-field">
-                    <span class="user-card-field-label">category</span>
-                    <span class="user-card-field-value"><?= htmlspecialchars($product3->category) ?></span>
+                    <span class="user-card-field-label">year</span>
+                    <span class="user-card-field-value"><?= $movie3->year ?></span>
                 </div>
             </div>
         </div>
 
         <div class="user-card">
             <div class="user-card-header">
-                <div class="user-card-avatar avatar-rose">Н</div>
+                <div class="user-card-avatar avatar-rose">К</div>
                 <div>
-                    <div class="user-card-name"><?= htmlspecialchars($product4->name) ?></div>
-                    <div class="user-card-label">$product4 <span class="user-card-badge badge-clone">clone</span></div>
+                    <div class="user-card-name"><?= htmlspecialchars($movie4->title) ?></div>
+                    <div class="user-card-label">$movie4</div>
                 </div>
             </div>
             <div class="user-card-body">
                 <div class="user-card-field">
-                    <span class="user-card-field-label">name</span>
-                    <span class="user-card-field-value"><?= htmlspecialchars($product4->name) ?></span>
+                    <span class="user-card-field-label">title</span>
+                    <span class="user-card-field-value"><?= htmlspecialchars($movie4->title) ?></span>
                 </div>
                 <div class="user-card-field">
-                    <span class="user-card-field-label">price</span>
-                    <span class="user-card-field-value"><?= $product4->price ?> грн</span>
+                    <span class="user-card-field-label">director</span>
+                    <span class="user-card-field-value"><?= htmlspecialchars($movie4->director) ?></span>
                 </div>
                 <div class="user-card-field">
-                    <span class="user-card-field-label">category</span>
-                    <span class="user-card-field-value"><?= htmlspecialchars($product4->category) ?></span>
+                    <span class="user-card-field-label">year</span>
+                    <span class="user-card-field-value"><?= $movie4->year ?></span>
                 </div>
             </div>
         </div>
@@ -89,19 +91,18 @@ ob_start();
 </div>
 
 <div class="section-divider">
-    <span class="section-divider-text">getInfo() порівняння</span>
+    <span class="section-divider-text">getInfo()</span>
 </div>
 
 <div class="info-output">
-    <div class="info-output-header">Результат getInfo() для оригіналу та клону</div>
     <div class="info-output-body">
         <div class="info-output-row">
-            <span class="info-output-label">$product3</span>
-            <span class="info-output-text"><?= htmlspecialchars($product3->getInfo()) ?></span>
+            <span class="info-output-label">$movie3</span>
+            <span class="info-output-text"><?= htmlspecialchars($movie3->getInfo()) ?></span>
         </div>
         <div class="info-output-row">
-            <span class="info-output-label">$product4</span>
-            <span class="info-output-text"><?= htmlspecialchars($product4->getInfo()) ?></span>
+            <span class="info-output-label">$movie4</span>
+            <span class="info-output-text"><?= htmlspecialchars($movie4->getInfo()) ?></span>
         </div>
     </div>
 </div>
@@ -109,3 +110,4 @@ ob_start();
 <?php
 $content = ob_get_clean();
 renderVariantLayout($content, 'Завдання 4', 'task4-body');
+?>
