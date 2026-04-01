@@ -18,7 +18,14 @@ function dateDifference(string $date1, string $date2): int|false
     }
 
     $interval = $d1->diff($d2);
-    return $interval->days;
+    $days = $interval->days;
+
+   
+    if ($interval->invert == 1) {
+        $days = -$days;
+    }
+
+    return $days;
 }
 
 function isValidDate(string $date): bool
