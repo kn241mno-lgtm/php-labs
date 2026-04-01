@@ -18,15 +18,16 @@ ob_start();
 
 <div class="task-header">
     <h1>Клонування</h1>
-    <p>Метод <code>__clone()</code> задає значення за замовчанням при копіюванні об'єкта</p>
+    <p><code>clone</code> створює точну копію об'єкта. Метод <code>__clone()</code> дозволяє кастомізувати копію (наприклад, скинути пароль)</p>
 </div>
 
 <div class="code-block"><span class="code-comment">// Метод __clone() — викликається автоматично при clone</span>
+<span class="code-comment">// clone спочатку копіює ВСІ властивості, потім викликає __clone()</span>
 <span class="code-keyword">public function</span> <span class="code-method">__clone</span>(): <span class="code-class">void</span>
 {
-    <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">name</span> = <span class="code-string">'User'</span>;
-    <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">login</span> = <span class="code-string">'User'</span>;
-    <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">password</span> = <span class="code-string">'qwerty'</span>;
+    <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">parentId</span> = <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">id</span>;    <span class="code-comment">// зберігаємо id батька</span>
+    <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">id</span> = <span class="code-variable">self</span>::<span class="code-variable">$nextId</span>++;      <span class="code-comment">// новий id для клону</span>
+    <span class="code-variable">$this</span><span class="code-arrow">-></span><span class="code-method">password</span> = <span class="code-string">'qwerty'</span>;     <span class="code-comment">// скидаємо пароль</span>
 }
 
 <span class="code-comment">// Створюємо 4-й об'єкт через clone</span>
@@ -48,6 +49,14 @@ ob_start();
             </div>
             <div class="user-card-body">
                 <div class="user-card-field">
+                    <span class="user-card-field-label">id</span>
+                    <span class="user-card-field-value"><?= $user3->id ?></span>
+                </div>
+                <div class="user-card-field">
+                    <span class="user-card-field-label">parentId</span>
+                    <span class="user-card-field-value"><?= $user3->parentId ?? 'null' ?></span>
+                </div>
+                <div class="user-card-field">
                     <span class="user-card-field-label">name</span>
                     <span class="user-card-field-value"><?= htmlspecialchars($user3->name) ?></span>
                 </div>
@@ -64,13 +73,21 @@ ob_start();
 
         <div class="user-card">
             <div class="user-card-header">
-                <div class="user-card-avatar avatar-rose">U</div>
+                <div class="user-card-avatar avatar-rose">Д</div>
                 <div>
                     <div class="user-card-name"><?= htmlspecialchars($user4->name) ?></div>
                     <div class="user-card-label">$user4 <span class="user-card-badge badge-clone">clone</span></div>
                 </div>
             </div>
             <div class="user-card-body">
+                <div class="user-card-field">
+                    <span class="user-card-field-label">id</span>
+                    <span class="user-card-field-value"><?= $user4->id ?></span>
+                </div>
+                <div class="user-card-field">
+                    <span class="user-card-field-label">parentId</span>
+                    <span class="user-card-field-value"><?= $user4->parentId ?></span>
+                </div>
                 <div class="user-card-field">
                     <span class="user-card-field-label">name</span>
                     <span class="user-card-field-value"><?= htmlspecialchars($user4->name) ?></span>

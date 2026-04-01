@@ -7,6 +7,10 @@
 
 class Users
 {
+    private static int $nextId = 1;
+
+    public int $id;
+    public ?int $parentId = null;
     public string $name;
     public string $login;
     public string $password;
@@ -16,6 +20,7 @@ class Users
      */
     public function __construct(string $name = '', string $login = '', string $password = '')
     {
+        $this->id = self::$nextId++;
         $this->name = $name;
         $this->login = $login;
         $this->password = $password;
@@ -30,12 +35,12 @@ class Users
     }
 
     /**
-     * При клонуванні — встановлює значення за замовчанням
+     * При клонуванні — кастомізація копії
      */
     public function __clone(): void
     {
-        $this->name = 'User';
-        $this->login = 'User';
+        $this->parentId = $this->id;
+        $this->id = self::$nextId++;
         $this->password = 'qwerty';
     }
 }

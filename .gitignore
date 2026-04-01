@@ -29,3 +29,6 @@ Thumbs.db
 *.log
 *.swp
 *.swo
+
+# Source PDFs (lab assignment originals)
+lr5/*.pdf

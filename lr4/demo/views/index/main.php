@@ -1,6 +1,6 @@
 <div class="page-home">
     <h1>PHP MVC Demo</h1>
-    <p class="page-home__subtitle">Лабораторна робота №4-5 &mdash; Створення MVC-додатку на PHP</p>
+    <p class="page-home__subtitle">Лабораторна робота №4 &mdash; Створення MVC-додатку на PHP</p>
 
     <div class="card-grid">
         <div class="card">

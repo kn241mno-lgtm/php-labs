@@ -1,0 +1,5 @@
+database/app.db
+data/uploads/*
+!data/uploads/.gitkeep
+data/users/*
+!data/users/.gitkeep
