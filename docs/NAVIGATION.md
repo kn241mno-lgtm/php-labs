@@ -148,7 +148,8 @@ php-labs/
 │   └── assignment.md             # General lab description
 │
 ├── lr2/, lr3/                    # Same pattern (demo/ + variants/ + assignment.md)
-├── lr4/                          # MVC demo (different structure)
+├── lr4/                          # MVC demo (sessions, cookies, forms)
+├── lr5/                          # MVC demo (files, PDO, auth, CRUD)
 └── shared/                       # Global CSS, helpers, templates
 ```
 
@@ -161,6 +162,6 @@ php-labs/
 3. Клік "Demo" → `/lr1/demo/` → вивчити робочий приклад
 4. Клік "Завдання (v5.md)" → GitHub (нова вкладка) → прочитати задачі
 5. **ЛР1:** скопіювати `lr1/variants/v30/` → `lr1/variants/v5/` → замінити дані
-6. **ЛР2-4:** створити файли в `lrN/` за прикладом з demo/
+6. **ЛР2-5:** створити файли в `lrN/` за прикладом з demo/
 7. `php -S localhost:8000` → перевірити в браузері
 8. Закомітити та push на GitHub

@@ -2,7 +2,7 @@
 /**
  * Завдання 4: Клонування об'єктів
  *
- * Варіант 14: _clone() — при копіюванні задає значення за замовчанням: title = "Без назви", director = "", year = 0
+ * Варіант 14: __clone() — дозволяє точне клонування об'єкта з усіма властивостями
  */
 require_once __DIR__ . '/layout.php';
 require_once __DIR__ . '/Movie.php';
@@ -18,16 +18,14 @@ ob_start();
 
 <div class="task-header">
     <h1>Клонування</h1>
-    <p>Метод <code>__clone()</code> задає значення за замовчанням при копіюванні об'єкта</p>
-</div>
+    <p>Метод <code>__clone()</code> дозволяє точне клонування об'єкта з усіма властивостями</p>
+</div>  
 
 <div class="code-block">
-<span class="code-comment">// Метод __clone()</span>
+<span class="code-comment">// Метод __clone() - точне клонування</span>
 <span class="code-keyword">public function</span> <span class="code-method">__clone</span>(): <span class="code-class">void</span>
 {
-    <span class="code-variable">$this</span><span class="code-arrow">-></span>title = <span class="code-string">'Без назви'</span>;
-    <span class="code-variable">$this</span><span class="code-arrow">-></span>director = <span class="code-string">''</span>;
-    <span class="code-variable">$this</span><span class="code-arrow">-></span>year = <span class="code-string">0</span>;
+    <span class="code-comment">// Властивості копіюються автоматично</span>
 }
 
 <span class="code-comment">// Створюємо 4-й об'єкт через clone</span>

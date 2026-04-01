@@ -52,6 +52,8 @@ php -S localhost:8000
 # http://localhost:8000/lr1/variants/v30/ — ЛР1 (7 завдань)
 # http://localhost:8000/lr2/variants/v30/ — ЛР2 (11 завдань)
 # http://localhost:8000/lr3/variants/v30/ — ЛР3 (4 завдання)
+# http://localhost:8000/lr4/variants/v30/ — ЛР4 (MVC, сесії, форми)
+# http://localhost:8000/lr5/variants/v30/ — ЛР5 (файли, PDO, CRUD)
 ```
 
 ## Як отримати оновлення від викладача
@@ -73,7 +75,7 @@ git push
 2. Функції, рядки, масиви, форми
 3. Об'єктно-орієнтоване програмування
 4. MVC паттерн
-5. MVC паттерн (продовження)
+5. Файли та база даних (PDO)
 6. Laravel
 7. Laravel (продовження)
 

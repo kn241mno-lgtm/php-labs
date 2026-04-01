@@ -15,8 +15,9 @@ class Movie {
     }
 
     public function __clone(): void {
-        $this->title = "Без назви";
+     
         $this->director = "";
-        $this->year = 0;
+        $this->year = 2001;
+        // Точний клон - без змін властивостей
     }
 }
