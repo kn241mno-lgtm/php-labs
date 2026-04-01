@@ -6,14 +6,14 @@
  */
 require_once __DIR__ . '/layout.php';
 
-// Опис класу прямо тут
+// Опис класу 
 class Movie {
     public $title;
     public $director;
     public $year;
 }
 
-// Створюємо 3 об'єкти
+// об'єкти
 $movie1 = new Movie();
 $movie1->title = 'Тіні забутих предків';
 $movie1->director = 'Сергій Параджанов';
