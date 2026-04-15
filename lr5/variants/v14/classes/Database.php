@@ -24,6 +24,11 @@ class Database
                 }
             } catch (PDOException $e) {
                 error_log('DB connection error: ' . $e->getMessage());
+                $appDebug = getenv('APP_DEBUG');
+                if ($appDebug === '1' || strtolower($appDebug) === 'true') {
+                    // show detailed error in development
+                    die('DB connection error: ' . htmlspecialchars($e->getMessage()));
+                }
                 die('Помилка підключення до бази даних.');
             }
         }

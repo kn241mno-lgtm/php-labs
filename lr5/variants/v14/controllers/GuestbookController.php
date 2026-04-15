@@ -102,4 +102,41 @@ class GuestbookController extends PageController
     {
         return isset($_SESSION['user_id']);
     }
+
+    public function action_delete(): void
+    {
+        // Delete a comment by id (admin only)
+        if (!isset($_SESSION['user_id'])) {
+            $this->redirect('auth/login');
+            return;
+        }
+
+        // check admin role
+        $isAdmin = false;
+        if ($this->db) {
+            $stmt = $this->db->prepare('SELECT role FROM users WHERE id = :id');
+            $stmt->execute([':id' => $_SESSION['user_id']]);
+            $row = $stmt->fetch();
+            $isAdmin = $row && ($row['role'] === 'admin');
+        }
+
+        if (!$isAdmin) {
+            $this->show404('Немає дозволу.');
+            return;
+        }
+
+        $id = (int)($this->request->get('id', 0));
+        if ($id <= 0) {
+            $this->redirect('guestbook/index');
+            return;
+        }
+
+        if ($this->db) {
+            $stmt = $this->db->prepare('DELETE FROM comments WHERE id = :id');
+            $stmt->execute([':id' => $id]);
+            $_SESSION['flash_success'] = 'Коментар видалено.';
+        }
+
+        $this->redirect('guestbook/index');
+    }
 }

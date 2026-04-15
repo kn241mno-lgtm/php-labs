@@ -17,6 +17,25 @@
             <div class="comment">
                 <div class="comment-meta"><?= htmlspecialchars($c['login']) ?> — <?= htmlspecialchars($c['created_at']) ?></div>
                 <div class="comment-body"><?= nl2br(htmlspecialchars($c['content'])) ?></div>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php
+                        $isAdmin = false;
+                        try {
+                            $db = Database::getInstance();
+                            $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
+                            $rs->execute([':id' => $_SESSION['user_id']]);
+                            $r = $rs->fetch();
+                            $isAdmin = $r && ($r['role'] === 'admin');
+                        } catch (Exception $e) {
+                            $isAdmin = false;
+                        }
+                    ?>
+                    <?php if ($isAdmin): ?>
+                        <form method="post" action="index.php?route=guestbook/delete&id=<?= $c['id'] ?>" style="display:inline">
+                            <button class="btn btn-small" onclick="return confirm('Видалити коментар?')">Видалити</button>
+                        </form>
+                    <?php endif; ?>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     <?php else: ?>
