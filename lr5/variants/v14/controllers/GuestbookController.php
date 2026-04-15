@@ -34,13 +34,34 @@ class GuestbookController extends PageController
 
                 if (empty($errors)) {
                     if ($this->db) {
-                        $stmt = $this->db->prepare('INSERT INTO comments (user_id, item_type, item_id, content) VALUES (:user_id, :item_type, :item_id, :content)');
-                        $stmt->execute([
-                            ':user_id' => $_SESSION['user_id'],
-                            ':item_type' => $itemType,
-                            ':item_id' => $itemId,
-                            ':content' => $comment,
-                        ]);
+                        // Map polymorphic inputs to dedicated comment columns in DB schema
+                        switch ($itemType) {
+                            case 'anime':
+                                $stmt = $this->db->prepare('INSERT INTO comments (user_id, anime_id, content) VALUES (:user_id, :anime_id, :content)');
+                                $stmt->execute([':user_id' => $_SESSION['user_id'], ':anime_id' => $itemId, ':content' => $comment]);
+                                break;
+                            case 'manga':
+                                $stmt = $this->db->prepare('INSERT INTO comments (user_id, manga_id, content) VALUES (:user_id, :manga_id, :content)');
+                                $stmt->execute([':user_id' => $_SESSION['user_id'], ':manga_id' => $itemId, ':content' => $comment]);
+                                break;
+                            case 'news':
+                                $stmt = $this->db->prepare('INSERT INTO comments (user_id, news_id, content) VALUES (:user_id, :news_id, :content)');
+                                $stmt->execute([':user_id' => $_SESSION['user_id'], ':news_id' => $itemId, ':content' => $comment]);
+                                break;
+                            case 'character':
+                                $stmt = $this->db->prepare('INSERT INTO comments (user_id, character_id, content) VALUES (:user_id, :character_id, :content)');
+                                $stmt->execute([':user_id' => $_SESSION['user_id'], ':character_id' => $itemId, ':content' => $comment]);
+                                break;
+                            case 'person':
+                                $stmt = $this->db->prepare('INSERT INTO comments (user_id, person_id, content) VALUES (:user_id, :person_id, :content)');
+                                $stmt->execute([':user_id' => $_SESSION['user_id'], ':person_id' => $itemId, ':content' => $comment]);
+                                break;
+                            default:
+                                // Generic guestbook comment without item linkage
+                                $stmt = $this->db->prepare('INSERT INTO comments (user_id, content) VALUES (:user_id, :content)');
+                                $stmt->execute([':user_id' => $_SESSION['user_id'], ':content' => $comment]);
+                                break;
+                        }
                         $message = 'Коментар додано!';
                     } else {
                         // fallback to file-based guestbook (anonymous name field)

@@ -3,7 +3,7 @@ $recipe = $recipe ?? [];
 $errors = $errors ?? [];
 ?>
 
-<h1>Редагувати рецепт #<?= (int)($recipe['id'] ?? 0) ?></h1>
+<h1>Редагувати статтю #<?= (int)($recipe['id'] ?? 0) ?></h1>
 
 <?php if (!empty($errors)): ?>
     <div class="alert alert--error">
@@ -18,42 +18,38 @@ $errors = $errors ?? [];
 
 <form method="POST" action="index.php?route=recipe/edit&id=<?= (int)($recipe['id'] ?? 0) ?>" class="form">
     <div class="form__group <?= isset($errors['title']) ? 'form__group--error' : '' ?>">
-        <label for="r_title" class="form__label">Назва рецепту <span class="required">*</span></label>
-        <input type="text" id="r_title" name="title" class="form__input"
-               value="<?= htmlspecialchars($recipe['title'] ?? '') ?>">
+        <label for="a_title" class="form__label">Заголовок <span class="required">*</span></label>
+         <input type="text" id="a_title" name="title" class="form__input"
+             value="<?= htmlspecialchars($recipe['title'] ?? '') ?>">
         <?php if (isset($errors['title'])): ?>
             <span class="form__error"><?= htmlspecialchars($errors['title']) ?></span>
         <?php endif; ?>
     </div>
 
+    <div class="form__group">
+        <label for="a_summary" class="form__label">Короткий опис / анонс</label>
+        <textarea id="a_summary" name="summary" class="form__textarea"><?= htmlspecialchars($recipe['summary'] ?? '') ?></textarea>
+    </div>
+
+    <div class="form__group">
+        <label for="a_content" class="form__label">Повний контент</label>
+        <textarea id="a_content" name="content" class="form__textarea"><?= htmlspecialchars($recipe['content'] ?? '') ?></textarea>
+    </div>
+
     <div class="form__row">
         <div class="form__group">
-            <label for="r_category" class="form__label">Категорія</label>
-            <input type="text" id="r_category" name="category" class="form__input"
-                   value="<?= htmlspecialchars($recipe['category'] ?? '') ?>">
+            <label for="a_category" class="form__label">Категорія</label>
+                 <input type="text" id="a_category" name="category" class="form__input"
+                     value="<?= htmlspecialchars($recipe['category'] ?? '') ?>">
         </div>
-
-        <div class="form__group <?= isset($errors['cooking_time']) ? 'form__group--error' : '' ?>">
-            <label for="r_time" class="form__label">Час приготування (хв)</label>
-            <input type="number" id="r_time" name="cooking_time" class="form__input" min="0"
-                   value="<?= htmlspecialchars($recipe['cooking_time'] ?? '') ?>">
+        <div class="form__group">
+            <label for="a_image" class="form__label">URL зображення</label>
+            <input type="text" id="a_image" name="image_url" class="form__input" value="<?= htmlspecialchars($recipe['image_url'] ?? '') ?>">
         </div>
     </div>
 
-    <div class="form__group <?= isset($errors['servings']) ? 'form__group--error' : '' ?>">
-        <label for="r_servings" class="form__label">Кількість порцій</label>
-        <input type="number" id="r_servings" name="servings" class="form__input" min="1"
-               value="<?= htmlspecialchars($recipe['servings'] ?? '') ?>">
-    </div>
-
     <div class="form__group">
-        <label for="r_ingredients" class="form__label">Інгредієнти</label>
-        <textarea id="r_ingredients" name="ingredients" class="form__textarea"><?= htmlspecialchars($recipe['ingredients'] ?? '') ?></textarea>
-    </div>
-
-    <div class="form__group">
-        <label for="r_instructions" class="form__label">Інструкція приготування</label>
-        <textarea id="r_instructions" name="instructions" class="form__textarea"><?= htmlspecialchars($recipe['instructions'] ?? '') ?></textarea>
+        <label class="form__label"><input type="checkbox" name="is_published" <?= (isset($recipe['is_published']) && $recipe['is_published']) ? 'checked' : '' ?>> Опубліковано</label>
     </div>
 
     <div class="form__actions">

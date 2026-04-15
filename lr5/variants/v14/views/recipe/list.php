@@ -2,40 +2,42 @@
 $recipes = $recipes ?? [];
 ?>
 
-<h1>Рецепти</h1>
-<p>Колекція рецептів кулінарного блогу. CRUD через PDO (prepared statements).</p>
+<h1>Новини та статті</h1>
+<p>Керування новинами/статтями сайту. Доступно для авторизованих користувачів.</p>
 
 <div class="form__actions" style="margin-bottom: 20px">
-    <a href="index.php?route=recipe/create" class="btn">Додати рецепт</a>
+    <a href="index.php?route=recipe/create" class="btn">Додати статтю</a>
+    <a href="index.php?route=anime/list" class="btn btn--secondary">Перейти до каталогу аніме</a>
+    <a href="index.php?route=manga/list" class="btn btn--secondary">Перейти до каталогу манги</a>
 </div>
 
 <?php if (empty($recipes)): ?>
-    <p class="text-muted">Рецептів ще немає.</p>
+    <p class="text-muted">Статей ще немає.</p>
 <?php else: ?>
     <table class="table">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Назва</th>
+                <th>Заголовок</th>
                 <th>Категорія</th>
-                <th>Час (хв)</th>
-                <th>Порції</th>
+                <th>Опубл.</th>
+                <th>Автор (ID)</th>
                 <th>Дії</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($recipes as $r): ?>
                 <tr>
-                    <td><?= (int)$r['id'] ?></td>
-                    <td><?= htmlspecialchars($r['title']) ?></td>
-                    <td><?= htmlspecialchars($r['category']) ?></td>
-                    <td><?= (int)$r['cooking_time'] ?></td>
-                    <td><?= (int)$r['servings'] ?></td>
+                    <td><?= (int)($r['id'] ?? 0) ?></td>
+                    <td><?= htmlspecialchars($r['title'] ?? '') ?></td>
+                    <td><?= htmlspecialchars($r['category'] ?? '') ?></td>
+                    <td><?= htmlspecialchars(isset($r['is_published']) && $r['is_published'] ? 'Так' : 'Ні') ?></td>
+                    <td><?= (int)($r['author_id'] ?? 0) ?></td>
                     <td class="table__actions">
-                        <a href="index.php?route=recipe/edit&id=<?= (int)$r['id'] ?>" class="btn btn--small">Редагувати</a>
+                        <a href="index.php?route=recipe/edit&id=<?= (int)($r['id'] ?? 0) ?>" class="btn btn--small">Редагувати</a>
                         <form method="POST" action="index.php?route=recipe/delete" style="display:inline"
-                              onsubmit="return confirm('Видалити рецепт?')">
-                            <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
+                              onsubmit="return confirm('Видалити статтю?')">
+                            <input type="hidden" name="id" value="<?= (int)($r['id'] ?? 0) ?>">
                             <button type="submit" class="btn btn--small btn--danger">Видалити</button>
                         </form>
                     </td>

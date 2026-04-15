@@ -35,8 +35,8 @@ class MangaController extends PageController
             return;
         }
 
-        $cstmt = $this->db->prepare('SELECT c.*, u.login FROM comments c JOIN users u ON u.id = c.user_id WHERE c.item_type = :type AND c.item_id = :id ORDER BY c.created_at DESC');
-        $cstmt->execute([':type' => 'manga', ':id' => $id]);
+        $cstmt = $this->db->prepare('SELECT c.*, u.login FROM comments c JOIN users u ON u.id = c.user_id WHERE c.manga_id = :id ORDER BY c.created_at DESC');
+        $cstmt->execute([':id' => $id]);
         $comments = $cstmt->fetchAll();
 
         $this->render('manga/view', ['item' => $item, 'comments' => $comments], $item['title']);
