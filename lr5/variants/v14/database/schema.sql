@@ -1,4 +1,3 @@
--- Users table (auth module)
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     login VARCHAR(50) NOT NULL UNIQUE,
@@ -10,30 +9,45 @@ CREATE TABLE IF NOT EXISTS users (
     city VARCHAR(50) DEFAULT '',
     gender VARCHAR(10) DEFAULT '',
     about TEXT DEFAULT '',
+    role VARCHAR(20) DEFAULT 'user', -- user or admin
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Recipes table (CRUD module — Кулінарний блог)
-CREATE TABLE IF NOT EXISTS recipes (
+-- Anime table
+CREATE TABLE IF NOT EXISTS anime (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title VARCHAR(150) NOT NULL,
-    category VARCHAR(50) DEFAULT '',
-    cooking_time INTEGER DEFAULT 0,
-    servings INTEGER DEFAULT 1,
-    ingredients TEXT DEFAULT '',
-    instructions TEXT DEFAULT '',
+    title VARCHAR(255) NOT NULL,
+    title_ua VARCHAR(255) DEFAULT '',
+    year INTEGER DEFAULT NULL,
+    type VARCHAR(50) DEFAULT '',
+    status VARCHAR(50) DEFAULT '',
+    episodes INTEGER DEFAULT 0,
+    description TEXT DEFAULT '',
+    cover_url VARCHAR(255) DEFAULT '',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Seed recipes
-INSERT INTO recipes (title, category, cooking_time, servings, ingredients, instructions) VALUES
-    ('Борщ класичний', 'Перші страви', 90, 6, 'Буряк — 2 шт, Капуста — 300г, Картопля — 3 шт, Морква — 1 шт, Цибуля — 1 шт, Томатна паста — 2 ст.л., Мясо — 500г', 'Зварити мясний бульйон. Обсмажити буряк з морквою та цибулею. Додати картоплю, капусту, засмажку. Варити 20 хв.'),
-    ('Вареники з картоплею', 'Другі страви', 60, 4, 'Борошно — 400г, Яйце — 1 шт, Вода — 200мл, Картопля — 500г, Цибуля — 2 шт, Сіль, перець', 'Замісити тісто. Зварити та розімяти картоплю. Обсмажити цибулю, змішати з пюре. Ліпити вареники, варити 5 хв.'),
-    ('Сирники', 'Десерти', 30, 3, 'Сир кисломолочний — 500г, Яйце — 1 шт, Цукор — 3 ст.л., Борошно — 4 ст.л., Ванілін', 'Змішати сир, яйце, цукор, борошно. Сформувати сирники. Обсмажити на олії з обох боків до золотистого кольору.'),
-    ('Олівє', 'Салати', 40, 6, 'Картопля — 4 шт, Морква — 2 шт, Яйця — 4 шт, Ковбаса — 300г, Горошок — 1 банка, Огірки мариновані — 3 шт, Майонез', 'Зварити овочі та яйця. Нарізати кубиками. Змішати з горошком та майонезом.'),
-    ('Млинці з мясом', 'Другі страви', 50, 4, 'Борошно — 250г, Молоко — 500мл, Яйця — 2 шт, Фарш — 400г, Цибуля — 1 шт, Сіль, перець', 'Замісити тісто для млинців. Спекти тонкі млинці. Обсмажити фарш з цибулею. Начинити млинці, обсмажити.'),
-    ('Деруни', 'Другі страви', 35, 3, 'Картопля — 6 шт, Яйце — 1 шт, Борошно — 2 ст.л., Цибуля — 1 шт, Сіль, перець, олія', 'Натерти картоплю та цибулю на тертці. Додати яйце, борошно, сіль. Обсмажити на олії з обох боків.'),
-    ('Компот з сухофруктів', 'Напої', 25, 8, 'Сухофрукти — 300г, Цукор — 100г, Вода — 3л, Лимон — пів шт', 'Промити сухофрукти. Залити водою, довести до кипіння. Додати цукор та лимон. Варити 15 хв. Дати настоятися.'),
-    ('Голубці', 'Другі страви', 80, 6, 'Капуста — 1 качан, Фарш — 500г, Рис — 150г, Морква — 1 шт, Цибуля — 1 шт, Томатна паста — 3 ст.л.', 'Відварити рис до напівготовності. Змішати з фаршем та обсмаженою цибулею. Загорнути в капустяні листки. Тушкувати з томатним соусом 40 хв.'),
-    ('Шарлотка з яблуками', 'Десерти', 45, 8, 'Яйця — 4 шт, Цукор — 200г, Борошно — 200г, Яблука — 4 шт, Корица — 1 ч.л.', 'Збити яйця з цукром. Додати борошно. Нарізати яблука. Викласти тісто у форму, зверху яблука. Випікати 180°C, 35 хв.'),
-    ('Вінегрет', 'Салати', 30, 4, 'Буряк — 2 шт, Картопля — 3 шт, Морква — 2 шт, Огірки мариновані — 3 шт, Горошок — 1 банка, Олія — 3 ст.л.', 'Зварити овочі. Нарізати кубиками. Змішати з горошком та олією. Посолити.');
+-- Manga table
+CREATE TABLE IF NOT EXISTS manga (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title VARCHAR(255) NOT NULL,
+    title_ua VARCHAR(255) DEFAULT '',
+    year INTEGER DEFAULT NULL,
+    type VARCHAR(50) DEFAULT '',
+    status VARCHAR(50) DEFAULT '',
+    chapters INTEGER DEFAULT 0,
+    description TEXT DEFAULT '',
+    cover_url VARCHAR(255) DEFAULT '',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Comments table (for anime/manga)
+CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    item_type VARCHAR(10) NOT NULL, -- 'anime' or 'manga'
+    item_id INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

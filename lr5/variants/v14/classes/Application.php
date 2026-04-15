@@ -35,11 +35,15 @@ class Application
     private function initDatabase(): void
     {
         $dbPath = ROOT_DIR . '/database/app.db';
-        if (!file_exists($dbPath)) {
-            $schemaPath = ROOT_DIR . '/database/schema.sql';
-            if (file_exists($schemaPath)) {
-                $db = Database::getInstance();
-                $db->exec(file_get_contents($schemaPath));
+        // Only auto-initialize local SQLite database — for SQL Server run schema manually
+        $config = require ROOT_DIR . '/config/database.php';
+        if (($config['driver'] ?? 'sqlite') === 'sqlite') {
+            if (!file_exists($dbPath)) {
+                $schemaPath = ROOT_DIR . '/database/schema.sql';
+                if (file_exists($schemaPath)) {
+                    $db = Database::getInstance();
+                    $db->exec(file_get_contents($schemaPath));
+                }
             }
         }
     }
