@@ -96,6 +96,16 @@ try {
     $pdo->exec('COMMIT;');
 
     echo "Schema applied successfully.\n";
+    // Cleanup: remove duplicate manga entries (keep lowest id) and ensure unique index
+    try {
+        echo "Removing duplicate manga entries (if any)...\n";
+        $pdo->exec("DELETE FROM manga WHERE id NOT IN (SELECT MIN(id) FROM manga GROUP BY title, year);");
+        // Create unique index to prevent future duplicates by title+year
+        $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS ux_manga_title_year ON manga(title, year);");
+        echo "Duplicate cleanup complete. Unique index ux_manga_title_year created.\n";
+    } catch (PDOException $e) {
+        echo "Cleanup warning: " . $e->getMessage() . "\n";
+    }
     echo "You can run the app with: php -S localhost:8000 -t " . ROOT_DIR . "\n";
 } catch (PDOException $e) {
     echo "DB error: " . $e->getMessage() . "\n";
