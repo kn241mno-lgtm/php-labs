@@ -1,7 +1,38 @@
 <div class="page">
     <h1>Каталог манги</h1>
 
-    <div class="card-grid">
+    <div class="layout-row">
+        <aside class="filters">
+            <form method="get" action="index.php">
+                <input type="hidden" name="route" value="manga/list">
+                <div class="form-group">
+                    <label>Пошук</label>
+                    <input type="text" name="q" value="<?= htmlspecialchars($filters['q'] ?? '') ?>" />
+                </div>
+                <div class="form-group">
+                    <label>Статус</label>
+                    <select name="status">
+                        <option value="">Всі статуси</option>
+                        <option value="Ongoing" <?= (isset($filters['status']) && $filters['status']=='Ongoing')?'selected':'' ?>>Ongoing</option>
+                        <option value="Completed" <?= (isset($filters['status']) && $filters['status']=='Completed')?'selected':'' ?>>Completed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Тип</label>
+                    <select name="type">
+                        <option value="">Всі типи</option>
+                        <option value="Manga" <?= (isset($filters['type']) && $filters['type']=='Manga')?'selected':'' ?>>Manga</option>
+                        <option value="Manhwa" <?= (isset($filters['type']) && $filters['type']=='Manhwa')?'selected':'' ?>>Manhwa</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="btn">Застосувати фільтри</button>
+                </div>
+            </form>
+        </aside>
+
+        <section class="content">
+            <div class="card-grid">
         <?php foreach ($manga as $m): ?>
             <div class="card">
                 <h3 class="card__title"><?= htmlspecialchars($m['title']) ?></h3>

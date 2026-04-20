@@ -12,11 +12,64 @@ class MangaController extends PageController
 
     public function action_list(): void
     {
-        $stmt = $this->db->prepare('SELECT * FROM manga ORDER BY created_at DESC');
-        $stmt->execute();
-        $items = $stmt->fetchAll();
+        $q = trim($this->request->get('q', ''));
+        $status = trim($this->request->get('status', ''));
+        $type = trim($this->request->get('type', ''));
+        $author = (int)($this->request->get('author', 0));
+        $genre = (int)($this->request->get('genre', 0));
+        $page = max(1, (int)($this->request->get('page', 1)));
+        $pageSize = max(6, min(48, (int)($this->request->get('pageSize', 24))));
+        $sort = trim($this->request->get('sort', 'title'));
 
-        $this->render('manga/list', ['manga' => $items], 'Каталог манги');
+        $params = [];
+        $where = ['1=1'];
+        $joins = [];
+
+        if ($q !== '') {
+            $where[] = '(m.title LIKE :q OR m.title_ua LIKE :q)';
+            $params[':q'] = '%' . $q . '%';
+        }
+
+        if ($status !== '') {
+            $where[] = 'm.status = :status';
+            $params[':status'] = $status;
+        }
+
+        if ($type !== '') {
+            $where[] = 'm.type = :type';
+            $params[':type'] = $type;
+        }
+
+        if ($author > 0) {
+            $joins[] = 'JOIN manga_author ma ON ma.manga_id = m.id';
+            $where[] = 'ma.author_id = :author';
+            $params[':author'] = $author;
+        }
+
+        if ($genre > 0) {
+            $joins[] = 'JOIN manga_genre mg ON mg.manga_id = m.id';
+            $where[] = 'mg.genre_id = :genre';
+            $params[':genre'] = $genre;
+        }
+
+        $order = 'm.title ASC';
+        switch ($sort) {
+            case 'year': $order = 'm.year DESC'; break;
+            case 'views': $order = 'm.views DESC'; break;
+        }
+
+        $sql = 'SELECT m.*, IFNULL(r.avg_rating,0) AS rating FROM manga m LEFT JOIN (SELECT manga_id, AVG(score) AS avg_rating FROM rating GROUP BY manga_id) r ON r.manga_id = m.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where) . ' ORDER BY ' . $order;
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $all = $stmt->fetchAll();
+
+        $total = count($all);
+        $totalPages = (int)ceil($total / $pageSize);
+        $start = ($page - 1) * $pageSize;
+        $items = array_slice($all, $start, $pageSize);
+
+        $this->render('manga/list', ['manga' => $items, 'pagination'=>['page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'totalPages'=>$totalPages], 'filters'=>['q'=>$q,'status'=>$status,'type'=>$type,'author'=>$author,'genre'=>$genre,'sort'=>$sort]], 'Каталог манги');
     }
 
     public function action_view(): void

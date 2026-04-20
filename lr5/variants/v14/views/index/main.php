@@ -1,39 +1,49 @@
 <div class="page-home">
-    <h1>Онлайн Енциклопедія аніме й манги</h1>
-    
-    <h2>Розділи</h2>
-    <div class="card-grid">
-        <div class="card">
-            <h3 class="card__title">Каталог аніме</h3>
-            <p class="card__text">Огляди, опис, рейтинг та коментарі — створення/редагування доступні адміну.</p>
-            <a href="index.php?route=anime/list" class="btn btn--small">Перейти</a>
-        </div>
+    <h1>Головна</h1>
 
-        <div class="card">
-            <h3 class="card__title">Каталог манги</h3>
-            <p class="card__text">Колекція манги з описами та коментарями.</p>
-            <a href="index.php?route=manga/list" class="btn btn--small">Перейти</a>
+    <section>
+        <h2>Онгойнги</h2>
+        <div class="card-grid">
+            <?php foreach (($ongoings ?? []) as $a): ?>
+                <div class="card">
+                    <?php if (!empty($a['cover_url'])): ?>
+                        <img src="<?= htmlspecialchars($a['cover_url']) ?>" alt="<?= htmlspecialchars($a['title']) ?>" style="width:100%;height:160px;object-fit:cover;border-radius:6px;margin-bottom:8px">
+                    <?php endif; ?>
+                    <h3 class="card__title"><?= htmlspecialchars($a['title_ua'] ?: $a['title']) ?></h3>
+                    <div class="card__text"><?= htmlspecialchars(mb_substr($a['title'],0,120)) ?></div>
+                    <div style="margin-top:8px;color:var(--muted);font-size:13px"><?= htmlspecialchars($a['studio_name'] ?? '') ?> • <?= htmlspecialchars($a['year'] ?? '') ?></div>
+                </div>
+            <?php endforeach; ?>
         </div>
+    </section>
 
-        <div class="card">
-            <h3 class="card__title">Коментарі</h3>
-            <p class="card__text">Коментування дозволено авторизованим користувачам. Адмін може видаляти коментарі.</p>
-            <a href="index.php?route=guestbook/index" class="btn btn--small">Коментарі</a>
+    <section>
+        <h2>Останні новини</h2>
+        <div class="card-grid">
+            <?php foreach (($news ?? []) as $n): ?>
+                <div class="card">
+                    <?php if (!empty($n['image_url'])): ?>
+                        <img src="<?= htmlspecialchars($n['image_url']) ?>" alt="<?= htmlspecialchars($n['title']) ?>" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px">
+                    <?php endif; ?>
+                    <h3 class="card__title"><?= htmlspecialchars($n['title']) ?></h3>
+                    <div class="card__text"><?= htmlspecialchars(mb_substr($n['summary'] ?? $n['content'] ?? '',0,140)) ?></div>
+                    <div style="margin-top:8px;color:var(--muted);font-size:13px">Автор: <?= htmlspecialchars($n['author'] ?? 'Адмін') ?> • <?= htmlspecialchars($n['published_at'] ?? '') ?></div>
+                </div>
+            <?php endforeach; ?>
         </div>
-    </div>
+    </section>
 
-    <h2>Акаунт</h2>
-    <div class="card-grid">
-        <div class="card">
-            <h3 class="card__title">Реєстрація / Вхід</h3>
-            <p class="card__text">Зареєструйтесь або увійдіть — доступ до коментування та особистого профілю.</p>
-            <a href="index.php?route=auth/login" class="btn btn--small">Увійти</a>
+    <section>
+        <h2>Топ аніме</h2>
+        <div class="card-grid" style="grid-template-columns:1fr;max-width:520px">
+            <ol style="padding-left:18px;color:var(--muted)">
+                <?php foreach (($top ?? []) as $t): ?>
+                    <li style="margin:8px 0;display:flex;justify-content:space-between;align-items:center">
+                        <span><?= htmlspecialchars($t['title_ua'] ?: $t['title']) ?></span>
+                        <span style="background:#1f2937;padding:6px 8px;border-radius:8px;color:#ffd166;font-weight:600"><?= round($t['rating'],1) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
         </div>
-
-        <div class="card">
-            <h3 class="card__title">Налаштування</h3>
-            <p class="card__text">Колір фону (сесія) та привітання (cookie).</p>
-            <a href="index.php?route=settings/color" class="btn btn--small">Налаштування</a>
-        </div>
-    </div>
+    </section>
 </div>

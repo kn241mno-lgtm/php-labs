@@ -9,8 +9,58 @@
         <a href="index.php?route=anime/create" class="btn btn-primary">Додати аніме</a>
     <?php endif; ?>
 
-    <div class="card-grid">
-        <?php foreach ($anime as $a): ?>
+    <div class="layout-row">
+        <aside class="filters">
+            <form method="get" action="index.php">
+                <input type="hidden" name="route" value="anime/list">
+                <div class="form-group">
+                    <label>Пошук</label>
+                    <input type="text" name="q" value="<?php echo htmlspecialchars($filters['q'] ?? '') ?>" />
+                </div>
+                <div class="form-group">
+                    <label>Жанр</label>
+                    <select name="genre">
+                        <option value="0">Всі жанри</option>
+                        <?php foreach ($genres as $g): ?>
+                            <option value="<?= $g['id'] ?>" <?= (isset($filters['genre']) && $filters['genre'] == $g['id']) ? 'selected' : '' ?>><?= htmlspecialchars($g['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Студія</label>
+                    <select name="studioId">
+                        <option value="0">Всі студії</option>
+                        <?php foreach ($studios as $s): ?>
+                            <option value="<?= $s['id'] ?>" <?= (isset($filters['studioId']) && $filters['studioId'] == $s['id']) ? 'selected' : '' ?>><?= htmlspecialchars($s['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Тип</label>
+                    <select name="type">
+                        <option value="">Всі типи</option>
+                        <option value="TV" <?= (isset($filters['type']) && $filters['type']=='TV')?'selected':'' ?>>TV</option>
+                        <option value="Movie" <?= (isset($filters['type']) && $filters['type']=='Movie')?'selected':'' ?>>Movie</option>
+                        <option value="OVA" <?= (isset($filters['type']) && $filters['type']=='OVA')?'selected':'' ?>>OVA</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Статус</label>
+                    <select name="status">
+                        <option value="">Всі статуси</option>
+                        <option value="Ongoing" <?= (isset($filters['status']) && $filters['status']=='Ongoing')?'selected':'' ?>>Ongoing</option>
+                        <option value="Completed" <?= (isset($filters['status']) && $filters['status']=='Completed')?'selected':'' ?>>Completed</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="btn">Застосувати фільтри</button>
+                </div>
+            </form>
+        </aside>
+
+        <section class="content">
+            <div class="card-grid">
+                <?php foreach ($anime as $a): ?>
             <div class="card">
                 <h3 class="card__title"><?= htmlspecialchars($a['title']) ?></h3>
                 <p class="card__text"><?= htmlspecialchars($a['description'] ? (mb_substr($a['description'],0,160).'...') : '') ?></p>

@@ -12,11 +12,97 @@ class AnimeController extends PageController
 
     public function action_list(): void
     {
-        $stmt = $this->db->prepare('SELECT * FROM anime ORDER BY created_at DESC');
-        $stmt->execute();
-        $items = $stmt->fetchAll();
+        // Filtering params
+        $q = trim($this->request->get('q', ''));
+        $studioId = (int)($this->request->get('studioId', 0));
+        $type = trim($this->request->get('type', ''));
+        $status = trim($this->request->get('status', ''));
+        $yearFrom = (int)($this->request->get('yearFrom', 0));
+        $yearTo = (int)($this->request->get('yearTo', 0));
+        $genre = (int)($this->request->get('genre', 0));
+        $sort = trim($this->request->get('sort', 'rating'));
+        $page = max(1, (int)($this->request->get('page', 1)));
+        $pageSize = max(6, min(48, (int)($this->request->get('pageSize', 24))));
 
-        $this->render('anime/list', ['anime' => $items], 'Каталог аніме');
+        $params = [];
+        $where = ['1=1'];
+        $joins = [];
+
+        if ($q !== '') {
+            $where[] = '(a.title LIKE :q OR a.title_ua LIKE :q)';
+            $params[':q'] = '%' . $q . '%';
+        }
+
+        if ($studioId > 0) {
+            $where[] = 'a.studio_id = :studioId';
+            $params[':studioId'] = $studioId;
+        }
+
+        if ($type !== '') {
+            $where[] = 'a.type = :type';
+            $params[':type'] = $type;
+        }
+
+        if ($status !== '') {
+            $where[] = 'a.status = :status';
+            $params[':status'] = $status;
+        }
+
+        if ($yearFrom > 0) {
+            $where[] = 'a.year >= :yearFrom';
+            $params[':yearFrom'] = $yearFrom;
+        }
+
+        if ($yearTo > 0) {
+            $where[] = 'a.year <= :yearTo';
+            $params[':yearTo'] = $yearTo;
+        }
+
+        if ($genre > 0) {
+            $joins[] = 'JOIN anime_genre ag ON ag.anime_id = a.id';
+            $where[] = 'ag.genre_id = :genre';
+            $params[':genre'] = $genre;
+        }
+
+        // Join aggregated ratings
+        $joins[] = 'LEFT JOIN (SELECT anime_id, AVG(score) AS avg_rating FROM rating GROUP BY anime_id) r ON r.anime_id = a.id';
+
+        $order = 'r.avg_rating DESC, a.created_at DESC';
+        switch ($sort) {
+            case 'year':
+                $order = 'a.year DESC';
+                break;
+            case 'title':
+                $order = 'a.title ASC';
+                break;
+            case 'views':
+                $order = 'a.views DESC';
+                break;
+        }
+
+        $sql = 'SELECT a.*, s.name AS studio_name, IFNULL(r.avg_rating, 0) AS rating FROM anime a LEFT JOIN studio s ON a.studio_id = s.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where) . ' ORDER BY ' . $order;
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $all = $stmt->fetchAll();
+
+        // Pagination
+        $total = count($all);
+        $totalPages = (int)ceil($total / $pageSize);
+        $start = ($page - 1) * $pageSize;
+        $items = array_slice($all, $start, $pageSize);
+
+        // fetch reference data for filters
+        $genres = $this->db->query('SELECT id, name FROM genre ORDER BY name')->fetchAll();
+        $studios = $this->db->query('SELECT id, name FROM studio ORDER BY name')->fetchAll();
+
+        $this->render('anime/list', [
+            'anime' => $items,
+            'pagination' => ['page' => $page, 'pageSize' => $pageSize, 'total' => $total, 'totalPages' => $totalPages],
+            'filters' => ['q'=>$q,'studioId'=>$studioId,'type'=>$type,'status'=>$status,'yearFrom'=>$yearFrom,'yearTo'=>$yearTo,'genre'=>$genre,'sort'=>$sort],
+            'genres' => $genres,
+            'studios' => $studios
+        ], 'Каталог аніме');
     }
 
     public function action_view(): void
