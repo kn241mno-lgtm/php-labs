@@ -61,10 +61,19 @@
         <section class="content">
             <div class="card-grid">
                 <?php foreach ($anime as $a): ?>
-            <div class="card">
-                <h3 class="card__title"><?= htmlspecialchars($a['title']) ?></h3>
-                <p class="card__text"><?= htmlspecialchars($a['description'] ? (mb_substr($a['description'],0,160).'...') : '') ?></p>
-                <a href="index.php?route=anime/view&id=<?= $a['id'] ?>" class="btn btn--small">Деталі</a>
+            <div class="card" style="position:relative">
+                <?php if (!empty($a['status']) && strtolower($a['status']) === 'ongoing'): ?>
+                    <div class="badge">Виходить</div>
+                <?php endif; ?>
+                <?php if (!empty($a['cover_url'])): ?>
+                    <a href="index.php?route=anime/view&id=<?= $a['id'] ?>"><img src="<?= htmlspecialchars($a['cover_url']) ?>" alt="" style="width:100%;height:320px;object-fit:cover;border-radius:6px;margin-bottom:10px"></a>
+                <?php endif; ?>
+                <div style="padding-top:6px">
+                    <h3 class="card__title"><?= htmlspecialchars($a['title_ua'] ?: $a['title']) ?></h3>
+                    <p class="card__text"><?= htmlspecialchars(mb_substr($a['description'] ?? '',0,120)) ?></p>
+                    <a href="index.php?route=anime/view&id=<?= $a['id'] ?>" class="btn btn--small">Деталі</a>
+                </div>
+                <div class="rating-pill"><?= round($a['rating'] ?? 0,1) ?></div>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <?php
                         $isAdmin = false;

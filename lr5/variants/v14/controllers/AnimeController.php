@@ -126,7 +126,12 @@ class AnimeController extends PageController
         $cstmt->execute([':id' => $id]);
         $comments = $cstmt->fetchAll();
 
-        $this->render('anime/view', ['item' => $item, 'comments' => $comments], $item['title']);
+        // load genres for this anime
+        $gstmt = $this->db->prepare('SELECT g.id, g.name FROM anime_genre ag JOIN genre g ON ag.genre_id = g.id WHERE ag.anime_id = :id');
+        $gstmt->execute([':id' => $id]);
+        $genres = $gstmt->fetchAll();
+
+        $this->render('anime/view', ['item' => $item, 'comments' => $comments, 'genres' => $genres], $item['title']);
     }
 
     public function action_create(): void

@@ -220,6 +220,74 @@ h3 {
   margin: 24px 0;
 }
 
+/* Card badges and rating */
+.card .badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #10b981;
+  color: #06121a;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 12px rgba(2, 6, 23, 0.6);
+}
+.card .rating-pill {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(90deg, #f59e0b, #f97316);
+  color: #06121a;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+/* Modal-like detail container */
+.modal-detail {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #0c1724;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.modal-detail .left {
+  float: left;
+  width: 260px;
+  margin-right: 20px;
+}
+.modal-detail .right {
+  overflow: hidden;
+}
+.modal-detail .genres {
+  margin-top: 12px;
+}
+.genre-chip {
+  display: inline-block;
+  background: #0f1724;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-right: 6px;
+  color: #9fb0c9;
+  font-size: 12px;
+}
+
+@media (max-width: 800px) {
+  .modal-detail {
+    padding: 12px;
+  }
+  .modal-detail .left {
+    float: none;
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+}
+
 .card {
   background: #0f1724; /* card dark */
   border: 1px solid rgba(255, 255, 255, 0.04);

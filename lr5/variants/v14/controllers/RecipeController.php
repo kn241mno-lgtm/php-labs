@@ -149,6 +149,31 @@ class RecipeController extends PageController
         $this->redirect('recipe/list');
     }
 
+    public function action_view(): void
+    {
+        $id = (int)$this->request->get('id', 0);
+        if ($id <= 0) {
+            $this->redirect('recipe/list');
+            return;
+        }
+
+        $stmt = $this->db->prepare('SELECT n.*, u.display_name AS author FROM news n LEFT JOIN users u ON n.author_id = u.id WHERE n.id = :id');
+        $stmt->execute([':id' => $id]);
+        $item = $stmt->fetch();
+
+        if (!$item) {
+            $this->show404('Стаття не знайдена');
+            return;
+        }
+
+        // load comments for this news
+        $cstmt = $this->db->prepare('SELECT c.*, u.login FROM comments c LEFT JOIN users u ON u.id = c.user_id WHERE c.news_id = :id ORDER BY c.created_at DESC');
+        $cstmt->execute([':id' => $id]);
+        $comments = $cstmt->fetchAll();
+
+        $this->render('recipe/view', ['item' => $item, 'comments' => $comments], $item['title']);
+    }
+
     private function validate(array $data): array
     {
         $errors = [];

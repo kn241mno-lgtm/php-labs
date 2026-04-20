@@ -1,14 +1,27 @@
 <div class="page">
-    <h1><?= htmlspecialchars($item['title']) ?></h1>
-
-    <div class="anime-detail">
-        <?php if (!empty($item['cover_url'])): ?>
-            <img src="<?= htmlspecialchars($item['cover_url']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" style="max-width:200px; float:right; margin-left:15px;">
-        <?php endif; ?>
-        <p><strong>Рік:</strong> <?= htmlspecialchars($item['year']) ?></p>
-        <p><strong>Тип:</strong> <?= htmlspecialchars($item['type']) ?></p>
-        <p><strong>Статус:</strong> <?= htmlspecialchars($item['status']) ?></p>
-        <p><?= nl2br(htmlspecialchars($item['description'])) ?></p>
+    <div class="modal-detail">
+        <div class="left">
+            <?php if (!empty($item['cover_url'])): ?>
+                <img src="<?= htmlspecialchars($item['cover_url']) ?>" alt="" style="width:100%;border-radius:8px">
+            <?php endif; ?>
+            <div style="margin-top:12px;font-weight:700;color:#ffd166;font-size:20px">★ <?= round($item['rating'] ?? 0,1) ?>/10</div>
+        </div>
+        <div class="right">
+            <h2 style="margin-top:0"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></h2>
+            <div style="display:flex;gap:24px;color:var(--muted)">
+                <div><strong>Рік:</strong> <?= htmlspecialchars($item['year']) ?></div>
+                <div><strong>Епізоди:</strong> <?= htmlspecialchars($item['episodes'] ?? '') ?></div>
+                <div><strong>Тип:</strong> <?= htmlspecialchars($item['type']) ?></div>
+            </div>
+            <div class="genres">
+                <?php foreach (($genres ?? []) as $g): ?>
+                    <span class="genre-chip"><?= htmlspecialchars($g['name']) ?></span>
+                <?php endforeach; ?>
+            </div>
+            <h3 style="margin-top:18px">Опис</h3>
+            <p style="color:var(--muted)"><?= nl2br(htmlspecialchars($item['description'] ?? '')) ?></p>
+        </div>
+        <div style="clear:both"></div>
     </div>
 
     <?php if (!empty($comments)): ?>

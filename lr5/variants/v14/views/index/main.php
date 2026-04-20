@@ -5,6 +5,7 @@
         <h2>Онгойнги</h2>
         <div class="card-grid">
             <?php foreach (($ongoings ?? []) as $a): ?>
+                <a href="index.php?route=anime/view&id=<?= $a['id'] ?>" style="text-decoration:none;color:inherit">
                 <div class="card">
                     <?php if (!empty($a['cover_url'])): ?>
                         <img src="<?= htmlspecialchars($a['cover_url']) ?>" alt="<?= htmlspecialchars($a['title']) ?>" style="width:100%;height:160px;object-fit:cover;border-radius:6px;margin-bottom:8px">
@@ -13,6 +14,7 @@
                     <div class="card__text"><?= htmlspecialchars(mb_substr($a['title'],0,120)) ?></div>
                     <div style="margin-top:8px;color:var(--muted);font-size:13px"><?= htmlspecialchars($a['studio_name'] ?? '') ?> • <?= htmlspecialchars($a['year'] ?? '') ?></div>
                 </div>
+                </a>
             <?php endforeach; ?>
         </div>
     </section>
@@ -21,6 +23,7 @@
         <h2>Останні новини</h2>
         <div class="card-grid">
             <?php foreach (($news ?? []) as $n): ?>
+                <a href="index.php?route=recipe/view&id=<?= $n['id'] ?>" style="text-decoration:none;color:inherit">
                 <div class="card">
                     <?php if (!empty($n['image_url'])): ?>
                         <img src="<?= htmlspecialchars($n['image_url']) ?>" alt="<?= htmlspecialchars($n['title']) ?>" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px">
@@ -29,6 +32,7 @@
                     <div class="card__text"><?= htmlspecialchars(mb_substr($n['summary'] ?? $n['content'] ?? '',0,140)) ?></div>
                     <div style="margin-top:8px;color:var(--muted);font-size:13px">Автор: <?= htmlspecialchars($n['author'] ?? 'Адмін') ?> • <?= htmlspecialchars($n['published_at'] ?? '') ?></div>
                 </div>
+                </a>
             <?php endforeach; ?>
         </div>
     </section>
