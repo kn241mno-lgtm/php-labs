@@ -4,8 +4,8 @@ $message = $message ?? '';
 $errors = $errors ?? [];
 ?>
 
-<h1>Гостьова книга</h1>
-<p>Коментарі зберігаються у файлі <code>data/comments.jsonl</code> (формат: JSON Lines).</p>
+<h1>Онлайн Енциклопедія аніме й манги — Коментарі</h1>
+<p>Коментарі та обговорення — частина спільноти енциклопедії. Коментарі зберігаються у файлі <code>data/comments.jsonl</code> (формат: JSON Lines).</p>
 
 <?php if ($message !== ''): ?>
     <div class="alert alert--success"><?= htmlspecialchars($message) ?></div>

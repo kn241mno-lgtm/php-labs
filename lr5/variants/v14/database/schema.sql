@@ -397,3 +397,29 @@ INSERT OR IGNORE INTO comments (user_id, character_id, content, likes, created_a
 (2,9,'Акі Хаякава - один з найкращих персонажів Chainsaw Man.',15,CURRENT_TIMESTAMP),(3,9,'Його смерть - одна з найсумніших сцен.',22,CURRENT_TIMESTAMP);
 
 -- End of converted seed
+
+-- Additional seeds: more anime, manga, news and comments
+INSERT OR IGNORE INTO anime (title, title_ua, year, season, episodes, episode_duration, type, status, source, rating_mpaa, description, studio_id, cover_url, views, favorites) VALUES
+('Spy x Family', 'Шпигунська родина', 2022, 'Spring', 25, 24, 'TV', 'Ongoing', 'Manga', 'PG-13', 'Шпигун створює родину для місії, не знаючи, що дружина — вбивця, а дитина — телепат.', 4, 'https://cdn.myanimelist.net/images/anime/10/116195.jpg', 220000, 27000),
+('Demon Slayer', 'Полювання на демонів', 2019, 'Spring', 26, 23, 'TV', 'Ongoing', 'Manga', 'R', 'Танджиро Камадо шукає ліки для сестри та мстить демонів.', 6, 'https://cdn.myanimelist.net/images/anime/1286/99889.jpg', 400000, 65000),
+('My Hero Academia', 'Моя геройська академія', 2016, 'Spring', 88, 24, 'TV', 'Ongoing', 'Manga', 'PG-13', 'Світ супергероїв, хлопець без сил мріє стати героєм.', 11, 'https://cdn.myanimelist.net/images/anime/10/78745.jpg', 350000, 48000),
+('Mob Psycho 100', 'Моб Психо 100', 2016, 'Summer', 25, 24, 'TV', 'Completed', 'Webcomic', 'PG-13', 'Телепат-підліток навчається контролювати свої сили.', 12, 'https://cdn.myanimelist.net/images/anime/6/81321.jpg', 90000, 12000);
+
+INSERT OR IGNORE INTO manga (title, title_ua, year, status, volumes, chapters, type, demographic, description, cover_url, views, favorites) VALUES
+('Vinland Saga', 'Сага про Вінланд', 2005, 'Ongoing', 24, 200, 'Manga', 'Seinen', 'Історична манга про вікінгів та помсту.', 'https://cdn.myanimelist.net/images/manga/3/202301.jpg', 120000, 21000),
+('Monster', 'Монстр', 1994, 'Completed', 18, 162, 'Manga', 'Seinen', 'Напружений трилер про лікаря та його переслідування.', 'https://cdn.myanimelist.net/images/manga/1/157901.jpg', 110000, 19000),
+('Golden Kamuy', 'Золоте Камуй', 2014, 'Ongoing', 30, 250, 'Manga', 'Seinen', 'Пригодницька манга про пошук скарбу в Хоккайдо.', 'https://cdn.myanimelist.net/images/manga/4/167215.jpg', 90000, 14000);
+
+INSERT OR IGNORE INTO character (name, name_ua, full_name, gender, age, occupation, description, image_url, favorites) VALUES
+('Loid Forger', 'Лойд Форджер', 'Loid Forger', 'Male', 30, 'Spy', 'Професійний шпигун, що грає роль батька.', 'https://cdn.myanimelist.net/images/characters/3/489321.jpg', 18000),
+('Anya Forger', 'Аня Форджер', 'Anya Forger', 'Female', 6, 'Telepath (child)', 'Дитина з телекинетичними здібностями та чарівною безпосередністю.', 'https://cdn.myanimelist.net/images/characters/9/489322.jpg', 26000),
+('Tanjiro Kamado', 'Танджиро Камадо', 'Tanjiro Kamado', 'Male', 15, 'Demon Slayer', 'Головний герой Demon Slayer, співчутливий та рішучий.', 'https://cdn.myanimelist.net/images/characters/2/40321.jpg', 48000);
+
+INSERT OR IGNORE INTO news (title, content, summary, category, image_url, author_id, views, likes, published_at) VALUES
+('Spy x Family: новий сезон оголошено', 'Студія офіційно підтвердила роботу над новим сезоном Spy x Family.', 'Новий сезон Spy x Family в розробці', 'Анонси', 'https://cdn.myanimelist.net/images/anime/10/116195.jpg', 2, 18200, 1400, CURRENT_TIMESTAMP),
+('Demon Slayer: нова арка вже в манзі', 'Остання арка манги приносить несподівані повороти сюжету.', 'Оновлення Demon Slayer в манзі', 'Новини', 'https://cdn.myanimelist.net/images/anime/1286/99889.jpg', 1, 45200, 3600, CURRENT_TIMESTAMP);
+
+-- Extra comments
+INSERT OR IGNORE INTO comments (user_id, anime_id, content, likes, created_at) VALUES
+(2,5,'Нова арка Demon Slayer неймовірна — прекрасна анімація!',45,CURRENT_TIMESTAMP),(3,1,'Spy x Family дуже тепле та смішне аніме для всієї родини.',32,CURRENT_TIMESTAMP),(4,3,'My Hero Academia має чудовий розвиток персонажів у новому сезоні.',28,CURRENT_TIMESTAMP);
+
