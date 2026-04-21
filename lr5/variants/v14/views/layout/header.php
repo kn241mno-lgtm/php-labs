@@ -1,5 +1,5 @@
 <?php
-$bgColor = $_SESSION['bg_color'] ?? '#081126';
+$bgColor = $_SESSION['bg_color'] ?? '#0b1b2c';
 $greetingName = $_COOKIE['greeting_name'] ?? '';
 $greetingGender = $_COOKIE['greeting_gender'] ?? '';
 
@@ -19,11 +19,18 @@ $navItems = [
     'anime/list' => 'Аніме',
     'manga/list' => 'Манга',
     'recipe/list' => 'Новини',
-    'guestbook/index' => 'Коментарі',
-    'settings/color' => 'Налаштування',
 ];
+// compute readable text color based on background
+$textColor = '#e6eef8';
+if (preg_match('/^#([0-9a-fA-F]{6})$/', $bgColor, $m)) {
+    [$r, $g, $b] = array_map('hexdec', str_split($m[1], 2));
+    $brightness = ($r * 0.299) + ($g * 0.587) + ($b * 0.114);
+    $textColor = $brightness > 186 ? '#06121a' : '#e6eef8';
+}
+// muted color (less prominent than main text)
+$mutedColor = ($textColor === '#06121a') ? '#6b7280' : '#9fb0c9';
+
 ?>
-<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -31,7 +38,7 @@ $navItems = [
     <title><?= htmlspecialchars($pageTitle ?? 'Miks') ?></title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body style="background-color: <?= htmlspecialchars($bgColor) ?>">
+<body style="background-color: <?= htmlspecialchars($bgColor) ?>; color: <?= htmlspecialchars($textColor) ?>; --color-base: <?= htmlspecialchars($textColor) ?>; --muted: <?= htmlspecialchars($mutedColor) ?>">
     <a href="#main-content" class="skip-link">Перейти до вмісту</a>
     <header class="header">
         <div class="container">
@@ -43,13 +50,7 @@ $navItems = [
                     <?php if ($greetingText !== ''): ?>
                         <span class="header__greeting"><?= $greetingText ?></span>
                     <?php endif; ?>
-                    <div class="header__search">
-                        <form action="index.php" method="GET">
-                            <input type="hidden" name="route" value="index/main">
-                            <input type="text" name="q" placeholder="Пошук аніме, манги, персонажів..." class="search__input">
-                            <button class="search__btn">Пошук</button>
-                        </form>
-                    </div>
+                    
                     <div class="header__auth">
                         <?php if ($isLoggedIn): ?>
                             <a href="index.php?route=auth/profile" class="header__auth-link"><?= htmlspecialchars($userLogin) ?></a>
@@ -57,6 +58,7 @@ $navItems = [
                         <?php else: ?>
                             <a href="index.php?route=auth/login" class="header__auth-link">Увійти</a>
                             <a href="index.php?route=auth/register" class="header__auth-link">Реєстрація</a>
+                            <a href="index.php?route=settings/color" class="header__auth-link">Налаштування</a>
                         <?php endif; ?>
                     </div>
                 </div>

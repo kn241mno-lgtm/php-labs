@@ -9,7 +9,7 @@ class SettingsController extends PageController
         '#fef9c3' => 'Жовтий',
         '#fce7f3' => 'Рожевий',
         '#f3e8ff' => 'Фіолетовий',
-        '#ffedd5' => 'Помаранчевий',
+        '#0b1b2c' => 'Темна тема',
         '#ffffff' => 'Білий',
     ];
 
@@ -19,7 +19,7 @@ class SettingsController extends PageController
         $error = '';
 
         if ($this->request->isPost()) {
-            $color = $this->request->post('bg_color', '#f9fafb');
+            $color = $this->request->post('bg_color', '#0b1b2c');
 
             if (array_key_exists($color, $this->availableColors)) {
                 $_SESSION['bg_color'] = $color;
@@ -31,7 +31,7 @@ class SettingsController extends PageController
 
         $this->render('settings/color', [
             'colors' => $this->availableColors,
-            'currentColor' => $_SESSION['bg_color'] ?? '#f9fafb',
+            'currentColor' => $_SESSION['bg_color'] ?? '#0b1b2c',
             'message' => $message,
             'error' => $error,
         ], 'Колір фону');

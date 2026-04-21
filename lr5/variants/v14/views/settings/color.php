@@ -5,9 +5,7 @@ $message = $message ?? '';
 $error = $error ?? '';
 ?>
 
-<h1>Колір фону (Сесії)</h1>
-
-<p>Оберіть колір фону сторінки. Значення зберігається в <code>$_SESSION</code> та діє на всіх сторінках до закриття браузера.</p>
+<h1>Колір фону</h1>
 
 <?php if ($error !== ''): ?>
     <div class="alert alert--error"><?= htmlspecialchars($error) ?></div>
@@ -33,5 +31,3 @@ $error = $error ?? '';
         <button type="submit" class="btn">Зберегти колір</button>
     </div>
 </form>
-
-<p class="text-muted text-muted--mt">Модуль успадковано з ЛР4. Також доступне <a href="index.php?route=settings/greeting">привітання через Cookie</a>.</p>

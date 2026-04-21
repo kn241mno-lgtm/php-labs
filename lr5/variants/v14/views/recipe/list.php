@@ -3,7 +3,6 @@ $recipes = $recipes ?? [];
 ?>
 
 <h1>Новини та статті</h1>
-<p>Керування новинами/статтями сайту. Доступно для авторизованих користувачів.</p>
 
 <div class="form__actions" style="margin-bottom: 20px">
     <a href="index.php?route=recipe/create" class="btn">Додати статтю</a>

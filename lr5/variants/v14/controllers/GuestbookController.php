@@ -81,13 +81,21 @@ class GuestbookController extends PageController
             }
         }
 
-        $comments = $this->readComments();
+        // After processing POST, redirect back to the referring page (comments live under items).
+        if ($this->request->isPost()) {
+            if ($message !== '') {
+                $_SESSION['flash_success'] = $message;
+            }
+            if (!empty($errors)) {
+                $_SESSION['flash_error'] = implode(' ', $errors);
+            }
+            $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+            header('Location: ' . $referer);
+            exit;
+        }
 
-        $this->render('guestbook/index', [
-            'comments' => $comments,
-            'message' => $message,
-            'errors' => $errors,
-        ], 'Гостьова книга');
+        // Prevent direct access to the standalone guestbook page — redirect to home.
+        $this->redirect('index/main');
     }
 
     private function readComments(): array
@@ -148,7 +156,7 @@ class GuestbookController extends PageController
 
         $id = (int)($this->request->get('id', 0));
         if ($id <= 0) {
-            $this->redirect('guestbook/index');
+            $this->redirect('index/main');
             return;
         }
 
@@ -158,6 +166,8 @@ class GuestbookController extends PageController
             $_SESSION['flash_success'] = 'Коментар видалено.';
         }
 
-        $this->redirect('guestbook/index');
+        $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+        header('Location: ' . $referer);
+        exit;
     }
 }

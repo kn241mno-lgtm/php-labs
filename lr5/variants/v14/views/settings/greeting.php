@@ -52,5 +52,3 @@ $currentGender = $currentGender ?? '';
         <button type="submit" class="btn">Зберегти в Cookie</button>
     </div>
 </form>
-
-<p class="text-muted text-muted--mt">Модуль успадковано з ЛР4. Також доступна <a href="index.php?route=settings/color">зміна кольору фону</a>.</p>
