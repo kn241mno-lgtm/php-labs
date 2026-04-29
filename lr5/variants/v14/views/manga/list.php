@@ -10,6 +10,14 @@
                     <input type="text" name="q" value="<?= htmlspecialchars($filters['q'] ?? '') ?>" />
                 </div>
                 <div class="form-group">
+                    <label>Рік від</label>
+                    <input type="number" name="yearFrom" min="1900" max="2100" value="<?= htmlspecialchars($filters['yearFrom'] ?? '') ?>" />
+                </div>
+                <div class="form-group">
+                    <label>Рік до</label>
+                    <input type="number" name="yearTo" min="1900" max="2100" value="<?= htmlspecialchars($filters['yearTo'] ?? '') ?>" />
+                </div>
+                <div class="form-group">
                     <label>Статус</label>
                     <select name="status">
                         <option value="">Всі статуси</option>
@@ -25,8 +33,17 @@
                         <option value="Manhwa" <?= (isset($filters['type']) && $filters['type']=='Manhwa')?'selected':'' ?>>Manhwa</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Сортувати за</label>
+                    <select name="sort">
+                        <option value="title" <?= (isset($filters['sort']) && $filters['sort']=='title')?'selected':'' ?>>Заголовок</option>
+                        <option value="year" <?= (isset($filters['sort']) && $filters['sort']=='year')?'selected':'' ?>>Рік</option>
+                        <option value="views" <?= (isset($filters['sort']) && $filters['sort']=='views')?'selected':'' ?>>Перегляди</option>
+                    </select>
+                </div>
                 <div class="form-actions">
                     <button class="btn">Застосувати фільтри</button>
+                    <a href="index.php?route=manga/list" class="btn btn--secondary">Скинути</a>
                 </div>
             </form>
         </aside>

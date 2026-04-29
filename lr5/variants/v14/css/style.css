@@ -749,6 +749,38 @@ h3 {
   .nav__link {
     padding: 6px 10px;
     font-size: 0.8rem;
+
+    .layout-row {
+      display: block;
+    }
+  }
+
+  /* Layout for list pages: filters on the left, content on the right */
+  .layout-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+  .filters {
+    width: 260px;
+    min-width: 200px;
+    background: linear-gradient(180deg, #071028, #081127);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    border-radius: 10px;
+    position: sticky;
+    top: 96px;
+    height: fit-content;
+  }
+  .filters .form-group {
+    margin-bottom: 12px;
+  }
+  .content {
+    flex: 1;
+  }
+
+  .genre-chip {
+    cursor: default;
   }
 
   .form__row {

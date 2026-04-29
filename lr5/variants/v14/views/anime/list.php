@@ -10,7 +10,7 @@
     <?php endif; ?>
 
     <div class="layout-row">
-        <aside class="filters">
+            <aside class="filters">
             <form method="get" action="index.php">
                 <input type="hidden" name="route" value="anime/list">
                 <div class="form-group">
@@ -25,6 +25,14 @@
                             <option value="<?= $g['id'] ?>" <?= (isset($filters['genre']) && $filters['genre'] == $g['id']) ? 'selected' : '' ?>><?= htmlspecialchars($g['name']) ?></option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label>Рік від</label>
+                    <input type="number" name="yearFrom" min="1900" max="2100" value="<?= htmlspecialchars($filters['yearFrom'] ?? '') ?>" />
+                </div>
+                <div class="form-group">
+                    <label>Рік до</label>
+                    <input type="number" name="yearTo" min="1900" max="2100" value="<?= htmlspecialchars($filters['yearTo'] ?? '') ?>" />
                 </div>
                 <div class="form-group">
                     <label>Студія</label>
@@ -52,8 +60,18 @@
                         <option value="Completed" <?= (isset($filters['status']) && $filters['status']=='Completed')?'selected':'' ?>>Completed</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Сортувати за</label>
+                    <select name="sort">
+                        <option value="rating" <?= (isset($filters['sort']) && $filters['sort']=='rating')?'selected':'' ?>>Рейтинг</option>
+                        <option value="year" <?= (isset($filters['sort']) && $filters['sort']=='year')?'selected':'' ?>>Рік</option>
+                        <option value="title" <?= (isset($filters['sort']) && $filters['sort']=='title')?'selected':'' ?>>Заголовок</option>
+                        <option value="views" <?= (isset($filters['sort']) && $filters['sort']=='views')?'selected':'' ?>>Перегляди</option>
+                    </select>
+                </div>
                 <div class="form-actions">
                     <button class="btn">Застосувати фільтри</button>
+                    <a href="index.php?route=anime/list" class="btn btn--secondary">Скинути</a>
                 </div>
             </form>
         </aside>

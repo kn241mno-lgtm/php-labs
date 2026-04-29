@@ -16,7 +16,8 @@ class MangaController extends PageController
         $status = trim($this->request->get('status', ''));
         $type = trim($this->request->get('type', ''));
         $author = (int)($this->request->get('author', 0));
-        $genre = (int)($this->request->get('genre', 0));
+        $genre = trim($this->request->get('genres', ''));
+        $minRating = (float)($this->request->get('minRating', 0));
         $page = max(1, (int)($this->request->get('page', 1)));
         $pageSize = max(6, min(48, (int)($this->request->get('pageSize', 24))));
         $sort = trim($this->request->get('sort', 'title'));
@@ -46,10 +47,24 @@ class MangaController extends PageController
             $params[':author'] = $author;
         }
 
-        if ($genre > 0) {
-            $joins[] = 'JOIN manga_genre mg ON mg.manga_id = m.id';
-            $where[] = 'mg.genre_id = :genre';
-            $params[':genre'] = $genre;
+        $genreIds = [];
+        if ($genre !== '') {
+            $parts = array_filter(array_map('trim', explode(',', $genre)));
+            foreach ($parts as $p) {
+                $id = (int)$p;
+                if ($id > 0) $genreIds[] = $id;
+            }
+        }
+
+        if (!empty($genreIds)) {
+            $joins[] = 'LEFT JOIN manga_genre mg ON mg.manga_id = m.id';
+            $placeholders = [];
+            foreach ($genreIds as $i => $g) {
+                $ph = ':g' . $i;
+                $placeholders[] = $ph;
+                $params[$ph] = $g;
+            }
+            $where[] = 'mg.genre_id IN (' . implode(',', $placeholders) . ')';
         }
 
         $order = 'm.title ASC';
@@ -58,16 +73,30 @@ class MangaController extends PageController
             case 'views': $order = 'm.views DESC'; break;
         }
 
-        $sql = 'SELECT m.*, IFNULL(r.avg_rating,0) AS rating FROM manga m LEFT JOIN (SELECT manga_id, AVG(score) AS avg_rating FROM rating GROUP BY manga_id) r ON r.manga_id = m.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where) . ' ORDER BY ' . $order;
+        $baseSql = 'FROM manga m LEFT JOIN rating r2 ON r2.manga_id = m.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where);
+        $having = '';
+        if ($minRating > 0) {
+            $having = ' HAVING AVG(r2.score) >= :minRating';
+        }
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        $all = $stmt->fetchAll();
+        $countSql = 'SELECT COUNT(DISTINCT m.id) ' . $baseSql . $having;
+        $countStmt = $this->db->prepare($countSql);
+        $countParams = $params;
+        if ($minRating > 0) $countParams[':minRating'] = $minRating;
+        $countStmt->execute($countParams);
+        $total = (int)$countStmt->fetchColumn();
 
-        $total = count($all);
         $totalPages = (int)ceil($total / $pageSize);
-        $start = ($page - 1) * $pageSize;
-        $items = array_slice($all, $start, $pageSize);
+        $offset = ($page - 1) * $pageSize;
+
+        $selectSql = 'SELECT m.*, IFNULL(AVG(r2.score),0) AS rating ' . $baseSql . ' GROUP BY m.id' . $having . ' ORDER BY ' . $order . ' LIMIT :limit OFFSET :offset';
+        $selectStmt = $this->db->prepare($selectSql);
+        $selectParams = $params;
+        if ($minRating > 0) $selectParams[':minRating'] = $minRating;
+        $selectParams[':limit'] = $pageSize;
+        $selectParams[':offset'] = $offset;
+        $selectStmt->execute($selectParams);
+        $items = $selectStmt->fetchAll();
 
         $this->render('manga/list', ['manga' => $items, 'pagination'=>['page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'totalPages'=>$totalPages], 'filters'=>['q'=>$q,'status'=>$status,'type'=>$type,'author'=>$author,'genre'=>$genre,'sort'=>$sort]], 'Каталог манги');
     }

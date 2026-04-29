@@ -19,7 +19,8 @@ class AnimeController extends PageController
         $status = trim($this->request->get('status', ''));
         $yearFrom = (int)($this->request->get('yearFrom', 0));
         $yearTo = (int)($this->request->get('yearTo', 0));
-        $genre = (int)($this->request->get('genre', 0));
+        $genre = trim($this->request->get('genres', ''));// comma-separated or single id
+        $minRating = (float)($this->request->get('minRating', 0));
         $sort = trim($this->request->get('sort', 'rating'));
         $page = max(1, (int)($this->request->get('page', 1)));
         $pageSize = max(6, min(48, (int)($this->request->get('pageSize', 24))));
@@ -58,16 +59,30 @@ class AnimeController extends PageController
             $params[':yearTo'] = $yearTo;
         }
 
-        if ($genre > 0) {
-            $joins[] = 'JOIN anime_genre ag ON ag.anime_id = a.id';
-            $where[] = 'ag.genre_id = :genre';
-            $params[':genre'] = $genre;
+        $genreIds = [];
+        if ($genre !== '') {
+            // allow either single id or comma-separated list
+            $parts = array_filter(array_map('trim', explode(',', $genre)));
+            foreach ($parts as $p) {
+                $id = (int)$p;
+                if ($id > 0) $genreIds[] = $id;
+            }
         }
 
-        // Join aggregated ratings
-        $joins[] = 'LEFT JOIN (SELECT anime_id, AVG(score) AS avg_rating FROM rating GROUP BY anime_id) r ON r.anime_id = a.id';
+        if (!empty($genreIds)) {
+            $joins[] = 'LEFT JOIN anime_genre ag ON ag.anime_id = a.id';
+            // create named placeholders :g0,:g1...
+            $placeholders = [];
+            foreach ($genreIds as $i => $g) {
+                $ph = ':g' . $i;
+                $placeholders[] = $ph;
+                $params[$ph] = $g;
+            }
+            $where[] = 'ag.genre_id IN (' . implode(',', $placeholders) . ')';
+        }
 
-        $order = 'r.avg_rating DESC, a.created_at DESC';
+        // build aggregate query: avg rating from rating table
+        $order = 'rating DESC, a.created_at DESC';
         switch ($sort) {
             case 'year':
                 $order = 'a.year DESC';
@@ -80,17 +95,38 @@ class AnimeController extends PageController
                 break;
         }
 
-        $sql = 'SELECT a.*, s.name AS studio_name, IFNULL(r.avg_rating, 0) AS rating FROM anime a LEFT JOIN studio s ON a.studio_id = s.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where) . ' ORDER BY ' . $order;
+        // Count total using grouped query when minRating or genres are used
+        $baseSql = 'FROM anime a LEFT JOIN studio s ON a.studio_id = s.id LEFT JOIN rating r2 ON r2.anime_id = a.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where);
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        $all = $stmt->fetchAll();
+        // If minRating filter present, we'll use HAVING on AVG(r2.score)
+        $having = '';
+        if ($minRating > 0) {
+            $having = ' HAVING AVG(r2.score) >= :minRating';
+        }
 
-        // Pagination
-        $total = count($all);
+        // total count of groups
+        $countSql = 'SELECT COUNT(DISTINCT a.id) ' . $baseSql . $having;
+        $countStmt = $this->db->prepare($countSql);
+        $countParams = $params;
+        if ($minRating > 0) {
+            $countParams[':minRating'] = $minRating;
+        }
+        $countStmt->execute($countParams);
+        $total = (int)$countStmt->fetchColumn();
+
         $totalPages = (int)ceil($total / $pageSize);
-        $start = ($page - 1) * $pageSize;
-        $items = array_slice($all, $start, $pageSize);
+        $offset = ($page - 1) * $pageSize;
+
+        // final select with aggregation
+        $selectSql = 'SELECT a.*, s.name AS studio_name, IFNULL(AVG(r2.score),0) AS rating ' . $baseSql . ' GROUP BY a.id' . $having . ' ORDER BY ' . $order . ' LIMIT :limit OFFSET :offset';
+
+        $selectStmt = $this->db->prepare($selectSql);
+        $selectParams = $params;
+        if ($minRating > 0) $selectParams[':minRating'] = $minRating;
+        $selectParams[':limit'] = $pageSize;
+        $selectParams[':offset'] = $offset;
+        $selectStmt->execute($selectParams);
+        $items = $selectStmt->fetchAll();
 
         // fetch reference data for filters
         $genres = $this->db->query('SELECT id, name FROM genre ORDER BY name')->fetchAll();

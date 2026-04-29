@@ -2,24 +2,50 @@
     <div class="modal-detail">
         <div class="left">
             <?php if (!empty($item['cover_url'])): ?>
-                <img src="<?= htmlspecialchars($item['cover_url']) ?>" alt="" style="width:100%;border-radius:8px">
+                <img src="<?= htmlspecialchars($item['cover_url']) ?>" alt="<?= htmlspecialchars($item['title'] ?? '') ?>" style="width:100%;border-radius:8px">
             <?php endif; ?>
             <div style="margin-top:12px;font-weight:700;color:#ffd166;font-size:20px">★ <?= round($item['rating'] ?? 0,1) ?>/10</div>
+            <?php if (!empty($studio ?? null)): ?>
+                <div style="margin-top:14px;color:var(--muted)"><strong>Студія:</strong> <?= htmlspecialchars($studio['name']) ?></div>
+            <?php endif; ?>
         </div>
         <div class="right">
             <h2 style="margin-top:0"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></h2>
-            <div style="display:flex;gap:24px;color:var(--muted)">
+            <div style="display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);margin-bottom:8px">
                 <div><strong>Рік:</strong> <?= htmlspecialchars($item['year']) ?></div>
                 <div><strong>Епізоди:</strong> <?= htmlspecialchars($item['episodes'] ?? '') ?></div>
                 <div><strong>Тип:</strong> <?= htmlspecialchars($item['type']) ?></div>
+                <div><strong>Статус:</strong> <?= htmlspecialchars($item['status'] ?? '') ?></div>
             </div>
-            <div class="genres">
+            <div class="genres" aria-hidden="false">
                 <?php foreach (($genres ?? []) as $g): ?>
                     <span class="genre-chip"><?= htmlspecialchars($g['name']) ?></span>
                 <?php endforeach; ?>
             </div>
             <h3 style="margin-top:18px">Опис</h3>
-            <p style="color:var(--muted)"><?= nl2br(htmlspecialchars($item['description'] ?? '')) ?></p>
+            <p style="color:var(--muted);line-height:1.5"><?= nl2br(htmlspecialchars($item['description'] ?? '')) ?></p>
+
+            <div class="info-block" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
+                <div style="min-width:160px">
+                    <h3>Дії</h3>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <form method="post" action="index.php?route=rating/toggle_favorite">
+                            <input type="hidden" name="anime_id" value="<?= $item['id'] ?>">
+                            <button class="btn" type="submit">Додати в улюблені</button>
+                        </form>
+                    <?php else: ?>
+                        <a class="btn" href="index.php?route=auth/login">Увійти щоб додати</a>
+                    <?php endif; ?>
+                </div>
+                <div style="flex:1">
+                    <h3>Деталі</h3>
+                    <table class="table" style="max-width:600px">
+                        <tr><td>Джерело</td><td><?= htmlspecialchars($item['source'] ?? '') ?></td></tr>
+                        <tr><td>Тривалість епізоду</td><td><?= htmlspecialchars($item['episode_duration'] ? $item['episode_duration'] . ' хв' : '') ?></td></tr>
+                        <tr><td>Перегляди</td><td><?= htmlspecialchars($item['views'] ?? 0) ?></td></tr>
+                    </table>
+                </div>
+            </div>
         </div>
         <div style="clear:both"></div>
     </div>
@@ -32,18 +58,15 @@
                 <div class="comment-body"><?= nl2br(htmlspecialchars($c['content'])) ?></div>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <?php
-                        // show delete for admin
                         $isAdmin = false;
-                        if (isset($_SESSION['user_id']) && isset($this)) {
-                            try {
-                                $db = Database::getInstance();
-                                $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
-                                $rs->execute([':id' => $_SESSION['user_id']]);
-                                $r = $rs->fetch();
-                                $isAdmin = $r && ($r['role'] === 'admin');
-                            } catch (Exception $e) {
-                                $isAdmin = false;
-                            }
+                        try {
+                            $db = Database::getInstance();
+                            $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
+                            $rs->execute([':id' => $_SESSION['user_id']]);
+                            $r = $rs->fetch();
+                            $isAdmin = $r && ($r['role'] === 'admin');
+                        } catch (Exception $e) {
+                            $isAdmin = false;
                         }
                     ?>
                     <?php if ($isAdmin): ?>
