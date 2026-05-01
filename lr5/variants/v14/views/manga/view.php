@@ -42,7 +42,36 @@
         <div style="clear:both"></div>
     </div>
 
-    <?php if (!empty($comments)): ?>
+        <?php if (!empty($characters)): ?>
+            <h3>Головні Персонажі</h3>
+            <div class="related-grid">
+                <?php foreach ($characters as $ch): ?>
+                    <a class="character-card" href="index.php?route=character/view&id=<?= $ch['id'] ?>">
+                        <?php if (!empty($ch['image_url'])): ?><img src="<?= htmlspecialchars($ch['image_url']) ?>" alt=""><?php endif; ?>
+                        <div class="name"><?= htmlspecialchars($ch['name_ua'] ?: $ch['name']) ?></div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($relatedAnime)): ?>
+            <h3>Пов'язані аніме</h3>
+            <div class="card-grid">
+                <?php foreach ($relatedAnime as $ra): ?>
+                    <a href="index.php?route=anime/view&id=<?= $ra['id'] ?>" style="text-decoration:none;color:inherit">
+                        <div class="card">
+                            <?php if (!empty($ra['cover_url'])): ?>
+                                <img src="<?= htmlspecialchars($ra['cover_url']) ?>" alt="" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px">
+                            <?php endif; ?>
+                            <h3 class="card__title"><?= htmlspecialchars($ra['title_ua'] ?: $ra['title']) ?></h3>
+                            <div class="card__text"><?= htmlspecialchars(mb_substr($ra['description'] ?? '',0,120)) ?></div>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($comments)): ?>
         <h2>Коментарі</h2>
         <?php foreach ($comments as $c): ?>
             <div class="comment">

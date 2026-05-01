@@ -7,12 +7,18 @@ $comments = $comments ?? [];
     <?php if (!$item): ?>
         <p>Новина не знайдена.</p>
     <?php else: ?>
-        <h1><?= htmlspecialchars($item['title']) ?></h1>
-        <?php if (!empty($item['image_url'])): ?>
-            <img src="<?= htmlspecialchars($item['image_url']) ?>" alt="" style="max-width:420px;width:100%;border-radius:8px;margin-bottom:12px">
-        <?php endif; ?>
-        <div style="color:var(--muted);margin-bottom:8px"> Автор: <?= htmlspecialchars($item['author'] ?? 'Адмін') ?> • <?= htmlspecialchars($item['published_at'] ?? $item['created_at']) ?></div>
-        <div class="news-content" style="margin-top:12px;color:var(--muted)"><?= nl2br(htmlspecialchars($item['content'] ?? '')) ?></div>
+        <div class="card">
+            <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+                <?php if (!empty($item['image_url'])): ?>
+                    <div style="flex:0 0 320px"><img src="<?= htmlspecialchars($item['image_url']) ?>" alt="" style="width:100%;border-radius:8px;margin-bottom:6px"></div>
+                <?php endif; ?>
+                <div style="flex:1">
+                    <h1 style="margin-top:0;margin-bottom:6px"><?= htmlspecialchars($item['title']) ?></h1>
+                    <div style="color:var(--muted);margin-bottom:8px"> Автор: <?= htmlspecialchars($item['author'] ?? 'Адмін') ?> • <?= htmlspecialchars($item['published_at'] ?? $item['created_at']) ?></div>
+                    <div class="news-content" style="margin-top:6px;color:var(--muted)"><?= nl2br(htmlspecialchars($item['content'] ?? '')) ?></div>
+                </div>
+            </div>
+        </div>
 
         <hr>
         <h3>Коментарі</h3>

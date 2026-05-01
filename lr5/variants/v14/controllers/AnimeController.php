@@ -167,7 +167,22 @@ class AnimeController extends PageController
         $gstmt->execute([':id' => $id]);
         $genres = $gstmt->fetchAll();
 
-        $this->render('anime/view', ['item' => $item, 'comments' => $comments, 'genres' => $genres], $item['title']);
+        // load characters linked to this anime
+        $c2 = $this->db->prepare('SELECT ch.id, ch.name_ua, ch.name, ch.image_url FROM anime_character ac JOIN character ch ON ac.character_id = ch.id WHERE ac.anime_id = :id');
+        $c2->execute([':id' => $id]);
+        $characters = $c2->fetchAll();
+
+        // if there are characters, find manga that share them
+        $relatedManga = [];
+        if (!empty($characters)) {
+            $ids = array_map(function($r){ return (int)$r['id']; }, $characters);
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $mstmt = $this->db->prepare("SELECT DISTINCT m.* FROM manga m JOIN manga_character mc ON mc.manga_id = m.id WHERE mc.character_id IN ($placeholders) LIMIT 8");
+            $mstmt->execute($ids);
+            $relatedManga = $mstmt->fetchAll();
+        }
+
+        $this->render('anime/view', ['item' => $item, 'comments' => $comments, 'genres' => $genres, 'characters' => $characters, 'relatedManga' => $relatedManga], $item['title']);
     }
 
     public function action_create(): void

@@ -9,7 +9,7 @@
         <a href="index.php?route=anime/create" class="btn btn-primary">Додати аніме</a>
     <?php endif; ?>
 
-    <div class="layout-row">
+    <div class="layout-row filters-right">
             <aside class="filters">
             <form method="get" action="index.php">
                 <input type="hidden" name="route" value="anime/list">

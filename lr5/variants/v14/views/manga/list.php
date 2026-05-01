@@ -51,10 +51,15 @@
         <section class="content">
             <div class="card-grid">
         <?php foreach ($manga as $m): ?>
-            <div class="card">
-                <h3 class="card__title"><?= htmlspecialchars($m['title']) ?></h3>
-                <p class="card__text"><?= htmlspecialchars($m['description'] ? (mb_substr($m['description'],0,160).'...') : '') ?></p>
-                <a href="index.php?route=manga/view&id=<?= $m['id'] ?>" class="btn btn--small">Деталі</a>
+            <div class="card" style="position:relative">
+                <?php if (!empty($m['cover_url'])): ?>
+                    <a href="index.php?route=manga/view&id=<?= $m['id'] ?>"><img src="<?= htmlspecialchars($m['cover_url']) ?>" alt="" style="width:100%;height:320px;object-fit:cover;border-radius:6px;margin-bottom:10px"></a>
+                <?php endif; ?>
+                <div style="padding-top:6px">
+                    <h3 class="card__title"><?= htmlspecialchars($m['title_ua'] ?: $m['title']) ?></h3>
+                    <p class="card__text"><?= htmlspecialchars(mb_substr($m['description'] ?? '',0,120)) ?></p>
+                    <a href="index.php?route=manga/view&id=<?= $m['id'] ?>" class="btn btn--small">Деталі</a>
+                </div>
             </div>
         <?php endforeach; ?>
     </div>

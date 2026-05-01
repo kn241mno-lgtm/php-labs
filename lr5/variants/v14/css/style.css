@@ -177,6 +177,57 @@ code {
   padding: 32px 0;
 }
 
+/* Layout helpers for list pages */
+.layout-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+.layout-row.filters-right {
+  flex-direction: row-reverse;
+}
+.filters {
+  width: 300px;
+  min-width: 220px;
+  background: linear-gradient(180deg, #071028, #081127);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 16px;
+  border-radius: 10px;
+  position: sticky;
+  top: 96px;
+  height: fit-content;
+}
+.content {
+  flex: 1;
+}
+
+/* Related lists and character cards */
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+.character-card {
+  background: #071028;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+}
+.character-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.character-card .name {
+  margin-top: 6px;
+  color: #e6eef8;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
 /* ===== Footer ===== */
 .footer {
   background-color: #071028;
