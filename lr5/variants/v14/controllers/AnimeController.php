@@ -20,6 +20,8 @@ class AnimeController extends PageController
         $status = trim($this->request->get('status', ''));
         $yearFrom = (int)($this->request->get('yearFrom', 0));
         $yearTo = (int)($this->request->get('yearTo', 0));
+        $ratingFrom = $this->request->get('ratingFrom', '');
+        $ratingTo = $this->request->get('ratingTo', '');
         $genre = trim($this->request->get('genres', ''));// comma-separated or single id
         if ($genre === '') {
             // support older view that used 'genre' param
@@ -120,19 +122,25 @@ class AnimeController extends PageController
         // Count total using grouped query when minRating or genres are used
         $baseSql = 'FROM anime a LEFT JOIN studio s ON a.studio_id = s.id LEFT JOIN rating r2 ON r2.anime_id = a.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where);
 
-        // If minRating filter present, we'll use HAVING on AVG(r2.score)
+        // build HAVING clause for rating range (if provided)
+        $havingParts = [];
+        if ($ratingFrom !== '' && is_numeric($ratingFrom)) {
+            $havingParts[] = 'AVG(r2.score) >= :ratingFrom';
+        }
+        if ($ratingTo !== '' && is_numeric($ratingTo)) {
+            $havingParts[] = 'AVG(r2.score) <= :ratingTo';
+        }
         $having = '';
-        if ($minRating > 0) {
-            $having = ' HAVING AVG(r2.score) >= :minRating';
+        if (!empty($havingParts)) {
+            $having = ' HAVING ' . implode(' AND ', $havingParts);
         }
 
         // total count of groups
         $countSql = 'SELECT COUNT(DISTINCT a.id) ' . $baseSql . $having;
         $countStmt = $this->db->prepare($countSql);
         $countParams = $params;
-        if ($minRating > 0) {
-            $countParams[':minRating'] = $minRating;
-        }
+        if ($ratingFrom !== '' && is_numeric($ratingFrom)) $countParams[':ratingFrom'] = (float)$ratingFrom;
+        if ($ratingTo !== '' && is_numeric($ratingTo)) $countParams[':ratingTo'] = (float)$ratingTo;
         $countStmt->execute($countParams);
         $total = (int)$countStmt->fetchColumn();
 
@@ -144,7 +152,8 @@ class AnimeController extends PageController
 
         $selectStmt = $this->db->prepare($selectSql);
         $selectParams = $params;
-        if ($minRating > 0) $selectParams[':minRating'] = $minRating;
+        if ($ratingFrom !== '' && is_numeric($ratingFrom)) $selectParams[':ratingFrom'] = (float)$ratingFrom;
+        if ($ratingTo !== '' && is_numeric($ratingTo)) $selectParams[':ratingTo'] = (float)$ratingTo;
         $selectParams[':limit'] = $pageSize;
         $selectParams[':offset'] = $offset;
         $selectStmt->execute($selectParams);
@@ -158,7 +167,7 @@ class AnimeController extends PageController
         $this->render('anime/list', [
             'anime' => $items,
             'pagination' => ['page' => $page, 'pageSize' => $pageSize, 'total' => $total, 'totalPages' => $totalPages],
-            'filters' => ['q'=>$q,'studioId'=>$studioId,'studios'=>$studiosParam,'type'=>$type,'status'=>$status,'yearFrom'=>$yearFrom,'yearTo'=>$yearTo,'genre'=>$genre,'sort'=>$sort],
+            'filters' => ['q'=>$q,'studioId'=>$studioId,'studios'=>$studiosParam,'type'=>$type,'status'=>$status,'yearFrom'=>$yearFrom,'yearTo'=>$yearTo,'genre'=>$genre,'sort'=>$sort,'ratingFrom'=>$this->request->get('ratingFrom',''),'ratingTo'=>$this->request->get('ratingTo','')],
             'genres' => $genres,
             'studios' => $studios
         ], 'Каталог аніме');
@@ -190,8 +199,8 @@ class AnimeController extends PageController
         $gstmt->execute([':id' => $id]);
         $genres = $gstmt->fetchAll();
 
-        // load characters linked to this anime
-        $c2 = $this->db->prepare('SELECT ch.id, ch.name_ua, ch.name, ch.image_url FROM anime_character ac JOIN character ch ON ac.character_id = ch.id WHERE ac.anime_id = :id');
+        // load characters linked to this anime (alias name -> name_ua for compatibility with views)
+        $c2 = $this->db->prepare('SELECT ch.id, ch.name AS name_ua, ch.name, ch.image_url FROM anime_character ac JOIN character ch ON ac.character_id = ch.id WHERE ac.anime_id = :id');
         $c2->execute([':id' => $id]);
         $characters = $c2->fetchAll();
 

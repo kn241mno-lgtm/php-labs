@@ -19,7 +19,8 @@ class MangaController extends PageController
         $genre = trim($this->request->get('genres', ''));
         $yearFrom = (int)($this->request->get('yearFrom', 0));
         $yearTo = (int)($this->request->get('yearTo', 0));
-        $minRating = (float)($this->request->get('minRating', 0));
+        $ratingFrom = $this->request->get('ratingFrom', '');
+        $ratingTo = $this->request->get('ratingTo', '');
         $page = max(1, (int)($this->request->get('page', 1)));
         $pageSize = max(6, min(48, (int)($this->request->get('pageSize', 24))));
         $sort = trim($this->request->get('sort', 'title'));
@@ -86,15 +87,25 @@ class MangaController extends PageController
         }
 
         $baseSql = 'FROM manga m LEFT JOIN rating r2 ON r2.manga_id = m.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where);
+
+        // build HAVING clause for rating range (if provided)
+        $havingParts = [];
+        if ($ratingFrom !== '' && is_numeric($ratingFrom)) {
+            $havingParts[] = 'AVG(r2.score) >= :ratingFrom';
+        }
+        if ($ratingTo !== '' && is_numeric($ratingTo)) {
+            $havingParts[] = 'AVG(r2.score) <= :ratingTo';
+        }
         $having = '';
-        if ($minRating > 0) {
-            $having = ' HAVING AVG(r2.score) >= :minRating';
+        if (!empty($havingParts)) {
+            $having = ' HAVING ' . implode(' AND ', $havingParts);
         }
 
         $countSql = 'SELECT COUNT(DISTINCT m.id) ' . $baseSql . $having;
         $countStmt = $this->db->prepare($countSql);
         $countParams = $params;
-        if ($minRating > 0) $countParams[':minRating'] = $minRating;
+        if ($ratingFrom !== '' && is_numeric($ratingFrom)) $countParams[':ratingFrom'] = (float)$ratingFrom;
+        if ($ratingTo !== '' && is_numeric($ratingTo)) $countParams[':ratingTo'] = (float)$ratingTo;
         $countStmt->execute($countParams);
         $total = (int)$countStmt->fetchColumn();
 
@@ -104,16 +115,31 @@ class MangaController extends PageController
         $selectSql = 'SELECT m.*, IFNULL(AVG(r2.score),0) AS rating ' . $baseSql . ' GROUP BY m.id' . $having . ' ORDER BY ' . $order . ' LIMIT :limit OFFSET :offset';
         $selectStmt = $this->db->prepare($selectSql);
         $selectParams = $params;
-        if ($minRating > 0) $selectParams[':minRating'] = $minRating;
+        if ($ratingFrom !== '' && is_numeric($ratingFrom)) $selectParams[':ratingFrom'] = (float)$ratingFrom;
+        if ($ratingTo !== '' && is_numeric($ratingTo)) $selectParams[':ratingTo'] = (float)$ratingTo;
         $selectParams[':limit'] = $pageSize;
         $selectParams[':offset'] = $offset;
         $selectStmt->execute($selectParams);
         $items = $selectStmt->fetchAll();
 
-        // fetch genres for UI
+        // fetch genres and authors for UI
         $genres = $this->db->query('SELECT id, name FROM genre ORDER BY name')->fetchAll();
+        $authors = [];
+        try {
+            $authors = $this->db->query('SELECT id, name FROM author ORDER BY name')->fetchAll();
+        } catch (Exception $e) { $authors = []; }
 
-        $this->render('manga/list', ['manga' => $items, 'pagination'=>['page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'totalPages'=>$totalPages], 'filters'=>['q'=>$q,'status'=>$status,'type'=>$type,'author'=>$author,'genre'=>$genre,'yearFrom'=>$this->request->get('yearFrom', ''),'yearTo'=>$this->request->get('yearTo', ''),'sort'=>$sort], 'genres'=>$genres], 'Каталог манги');
+        $this->render('manga/list', [
+            'manga' => $items,
+            'pagination' => ['page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'totalPages'=>$totalPages],
+            'filters' => [
+                'q'=>$q,'status'=>$status,'type'=>$type,'author'=>$author,'genre'=>$genre,
+                'yearFrom'=>$this->request->get('yearFrom', ''),'yearTo'=>$this->request->get('yearTo', ''),'sort'=>$sort,
+                'ratingFrom'=>$this->request->get('ratingFrom',''),'ratingTo'=>$this->request->get('ratingTo','')
+            ],
+            'genres'=>$genres,
+            'authors'=>$authors
+        ], 'Каталог манги');
     }
 
     public function action_view(): void
@@ -136,8 +162,8 @@ class MangaController extends PageController
         $cstmt->execute([':id' => $id]);
         $comments = $cstmt->fetchAll();
 
-        // load characters for this manga
-        $c2 = $this->db->prepare('SELECT ch.id, ch.name_ua, ch.name, ch.image_url FROM manga_character mc JOIN character ch ON mc.character_id = ch.id WHERE mc.manga_id = :id');
+        // load characters for this manga (alias name -> name_ua for compatibility with views)
+        $c2 = $this->db->prepare('SELECT ch.id, ch.name AS name_ua, ch.name, ch.image_url FROM manga_character mc JOIN character ch ON mc.character_id = ch.id WHERE mc.manga_id = :id');
         $c2->execute([':id' => $id]);
         $characters = $c2->fetchAll();
 

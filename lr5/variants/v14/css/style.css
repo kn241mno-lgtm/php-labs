@@ -197,6 +197,9 @@ code {
   top: 96px;
   height: fit-content;
 }
+.filters .form-group {
+  margin-bottom: 14px;
+}
 .content {
   flex: 1;
 }
@@ -413,9 +416,10 @@ h3 {
 .layout-row.filters-right .filters {
   position: relative;
 }
+/* Keep overlays opening to the right of the control for consistency */
 .layout-row.filters-right .filters .overlay-panel {
-  left: auto;
-  right: calc(100% + 12px);
+  left: calc(100% + 12px);
+  right: auto;
 }
 
 /* Normal case: filters on left */

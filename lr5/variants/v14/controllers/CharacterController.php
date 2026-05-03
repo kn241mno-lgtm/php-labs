@@ -18,7 +18,8 @@ class CharacterController extends PageController
             return;
         }
 
-        $stmt = $this->db->prepare('SELECT * FROM character WHERE id = :id');
+        // select name as name_ua so views that use name_ua work even without a dedicated column
+        $stmt = $this->db->prepare('SELECT *, name AS name_ua FROM character WHERE id = :id');
         $stmt->execute([':id' => $id]);
         $item = $stmt->fetch();
         if (!$item) {

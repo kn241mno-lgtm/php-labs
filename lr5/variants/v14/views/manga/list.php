@@ -1,108 +1,45 @@
 <div class="page">
     <h1>Каталог манги</h1>
-    <?php
-        $canCreateManga = false;
-        if (isset($_SESSION['user_id'])) {
-            try {
-                $db = Database::getInstance();
-                $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
-                $rs->execute([':id' => $_SESSION['user_id']]);
-                $r = $rs->fetch();
-                $canCreateManga = $r && ($r['role'] === 'admin');
-            } catch (Exception $e) { $canCreateManga = false; }
-        }
-    ?>
-    <?php if ($canCreateManga): ?>
-        <a href="index.php?route=manga/create" class="btn btn-primary">Додати мангу</a>
-    <?php endif; ?>
+    <form method="get" action="index.php">
+        <input type="hidden" name="route" value="manga/list">
+        <div class="list-toolbar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div></div>
+            <div style="display:flex;gap:12px;align-items:center">
+                <input type="text" name="q" placeholder="Пошук..." value="<?= htmlspecialchars($filters['q'] ?? '') ?>" style="min-width:280px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit">
+                <select name="sort" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit">
+                    <option value="title" <?= (isset($filters['sort']) && $filters['sort']=='title')?'selected':'' ?>>Заголовок</option>
+                    <option value="year" <?= (isset($filters['sort']) && $filters['sort']=='year')?'selected':'' ?>>Рік</option>
+                    <option value="views" <?= (isset($filters['sort']) && $filters['sort']=='views')?'selected':'' ?>>Перегляди</option>
+                </select>
+            </div>
+        </div>
 
-    <div class="layout-row filters-right">
-        <aside class="filters">
-            <form method="get" action="index.php">
-                <input type="hidden" name="route" value="manga/list">
-                <div class="form-group">
-                    <label>Пошук</label>
-                    <input type="text" name="q" value="<?= htmlspecialchars($filters['q'] ?? '') ?>" />
-                </div>
+        <div class="layout-row filters-right">
+            <aside class="filters">
                 <div class="form-group">
                     <label>Рік випуску</label>
                     <div class="year-range range-wrap">
                         <div class="range-track"></div>
-                        <input type="range" id="m_yearFromRange" min="1900" max="2100" value="<?= (int)($filters['yearFrom'] ?: 1900) ?>">
-                        <input type="range" id="m_yearToRange" min="1900" max="2100" value="<?= (int)($filters['yearTo'] ?: 2100) ?>">
+                        <input type="range" id="m_yearFromRange" min="1965" max="2026" value="<?= (int)($filters['yearFrom'] !== '' ? $filters['yearFrom'] : 1965) ?>">
+                        <input type="range" id="m_yearToRange" min="1965" max="2026" value="<?= (int)($filters['yearTo'] !== '' ? $filters['yearTo'] : 2026) ?>">
                         <div class="year-values">Від <span id="m_yearFromDisplay"></span> до <span id="m_yearToDisplay"></span></div>
                         <input type="hidden" name="yearFrom" id="m_yearFrom" value="<?= htmlspecialchars($filters['yearFrom'] ?? '') ?>">
                         <input type="hidden" name="yearTo" id="m_yearTo" value="<?= htmlspecialchars($filters['yearTo'] ?? '') ?>">
                     </div>
                 </div>
 
-                    <script>
-                        (function(){
-                            // year dual-range for manga
-                            var yFromRange = document.getElementById('m_yearFromRange');
-                            var yToRange = document.getElementById('m_yearToRange');
-                            var yFromHidden = document.getElementById('m_yearFrom');
-                            var yToHidden = document.getElementById('m_yearTo');
-                            var yFromDisplay = document.getElementById('m_yearFromDisplay');
-                            var yToDisplay = document.getElementById('m_yearToDisplay');
-                            var track = document.querySelector('#mGenresOverlay .range-track') || document.querySelector('.range-track');
-                            function syncYears(){
-                                var min = parseInt(yFromRange.min,10);
-                                var max = parseInt(yFromRange.max,10);
-                                var from = parseInt(yFromRange.value,10);
-                                var to = parseInt(yToRange.value,10);
-                                if(from > to){ var tmp = from; from = to; to = tmp; }
-                                yFromHidden.value = from;
-                                yToHidden.value = to;
-                                yFromDisplay.textContent = from;
-                                yToDisplay.textContent = to;
-                                if(track){
-                                    var left = ((from - min) / (max - min)) * 100;
-                                    var right = ((to - min) / (max - min)) * 100;
-                                    track.style.left = left + '%';
-                                    track.style.width = Math.max(0, right - left) + '%';
-                                }
-                            }
-                            if(yFromRange && yToRange){
-                                yFromRange.addEventListener('input', syncYears);
-                                yToRange.addEventListener('input', syncYears);
-                                syncYears();
-                            }
+                <div class="form-group">
+                    <label>Оцінка</label>
+                    <div class="rating-range range-wrap" style="padding-top:12px;padding-bottom:8px">
+                        <div class="range-track"></div>
+                        <input type="range" id="m_ratingFromRange" min="0" max="10" step="0.1" value="<?= htmlspecialchars($filters['ratingFrom'] !== '' ? $filters['ratingFrom'] : 0) ?>">
+                        <input type="range" id="m_ratingToRange" min="0" max="10" step="0.1" value="<?= htmlspecialchars($filters['ratingTo'] !== '' ? $filters['ratingTo'] : 10) ?>">
+                        <div class="year-values">Від <span id="m_ratingFromDisplay"></span> до <span id="m_ratingToDisplay"></span></div>
+                        <input type="hidden" name="ratingFrom" id="m_ratingFrom" value="<?= htmlspecialchars($filters['ratingFrom'] ?? '') ?>">
+                        <input type="hidden" name="ratingTo" id="m_ratingTo" value="<?= htmlspecialchars($filters['ratingTo'] ?? '') ?>">
+                    </div>
+                </div>
 
-                            // overlay for manga genres
-                            function setupOverlay(btnId, overlayId, applyId, closeId, selectAllId, clearAllId, hiddenInputId){
-                                var btn = document.getElementById(btnId);
-                                var overlay = document.getElementById(overlayId);
-                                var apply = document.getElementById(applyId);
-                                var close = document.getElementById(closeId);
-                                var selectAll = document.getElementById(selectAllId);
-                                var clearAll = document.getElementById(clearAllId);
-                                var hidden = document.getElementById(hiddenInputId);
-                                if(!btn || !overlay) return;
-                                btn.addEventListener('click', function(){ overlay.style.display = (overlay.style.display === 'none' || overlay.style.display === '') ? 'block' : 'none'; });
-                                if(close) close.addEventListener('click', function(){ overlay.style.display = 'none'; });
-                                if(selectAll) selectAll.addEventListener('click', function(){ overlay.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = true; }); });
-                                if(clearAll) clearAll.addEventListener('click', function(){ overlay.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = false; }); });
-                                if(apply) apply.addEventListener('click', function(){ var vals=[]; overlay.querySelectorAll('input[type=checkbox]:checked').forEach(function(c){ vals.push(c.value); }); if(hidden) hidden.value = vals.join(','); overlay.style.display='none'; });
-                                document.addEventListener('click', function(e){ if(!overlay.contains(e.target) && !btn.contains(e.target)){ overlay.style.display = 'none'; } });
-                            }
-                            setupOverlay('openMGenresBtn','mGenresOverlay','mApplyGenres','mCloseGenres','mGenreSelectAll','mGenreClearAll','m_genreInput');
-                            // overlay search for manga genres
-                            function setupOverlaySearch(overlayId, searchId){
-                                var overlay = document.getElementById(overlayId);
-                                var input = document.getElementById(searchId);
-                                if(!overlay || !input) return;
-                                input.addEventListener('input', function(){
-                                    var q = input.value.trim().toLowerCase();
-                                    overlay.querySelectorAll('.overlay-checkbox').forEach(function(lb){
-                                        var text = lb.textContent.trim().toLowerCase();
-                                        lb.style.display = q === '' || text.indexOf(q) !== -1 ? 'block' : 'none';
-                                    });
-                                });
-                            }
-                            setupOverlaySearch('mGenresOverlay','m_genreSearch');
-                        })();
-                    </script>
                 <div class="form-group">
                     <label>Статус</label>
                     <select name="status">
@@ -111,6 +48,17 @@
                         <option value="Completed" <?= (isset($filters['status']) && $filters['status']=='Completed')?'selected':'' ?>>Completed</option>
                     </select>
                 </div>
+
+                <div class="form-group">
+                    <label>Автор</label>
+                    <select name="author">
+                        <option value="">Всі автори</option>
+                        <?php if(!empty($authors)): foreach($authors as $au): ?>
+                            <option value="<?= $au['id'] ?>" <?= (isset($filters['author']) && $filters['author']==$au['id'])?'selected':'' ?>><?= htmlspecialchars($au['name']) ?></option>
+                        <?php endforeach; endif; ?>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label>Жанри</label>
                     <input type="hidden" name="genres" id="m_genreInput" value="<?= htmlspecialchars($filters['genre'] ?? '') ?>" />
@@ -131,6 +79,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="form-group">
                     <label>Тип</label>
                     <select name="type">
@@ -139,26 +88,112 @@
                         <option value="Manhwa" <?= (isset($filters['type']) && $filters['type']=='Manhwa')?'selected':'' ?>>Manhwa</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Сортувати за</label>
-                    <select name="sort">
-                        <option value="title" <?= (isset($filters['sort']) && $filters['sort']=='title')?'selected':'' ?>>Заголовок</option>
-                        <option value="year" <?= (isset($filters['sort']) && $filters['sort']=='year')?'selected':'' ?>>Рік</option>
-                        <option value="views" <?= (isset($filters['sort']) && $filters['sort']=='views')?'selected':'' ?>>Перегляди</option>
-                    </select>
-                </div>
+
                 <div class="form-actions">
                     <button class="btn">Застосувати фільтри</button>
-                    <a href="index.php?route=manga/list" class="btn btn--secondary">Скинути</a>
+                    <a href="index.php?route=manga/list" class="btn">Скинути</a>
                 </div>
-            </form>
-        </aside>
+
+                <script>
+                    (function(){
+                        // year sync
+                        var yFromRange = document.getElementById('m_yearFromRange');
+                        var yToRange = document.getElementById('m_yearToRange');
+                        var yFromHidden = document.getElementById('m_yearFrom');
+                        var yToHidden = document.getElementById('m_yearTo');
+                        var yFromDisplay = document.getElementById('m_yearFromDisplay');
+                        var yToDisplay = document.getElementById('m_yearToDisplay');
+                        var yContainer = document.querySelector('.year-range');
+                        var yTrack = yContainer ? yContainer.querySelector('.range-track') : null;
+                        function syncYears(){
+                            var min = parseFloat(yFromRange.min);
+                            var max = parseFloat(yFromRange.max);
+                            var from = parseFloat(yFromRange.value);
+                            var to = parseFloat(yToRange.value);
+                            if(from > to){ var tmp = from; from = to; to = tmp; }
+                            yFromHidden.value = from;
+                            yToHidden.value = to;
+                            yFromDisplay.textContent = from;
+                            yToDisplay.textContent = to;
+                            if(yTrack){
+                                var left = ((from - min) / (max - min)) * 100;
+                                var right = ((to - min) / (max - min)) * 100;
+                                yTrack.style.left = left + '%';
+                                yTrack.style.width = Math.max(0, right - left) + '%';
+                            }
+                        }
+                        if(yFromRange && yToRange){ yFromRange.addEventListener('input', syncYears); yToRange.addEventListener('input', syncYears); syncYears(); }
+
+                        // rating sync
+                        var rf = document.getElementById('m_ratingFromRange');
+                        var rt = document.getElementById('m_ratingToRange');
+                        var rfHidden = document.getElementById('m_ratingFrom');
+                        var rtHidden = document.getElementById('m_ratingTo');
+                        var rfDisplay = document.getElementById('m_ratingFromDisplay');
+                        var rtDisplay = document.getElementById('m_ratingToDisplay');
+                        var rContainer = document.querySelector('.rating-range');
+                        var rTrack = rContainer ? rContainer.querySelector('.range-track') : null;
+                        function syncRating(){
+                            var min = parseFloat(rf.min);
+                            var max = parseFloat(rf.max);
+                            var from = parseFloat(rf.value);
+                            var to = parseFloat(rt.value);
+                            if(from > to){ var tmp = from; from = to; to = tmp; }
+                            rfHidden.value = from;
+                            rtHidden.value = to;
+                            rfDisplay.textContent = from.toFixed(1);
+                            rtDisplay.textContent = to.toFixed(1);
+                            if(rTrack){
+                                var left = ((from - min) / (max - min)) * 100;
+                                var right = ((to - min) / (max - min)) * 100;
+                                rTrack.style.left = left + '%';
+                                rTrack.style.width = Math.max(0, right - left) + '%';
+                            }
+                        }
+                        if(rf && rt){ rf.addEventListener('input', syncRating); rt.addEventListener('input', syncRating); syncRating(); }
+
+                        // overlay helpers
+                        function setupOverlay(btnId, overlayId, applyId, closeId, selectAllId, clearAllId, hiddenInputId){
+                            var btn = document.getElementById(btnId);
+                            var overlay = document.getElementById(overlayId);
+                            var apply = document.getElementById(applyId);
+                            var close = document.getElementById(closeId);
+                            var selectAll = document.getElementById(selectAllId);
+                            var clearAll = document.getElementById(clearAllId);
+                            var hidden = document.getElementById(hiddenInputId);
+                            if(!btn || !overlay) return;
+                            btn.addEventListener('click', function(e){ e.stopPropagation(); overlay.style.display = (overlay.style.display === 'none' || overlay.style.display === '') ? 'block' : 'none'; });
+                            if(close) close.addEventListener('click', function(){ overlay.style.display = 'none'; });
+                            if(selectAll) selectAll.addEventListener('click', function(){ overlay.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = true; }); });
+                            if(clearAll) clearAll.addEventListener('click', function(){ overlay.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = false; }); });
+                            if(apply) apply.addEventListener('click', function(){ var vals=[]; overlay.querySelectorAll('input[type=checkbox]:checked').forEach(function(c){ vals.push(c.value); }); if(hidden) hidden.value = vals.join(','); overlay.style.display='none'; });
+                            document.addEventListener('click', function(e){ if(!overlay.contains(e.target) && !btn.contains(e.target)){ overlay.style.display = 'none'; } });
+                        }
+                        setupOverlay('openMGenresBtn','mGenresOverlay','mApplyGenres','mCloseGenres','mGenreSelectAll','mGenreClearAll','m_genreInput');
+
+                        function setupOverlaySearch(overlayId, searchId){
+                            var overlay = document.getElementById(overlayId);
+                            var input = document.getElementById(searchId);
+                            if(!overlay || !input) return;
+                            input.addEventListener('input', function(){
+                                var q = input.value.trim().toLowerCase();
+                                overlay.querySelectorAll('.overlay-checkbox').forEach(function(lb){
+                                    var text = lb.textContent.trim().toLowerCase();
+                                    lb.style.display = q === '' || text.indexOf(q) !== -1 ? 'block' : 'none';
+                                });
+                            });
+                        }
+                        setupOverlaySearch('mGenresOverlay','m_genreSearch');
+
+                    })();
+                </script>
+            </aside>
 
         <section class="content">
             <div class="card-grid">
         <?php foreach ($manga as $m): ?>
             <div class="card" style="position:relative">
-                <?php $mcover = !empty($m['cover_url']) ? htmlspecialchars($m['cover_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'; ?>
+                <?php $mcover = !empty($m['cover_url']) ? htmlspecialchars($m['cover_url']) : (!empty($m['poster_url']) ? htmlspecialchars($m['poster_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'); ?>
                 <a href="index.php?route=manga/view&id=<?= $m['id'] ?>"><img src="<?= $mcover ?>" alt="<?= htmlspecialchars($m['title']) ?>" class="card__img" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'" /></a>
                 <div style="padding-top:6px">
                     <h3 class="card__title"><?= htmlspecialchars($m['title_ua'] ?: $m['title']) ?></h3>
@@ -167,5 +202,8 @@
                 </div>
             </div>
         <?php endforeach; ?>
-    </div>
+            </div> <!-- .card-grid -->
+        </section>
+    </div> <!-- .layout-row -->
+    </form>
 </div>

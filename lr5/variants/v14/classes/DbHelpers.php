@@ -87,7 +87,8 @@ class DbHelpers
         $stmt->execute([':q' => $q]);
         $results = array_merge($results, $stmt->fetchAll(PDO::FETCH_ASSOC));
 
-        $stmt = $db->prepare('SELECT id as id, name as title, name_ua as title_ua, "character" as type, image_url as image_url FROM character WHERE name LIKE :q OR name_ua LIKE :q');
+        // character table has no separate localized name column; use full_name if present
+        $stmt = $db->prepare('SELECT id as id, name as title, COALESCE(full_name, name) as title_ua, "character" as type, image_url as image_url FROM character WHERE name LIKE :q OR full_name LIKE :q');
         $stmt->execute([':q' => $q]);
         $results = array_merge($results, $stmt->fetchAll(PDO::FETCH_ASSOC));
 
