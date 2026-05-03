@@ -51,86 +51,93 @@ CREATE TABLE IF NOT EXISTS anime (
     poster_url TEXT,
     views INTEGER DEFAULT 0,
     favorites INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (studio_id) REFERENCES studio(id) ON DELETE SET NULL
-);
-CREATE UNIQUE INDEX IF NOT EXISTS ux_anime_title_year ON anime(title, year);
+    -- Cleaned additional seeds (deduplicated)
+    -- This section replaces repeated appended INSERT blocks and consolidates canonical seed data.
 
-CREATE TABLE IF NOT EXISTS manga (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    title_ua TEXT,
-    year INTEGER,
-    status TEXT,
-    volumes INTEGER DEFAULT 0,
-    chapters INTEGER DEFAULT 0,
-    type TEXT,
-    demographic TEXT,
-    description TEXT,
-    cover_url TEXT,
-    views INTEGER DEFAULT 0,
-    favorites INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+    -- Genres (canonical)
+    INSERT OR IGNORE INTO genre (name, description, color, icon) VALUES
+    ('Action','Аніме з інтенсивними битвами та екшен-сценами','#ef4444','sword'),
+    ('Adventure','Подорожі та відкриття','#f59e0b','compass'),
+    ('Comedy','Гумор та легкі ситуації','#10b981','laugh'),
+    ('Drama','Емоційні драми','#8b5cf6','drama'),
+    ('Fantasy','Магія та вигадані світи','#ec4899','magic'),
+    ('Sci-Fi','Наукова фантастика','#3b82f6','robot'),
+    ('Romance','Романтика','#ff6b6b','heart'),
+    ('Mystery','Таємниці та розслідування','#6366f1','question'),
+    ('Horror','Жахи','#18181b','ghost'),
+    ('Psychological','Психологічні сюжети','#7c3aed','brain'),
+    ('Supernatural','Надприродне','#c084fc','sparkles'),
+    ('Sports','Спортивні змагання','#22c55e','sports'),
+    ('Music','Музичні історії','#f43f5e','music'),
+    ('Slice of Life','Буденне життя','#a3e635','home'),
+    ('Isekai','Перенесення в інший світ','#a855f7','portal'),
+    ('Mecha','Гігантські роботи','#64748b','robot'),
+    ('Historical','Історичні події','#b45309','history'),
+    ('Thriller','Напружені трилери','#292524','thriller'),
+    ('School','Шкільні історії','#eab308','school'),
+    ('Seinen','Для дорослої аудиторії','#6b7280','mature');
 
-CREATE TABLE IF NOT EXISTS character (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    full_name TEXT,
-    gender TEXT,
-    age INTEGER,
-    description TEXT,
-    image_url TEXT,
-    favorites INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+    -- Studios (canonical)
+    INSERT OR IGNORE INTO studio (name,country,founded,description,website) VALUES
+    ('MAPPA','Japan',2011,'Відома студія, сучасні хіти','https://mappa.co.jp'),
+    ('Kyoto Animation','Japan',1981,'Висока якість анімації','https://kyotoanimation.co.jp'),
+    ('Bones','Japan',1998,'Популярні проєкти','https://bones.co.jp'),
+    ('Madhouse','Japan',1972,'Класика та новинки','https://madhouse.co.jp'),
+    ('Ufotable','Japan',2000,'Висока якість CGI','https://ufotable.com'),
+    ('WIT Studio','Japan',2012,'Відомі адаптації','https://witstudio.co.jp'),
+    ('CloverWorks','Japan',2018,'Роботи для широкої аудиторії','https://cloverworks.co.jp'),
+    ('Trigger','Japan',2011,'Експериментальний стиль','https://www.trigger.co.jp');
 
-CREATE TABLE IF NOT EXISTS person (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    birth_date TEXT,
-    birth_place TEXT,
-    gender TEXT,
-    biography TEXT,
-    image_url TEXT,
-    website TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+    -- Users (canonical)
+    INSERT OR IGNORE INTO users (login,email,display_name,avatar_url,role,bio) VALUES
+    ('admin','admin@example.com','Адміністратор','https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png','admin','Головний адміністратор.'),
+    ('animefan','fan@example.com','Аніме Фан','https://cdn.pixabay.com/photo/2016/03/31/20/27/avatar-1295773_1280.png','user','Любить екшен та пригоди.'),
+    ('mangalover','manga@example.com','Манга Любитель','https://cdn.pixabay.com/photo/2016/03/31/20/31/avatar-1295775_1280.png','user','Колекціонує мангу.'),
+    ('reviewer','review@example.com','Оглядач','https://cdn.pixabay.com/photo/2016/03/31/20/27/avatar-1295770_1280.png','user','Пишу огляди.'),
+    ('moderator','mod@example.com','Модератор','https://cdn.pixabay.com/photo/2016/03/31/20/27/avatar-1295772_1280.png','moderator','Слідкую за порядком.');
 
-CREATE TABLE IF NOT EXISTS news (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    content TEXT,
-    summary TEXT,
-    category TEXT,
-    image_url TEXT,
-    author_id INTEGER,
-    views INTEGER DEFAULT 0,
-    likes INTEGER DEFAULT 0,
-    is_published INTEGER DEFAULT 1,
-    published_at DATETIME,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL
-);
-CREATE UNIQUE INDEX IF NOT EXISTS ux_news_title_pub ON news(title, published_at);
+    -- Selected Anime (canonical, unique)
+    INSERT OR IGNORE INTO anime (title,title_ua,year,season,episodes,episode_duration,type,status,source,description,studio_id,cover_url,views,favorites) VALUES
+    ('One Piece','Ван Піс',1999,'Fall',1000,24,'TV','Ongoing','Manga','Палаві пригоди піратів, що шукають Скарб Короля Піратів.', (SELECT id FROM studio WHERE name='Bones' LIMIT 1), 'https://cdn.myanimelist.net/images/anime/6/73245.jpg',300000,50000),
+    ('Jujutsu Kaisen','Магічна битва',2020,'Fall',24,23,'TV','Ongoing','Manga','Відчайдушні бої проти проклять та демонічних сил.', (SELECT id FROM studio WHERE name='MAPPA' LIMIT 1), 'https://cdn.myanimelist.net/images/anime/1171/109222.jpg',200000,30000),
+    ('Attack on Titan','Напад титанів',2013,'Spring',25,24,'TV','Completed','Manga','Боротьба людства проти титанів за виживання.', (SELECT id FROM studio WHERE name='WIT Studio' LIMIT 1), 'https://cdn.myanimelist.net/images/anime/10/47347.jpg',250000,40000),
+    ('Fullmetal Alchemist: Brotherhood','Сталевий алхімік: Братство',2009,'Spring',64,24,'TV','Completed','Manga','Два брати, які шукають спосіб повернути втрачене.', (SELECT id FROM studio WHERE name='Bones' LIMIT 1), 'https://cdn.myanimelist.net/images/anime/1223/96541.jpg',180000,30000),
+    ('Chainsaw Man','Людина-бензопила',2022,'Fall',12,24,'TV','Completed','Manga','Темна історія про парубка та його зв''язок з демонами.', (SELECT id FROM studio WHERE name='MAPPA' LIMIT 1), 'https://cdn.myanimelist.net/images/anime/1806/126216.jpg',175000,29000);
 
-CREATE TABLE IF NOT EXISTS release_dates (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    anime_id INTEGER,
-    episode_number INTEGER,
-    release_date DATETIME,
-    title TEXT,
-    description TEXT,
-    is_confirmed INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE
-);
+    -- Selected Manga
+    INSERT OR IGNORE INTO manga (title,title_ua,year,status,volumes,chapters,type,demographic,description,cover_url,views,favorites) VALUES
+    ('Berserk','Берсерк',1989,'Ongoing',42,376,'Manga','Seinen','Темна манга про війну та помсту.','https://cdn.myanimelist.net/images/manga/1/157897.jpg',200000,35000),
+    ('One Punch Man','Людина-один удар',2012,'Ongoing',28,200,'Manga','Shounen','Герой, що перемагає всіх одним ударом.','https://cdn.myanimelist.net/images/manga/3/155939.jpg',180000,30000);
 
-CREATE TABLE IF NOT EXISTS comments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    parent_id INTEGER,
-    user_id INTEGER,
-    anime_id INTEGER,
+    -- Characters (sample)
+    INSERT OR IGNORE INTO character (name,full_name,gender,age,description,image_url,favorites) VALUES
+    ('Tanjiro Kamado','Tanjiro Kamado','Male',15,'Сміливий мисливець на демонів.','https://cdn.myanimelist.net/images/characters/2/40321.jpg',48000),
+    ('Alphonse Elric','Alphonse Elric','Male',15,'Душа, прикріплена до зброї.', 'https://cdn.myanimelist.net/images/characters/10/157897.jpg',25000),
+    ('Edward Elric','Edward Elric','Male',15,'Молодший брат-алхімік.', 'https://cdn.myanimelist.net/images/characters/11/96541.jpg',30000);
+
+    -- Links: anime_genre, anime_character (sample mappings)
+    INSERT OR IGNORE INTO anime_genre (anime_id, genre_id) VALUES
+    ((SELECT id FROM anime WHERE title='One Piece' LIMIT 1),(SELECT id FROM genre WHERE name='Adventure' LIMIT 1)),
+    ((SELECT id FROM anime WHERE title='Jujutsu Kaisen' LIMIT 1),(SELECT id FROM genre WHERE name='Action' LIMIT 1)),
+    ((SELECT id FROM anime WHERE title='Fullmetal Alchemist: Brotherhood' LIMIT 1),(SELECT id FROM genre WHERE name='Drama' LIMIT 1));
+
+    INSERT OR IGNORE INTO anime_character (anime_id, character_id, role, is_main) VALUES
+    ((SELECT id FROM anime WHERE title='Fullmetal Alchemist: Brotherhood' LIMIT 1),(SELECT id FROM character WHERE name='Edward Elric' LIMIT 1),'Main',1),
+    ((SELECT id FROM anime WHERE title='Fullmetal Alchemist: Brotherhood' LIMIT 1),(SELECT id FROM character WHERE name='Alphonse Elric' LIMIT 1),'Main',1);
+
+    -- Ratings and comments (sample)
+    INSERT OR IGNORE INTO rating (anime_id, user_id, score, is_favorite, status, progress) VALUES
+    ((SELECT id FROM anime WHERE title='One Piece' LIMIT 1),(SELECT id FROM users WHERE login='admin' LIMIT 1),9.5,1,'Watching',100),
+    ((SELECT id FROM anime WHERE title='Fullmetal Alchemist: Brotherhood' LIMIT 1),(SELECT id FROM users WHERE login='reviewer' LIMIT 1),9.8,1,'Completed',64);
+
+    INSERT OR IGNORE INTO comments (user_id, anime_id, content, likes, created_at) VALUES
+    ((SELECT id FROM users WHERE login='animefan' LIMIT 1),(SELECT id FROM anime WHERE title='Jujutsu Kaisen' LIMIT 1),'Чудові бої та анімація!',12,CURRENT_TIMESTAMP);
+
+    -- Release dates (sample)
+    INSERT OR IGNORE INTO release_dates (anime_id, episode_number, release_date, title, description, is_confirmed) VALUES
+    ((SELECT id FROM anime WHERE title='Chainsaw Man' LIMIT 1),1,CURRENT_TIMESTAMP,'Chainsaw Man S1E1','Прем''єра першої серії',1);
+
+    COMMIT;
     manga_id INTEGER,
     character_id INTEGER,
     person_id INTEGER,

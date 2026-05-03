@@ -20,6 +20,10 @@ class AnimeController extends PageController
         $yearFrom = (int)($this->request->get('yearFrom', 0));
         $yearTo = (int)($this->request->get('yearTo', 0));
         $genre = trim($this->request->get('genres', ''));// comma-separated or single id
+        if ($genre === '') {
+            // support older view that used 'genre' param
+            $genre = trim($this->request->get('genre', ''));
+        }
         $minRating = (float)($this->request->get('minRating', 0));
         $sort = trim($this->request->get('sort', 'rating'));
         $page = max(1, (int)($this->request->get('page', 1)));
@@ -129,7 +133,8 @@ class AnimeController extends PageController
         $items = $selectStmt->fetchAll();
 
         // fetch reference data for filters
-        $genres = $this->db->query('SELECT id, name FROM genre ORDER BY name')->fetchAll();
+        // fetch genre color too so UI can style chips
+        $genres = $this->db->query('SELECT id, name, color FROM genre ORDER BY name')->fetchAll();
         $studios = $this->db->query('SELECT id, name FROM studio ORDER BY name')->fetchAll();
 
         $this->render('anime/list', [
