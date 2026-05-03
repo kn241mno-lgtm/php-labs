@@ -1,16 +1,32 @@
 <div class="page">
     <div class="modal-detail">
         <div class="left">
-            <?php if (!empty($item['cover_url'])): ?>
-                <img src="<?= htmlspecialchars($item['cover_url']) ?>" alt="<?= htmlspecialchars($item['title'] ?? '') ?>" style="width:100%;border-radius:8px">
-            <?php endif; ?>
+            <?php $cover = !empty($item['cover_url']) ? htmlspecialchars($item['cover_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'; ?>
+            <img src="<?= $cover ?>" alt="<?= htmlspecialchars($item['title'] ?? '') ?>" style="width:100%;border-radius:8px" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'">
             <div style="margin-top:12px;font-weight:700;color:#ffd166;font-size:20px">★ <?= round($item['rating'] ?? 0,1) ?>/10</div>
             <?php if (!empty($studio ?? null)): ?>
                 <div style="margin-top:14px;color:var(--muted)"><strong>Студія:</strong> <?= htmlspecialchars($studio['name']) ?></div>
             <?php endif; ?>
         </div>
         <div class="right">
-            <h2 style="margin-top:0"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></h2>
+            <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+                <h2 style="margin-top:0"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></h2>
+                <?php
+                    $canEdit = false;
+                    if (isset($_SESSION['user_id'])) {
+                        try {
+                            $db = Database::getInstance();
+                            $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
+                            $rs->execute([':id' => $_SESSION['user_id']]);
+                            $r = $rs->fetch();
+                            $canEdit = $r && ($r['role'] === 'admin');
+                        } catch (Exception $e) { $canEdit = false; }
+                    }
+                ?>
+                <?php if ($canEdit): ?>
+                    <div><a class="btn btn--small" href="index.php?route=anime/edit&id=<?= $item['id'] ?>">Редагувати</a></div>
+                <?php endif; ?>
+            </div>
             <div style="display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);margin-bottom:8px">
                 <div><strong>Рік:</strong> <?= htmlspecialchars($item['year']) ?></div>
                 <div><strong>Епізоди:</strong> <?= htmlspecialchars($item['episodes'] ?? '') ?></div>
@@ -28,13 +44,19 @@
             <div class="info-block" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
                 <div style="min-width:160px">
                     <h3>Дії</h3>
-                    <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php
+                        $showActionButton = false;
+                        if (isset($_SESSION['user_id'])) {
+                            $showActionButton = true; // logged-in users can add favorites
+                        }
+                    ?>
+                    <?php if ($showActionButton): ?>
                         <form method="post" action="index.php?route=rating/toggle_favorite">
                             <input type="hidden" name="anime_id" value="<?= $item['id'] ?>">
                             <button class="btn" type="submit">Додати в улюблені</button>
                         </form>
                     <?php else: ?>
-                        <a class="btn" href="index.php?route=auth/login">Увійти щоб додати</a>
+                        <div class="no-comments">Увійдіть, щоб додати улюблене.</div>
                     <?php endif; ?>
                 </div>
                 <div style="flex:1">
@@ -107,7 +129,7 @@
             </div>
         <?php endforeach; ?>
     <?php else: ?>
-        <p>Поки що немає коментарів.</p>
+        <div class="no-comments">Поки що немає коментарів.</div>
     <?php endif; ?>
 
     <?php if (isset($_SESSION['user_id'])): ?>

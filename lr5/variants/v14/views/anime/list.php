@@ -5,7 +5,19 @@
         <div class="alert success"><?php echo $_SESSION['flash_success']; unset($_SESSION['flash_success']); ?></div>
     <?php endif; ?>
 
-    <?php if (isset($_SESSION['user_id'])): ?>
+    <?php
+        $canCreateAnime = false;
+        if (isset($_SESSION['user_id'])) {
+            try {
+                $db = Database::getInstance();
+                $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
+                $rs->execute([':id' => $_SESSION['user_id']]);
+                $r = $rs->fetch();
+                $canCreateAnime = $r && ($r['role'] === 'admin');
+            } catch (Exception $e) { $canCreateAnime = false; }
+        }
+    ?>
+    <?php if ($canCreateAnime): ?>
         <a href="index.php?route=anime/create" class="btn btn-primary">Додати аніме</a>
     <?php endif; ?>
 
@@ -19,12 +31,13 @@
                 </div>
                 <div class="form-group">
                     <label>Жанр</label>
-                    <select name="genre">
-                        <option value="0">Всі жанри</option>
+                    <input type="hidden" name="genre" id="genreInput" value="<?= htmlspecialchars($filters['genre'] ?? '') ?>" />
+                    <div class="filter-chips" id="genreChips">
+                        <div class="filter-chip <?= empty($filters['genre']) ? 'active' : '' ?>" data-id="">Всі жанри</div>
                         <?php foreach ($genres as $g): ?>
-                            <option value="<?= $g['id'] ?>" <?= (isset($filters['genre']) && $filters['genre'] == $g['id']) ? 'selected' : '' ?>><?= htmlspecialchars($g['name']) ?></option>
+                            <div class="filter-chip <?= (isset($filters['genre']) && $filters['genre'] == $g['id']) ? 'active' : '' ?>" data-id="<?= $g['id'] ?>"><?= htmlspecialchars($g['name']) ?></div>
                         <?php endforeach; ?>
-                    </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Рік від</label>
@@ -45,20 +58,22 @@
                 </div>
                 <div class="form-group">
                     <label>Тип</label>
-                    <select name="type">
-                        <option value="">Всі типи</option>
-                        <option value="TV" <?= (isset($filters['type']) && $filters['type']=='TV')?'selected':'' ?>>TV</option>
-                        <option value="Movie" <?= (isset($filters['type']) && $filters['type']=='Movie')?'selected':'' ?>>Movie</option>
-                        <option value="OVA" <?= (isset($filters['type']) && $filters['type']=='OVA')?'selected':'' ?>>OVA</option>
-                    </select>
+                    <div class="filter-chips" id="typeChips">
+                        <input type="hidden" name="type" id="typeInput" value="<?= htmlspecialchars($filters['type'] ?? '') ?>" />
+                        <div class="filter-chip <?= empty($filters['type']) ? 'active' : '' ?>" data-val="">Всі</div>
+                        <div class="filter-chip <?= (isset($filters['type']) && $filters['type']=='TV') ? 'active' : '' ?>" data-val="TV">TV Серіал</div>
+                        <div class="filter-chip <?= (isset($filters['type']) && $filters['type']=='Movie') ? 'active' : '' ?>" data-val="Movie">Фільм</div>
+                        <div class="filter-chip <?= (isset($filters['type']) && $filters['type']=='OVA') ? 'active' : '' ?>" data-val="OVA">OVA</div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Статус</label>
-                    <select name="status">
-                        <option value="">Всі статуси</option>
-                        <option value="Ongoing" <?= (isset($filters['status']) && $filters['status']=='Ongoing')?'selected':'' ?>>Ongoing</option>
-                        <option value="Completed" <?= (isset($filters['status']) && $filters['status']=='Completed')?'selected':'' ?>>Completed</option>
-                    </select>
+                    <div class="filter-chips" id="statusChips">
+                        <input type="hidden" name="status" id="statusInput" value="<?= htmlspecialchars($filters['status'] ?? '') ?>" />
+                        <div class="filter-chip <?= empty($filters['status']) ? 'active' : '' ?>" data-val="">Всі</div>
+                        <div class="filter-chip <?= (isset($filters['status']) && $filters['status']=='Ongoing') ? 'active' : '' ?>" data-val="Ongoing">Виходить</div>
+                        <div class="filter-chip <?= (isset($filters['status']) && $filters['status']=='Completed') ? 'active' : '' ?>" data-val="Completed">Завершено</div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Сортувати за</label>
@@ -83,36 +98,39 @@
                 <?php if (!empty($a['status']) && strtolower($a['status']) === 'ongoing'): ?>
                     <div class="badge">Виходить</div>
                 <?php endif; ?>
-                <?php if (!empty($a['cover_url'])): ?>
-                    <a href="index.php?route=anime/view&id=<?= $a['id'] ?>"><img src="<?= htmlspecialchars($a['cover_url']) ?>" alt="" style="width:100%;height:320px;object-fit:cover;border-radius:6px;margin-bottom:10px"></a>
-                <?php endif; ?>
+                <?php $cover = !empty($a['cover_url']) ? htmlspecialchars($a['cover_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'; ?>
+                    <a href="index.php?route=anime/view&id=<?= $a['id'] ?>"><img src="<?= $cover ?>" alt="<?= htmlspecialchars($a['title']) ?>" class="card__img" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'" /></a>
                 <div style="padding-top:6px">
                     <h3 class="card__title"><?= htmlspecialchars($a['title_ua'] ?: $a['title']) ?></h3>
                     <p class="card__text"><?= htmlspecialchars(mb_substr($a['description'] ?? '',0,120)) ?></p>
-                    <a href="index.php?route=anime/view&id=<?= $a['id'] ?>" class="btn btn--small">Деталі</a>
+                    <!-- details available by clicking the cover/title -->
                 </div>
                 <div class="rating-pill"><?= round($a['rating'] ?? 0,1) ?></div>
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <?php
-                        $isAdmin = false;
-                        try {
-                            $db = Database::getInstance();
-                            $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
-                            $rs->execute([':id' => $_SESSION['user_id']]);
-                            $r = $rs->fetch();
-                            $isAdmin = $r && ($r['role'] === 'admin');
-                        } catch (Exception $e) {
-                            $isAdmin = false;
-                        }
-                    ?>
-                    <?php if ($isAdmin): ?>
-                        <a href="index.php?route=anime/edit&id=<?= $a['id'] ?>" class="btn btn-small">Редагувати</a>
-                        <form method="post" action="index.php?route=anime/delete&id=<?= $a['id'] ?>" style="display:inline">
-                            <button class="btn btn-small" onclick="return confirm('Видалити аніме?')">Видалити</button>
-                        </form>
-                    <?php endif; ?>
-                <?php endif; ?>
+                <!-- admin controls are available on the anime detail page only -->
             </div>
         <?php endforeach; ?>
     </div>
 </div>
+
+<script>
+    // Filter chips wiring
+    (function(){
+        function wire(chipsSelector, inputId, dataAttr){
+            var container = document.getElementById(chipsSelector);
+            if(!container) return;
+            var input = document.getElementById(inputId);
+            container.addEventListener('click', function(e){
+                var chip = e.target.closest('.filter-chip');
+                if(!chip) return;
+                // deactivate siblings
+                container.querySelectorAll('.filter-chip').forEach(function(c){ c.classList.remove('active'); });
+                chip.classList.add('active');
+                var val = chip.getAttribute(dataAttr) || chip.getAttribute('data-val') || chip.getAttribute('data-id') || '';
+                if(input) input.value = val;
+            });
+        }
+        wire('genreChips','genreInput','data-id');
+        wire('typeChips','typeInput','data-val');
+        wire('statusChips','statusInput','data-val');
+    })();
+</script>

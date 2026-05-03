@@ -21,7 +21,24 @@ $comments = $comments ?? [];
         </div>
 
         <hr>
-        <h3>Коментарі</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3>Коментарі</h3>
+            <?php
+                $canEditNews = false;
+                if (isset($_SESSION['user_id'])) {
+                    try {
+                        $db = Database::getInstance();
+                        $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
+                        $rs->execute([':id' => $_SESSION['user_id']]);
+                        $r = $rs->fetch();
+                        if ($r && in_array($r['role'], ['admin','helper'])) $canEditNews = true;
+                    } catch (Exception $e) { $canEditNews = false; }
+                }
+            ?>
+            <?php if ($canEditNews): ?>
+                <a class="btn btn--small" href="index.php?route=recipe/edit&id=<?= $item['id'] ?>">Редагувати новину</a>
+            <?php endif; ?>
+        </div>
         <?php if (!empty($comments)): ?>
             <?php foreach ($comments as $c): ?>
                 <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
@@ -30,7 +47,9 @@ $comments = $comments ?? [];
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <p>Поки що немає коментарів.</p>
+            <div class="card comment-card">
+                <div class="text-muted">Поки що немає коментарів.</div>
+            </div>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['user_id'])): ?>
