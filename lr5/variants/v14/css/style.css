@@ -349,6 +349,148 @@ h3 {
   border-color: rgba(37, 99, 235, 0.25);
 }
 
+/* Overlay panel for multi-select filters */
+.overlay-panel {
+  position: absolute;
+  z-index: 220;
+  left: calc(100% + 12px);
+  top: 0;
+  width: 320px;
+  max-height: 60vh;
+  background: linear-gradient(180deg, #071028, #081127);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.overlay-panel .overlay-header {
+  padding: 8px 12px;
+  font-weight: 700;
+  color: #e6eef8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.overlay-panel .overlay-body {
+  padding: 8px 12px 12px 12px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.overlay-panel .overlay-actions {
+  padding: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.overlay-checkbox {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #cfe1f5;
+  line-height: 1.2;
+}
+.overlay-checkbox input {
+  margin-right: 8px;
+}
+.overlay-search {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  margin-right: 6px;
+  background: transparent;
+  color: inherit;
+}
+
+/* When filters are on the right side, open overlay to the left */
+.layout-row.filters-right .filters {
+  position: relative;
+}
+.layout-row.filters-right .filters .overlay-panel {
+  left: auto;
+  right: calc(100% + 12px);
+}
+
+/* Normal case: filters on left */
+.layout-row .filters {
+  position: relative;
+}
+.layout-row .filters .overlay-panel {
+  left: calc(100% + 12px);
+  right: auto;
+}
+
+@media (max-width: 900px) {
+  .overlay-panel {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 12vh;
+    width: calc(100% - 40px);
+    max-height: 70vh;
+  }
+}
+
+/* Range track for dual-range control */
+.range-wrap {
+  position: relative;
+  padding: 18px 0 6px;
+}
+.range-wrap input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+  position: absolute;
+  left: 0;
+  top: 6px;
+}
+.range-wrap input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #2563eb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+.range-wrap input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #2563eb;
+}
+.range-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  top: 14px;
+  background: linear-gradient(90deg, #071028, #071028);
+  border-radius: 6px;
+}
+.range-track::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #334155, #0f1724);
+  border-radius: 6px;
+  opacity: 0.3;
+}
+.range-track {
+  left: 2%;
+  right: 2%;
+}
+
 /* Comment card for empty state */
 .comment-card {
   padding: 12px 16px;
@@ -908,7 +1050,7 @@ h3 {
     height: fit-content;
   }
   .filters .form-group {
-    margin-bottom: 12px;
+    margin-bottom: 18px;
   }
   .content {
     flex: 1;

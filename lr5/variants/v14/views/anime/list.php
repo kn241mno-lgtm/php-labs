@@ -33,19 +33,26 @@
                     <label>Жанр</label>
                     <input type="hidden" name="genres" id="genreInput" value="<?= htmlspecialchars($filters['genre'] ?? '') ?>" />
                     <div class="chips-toggle">
-                        <button type="button" class="btn" id="openGenresBtn">Вибрати жанри</button>
+                        <button type="button" class="filter-pill" id="openGenresBtn">Жанри ▾</button>
                     </div>
-                    <div class="filter-chips" id="genreChips" style="display:none;margin-top:8px;">
-                        <div class="filter-chip <?= empty($filters['genre']) ? 'active' : '' ?>" data-id="" data-color="#444">Всі жанри</div>
-                        <?php foreach ($genres as $g): ?>
-                            <?php $color = !empty($g['color']) ? $g['color'] : '#2563eb'; ?>
-                            <div class="filter-chip <?= (isset($filters['genre']) && $filters['genre'] == $g['id']) ? 'active' : '' ?>" data-id="<?= $g['id'] ?>" data-color="<?= htmlspecialchars($color) ?>" style="border:1px solid rgba(255,255,255,0.03);"><?= htmlspecialchars($g['name']) ?></div>
-                        <?php endforeach; ?>
+                    <div class="overlay-panel" id="genresOverlay" style="display:none;">
+                        <div class="overlay-header"><span>Жанри</span><input type="search" id="genreSearch" class="overlay-search" placeholder="Пошук..."></div>
+                        <div class="overlay-body">
+                            <div style="margin-bottom:8px"><button type="button" class="btn" id="genreSelectAll">Позначити всі</button> <button type="button" class="btn" id="genreClearAll">Зняти всі</button></div>
+                            <?php foreach ($genres as $g): ?>
+                                <label class="overlay-checkbox"><input type="checkbox" value="<?= $g['id'] ?>" data-name="<?= htmlspecialchars($g['name']) ?>" <?php if(isset($filters['genre']) && $filters['genre']!=='' && in_array($g['id'], array_filter(array_map('intval', explode(',', $filters['genre']))))): ?>checked<?php endif; ?>> <?= htmlspecialchars($g['name']) ?></label>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="overlay-actions">
+                            <button type="button" class="btn" id="applyGenres">Застосувати</button>
+                            <button type="button" class="btn btn--secondary" id="closeGenres">Закрити</button>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Рік випуску</label>
-                    <div class="year-range">
+                    <div class="year-range range-wrap">
+                        <div class="range-track"></div>
                         <input type="range" id="yearFromRange" min="1965" max="2026" value="<?= (int)($filters['yearFrom'] ?: 1965) ?>">
                         <input type="range" id="yearToRange" min="1965" max="2026" value="<?= (int)($filters['yearTo'] ?: 2026) ?>">
                         <div class="year-values">Від <span id="yearFromDisplay"></span> до <span id="yearToDisplay"></span></div>
@@ -55,15 +62,23 @@
                 </div>
                 <div class="form-group">
                     <label>Студія</label>
-                    <input type="hidden" name="studioId" id="studioInput" value="<?= htmlspecialchars($filters['studioId'] ?? '') ?>" />
+                    <input type="hidden" name="studios" id="studioInput" value="<?= htmlspecialchars($filters['studios'] ?? ($filters['studioId'] ?? '')) ?>" />
                     <div class="chips-toggle">
-                        <button type="button" class="btn" id="openStudiosBtn">Вибрати студію</button>
+                        <button type="button" class="filter-pill" id="openStudiosBtn">Студії ▾</button>
                     </div>
-                    <div class="filter-chips" id="studioChips" style="display:none;margin-top:8px;">
-                        <div class="filter-chip <?= empty($filters['studioId']) ? 'active' : '' ?>" data-id="">Всі студії</div>
-                        <?php foreach ($studios as $s): ?>
-                            <div class="filter-chip <?= (isset($filters['studioId']) && $filters['studioId'] == $s['id']) ? 'active' : '' ?>" data-id="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></div>
-                        <?php endforeach; ?>
+                    <div class="overlay-panel" id="studiosOverlay" style="display:none;">
+                        <div class="overlay-header"><span>Студії</span><input type="search" id="studioSearch" class="overlay-search" placeholder="Пошук..."></div>
+                        <div class="overlay-body">
+                            <div style="margin-bottom:8px"><button type="button" class="btn" id="studioSelectAll">Позначити всі</button> <button type="button" class="btn" id="studioClearAll">Зняти всі</button></div>
+                            <?php foreach ($studios as $s): ?>
+                                <?php $checked = false; if(!empty($filters['studios'])){ $arr = array_filter(array_map('intval', explode(',', $filters['studios']))); if(in_array($s['id'],$arr)) $checked = true; } elseif(isset($filters['studioId']) && $filters['studioId']==$s['id']){ $checked = true; } ?>
+                                <label class="overlay-checkbox"><input type="checkbox" value="<?= $s['id'] ?>" <?php if($checked): ?>checked<?php endif; ?>> <?= htmlspecialchars($s['name']) ?></label>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="overlay-actions">
+                            <button type="button" class="btn" id="applyStudios">Застосувати</button>
+                            <button type="button" class="btn btn--secondary" id="closeStudios">Закрити</button>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -123,8 +138,8 @@
 </div>
 
 <script>
-        // UI wiring: chips + toggles + year dual-range
     (function(){
+        // chips (type/status) single-select behavior remains
         function wire(chipsId, inputId, attr){
             var container = document.getElementById(chipsId);
             if(!container) return;
@@ -138,20 +153,60 @@
                 if(input) input.value = val;
             });
         }
-        // toggles
-        document.getElementById('openGenresBtn').addEventListener('click', function(){
-            var el = document.getElementById('genreChips');
-            el.style.display = (el.style.display === 'none') ? 'flex' : 'none';
-        });
-        document.getElementById('openStudiosBtn').addEventListener('click', function(){
-            var el = document.getElementById('studioChips');
-            el.style.display = (el.style.display === 'none') ? 'flex' : 'none';
-        });
-
-        wire('genreChips','genreInput','data-id');
-        wire('studioChips','studioInput','data-id');
         wire('typeChips','typeInput','data-val');
         wire('statusChips','statusInput','data-val');
+
+        // overlay helper
+        function setupOverlay(btnId, overlayId, applyId, closeId, selectAllId, clearAllId, hiddenInputId){
+            var btn = document.getElementById(btnId);
+            var overlay = document.getElementById(overlayId);
+            var apply = document.getElementById(applyId);
+            var close = document.getElementById(closeId);
+            var selectAll = document.getElementById(selectAllId);
+            var clearAll = document.getElementById(clearAllId);
+            var hidden = document.getElementById(hiddenInputId);
+            if(!btn || !overlay) return;
+
+            btn.addEventListener('click', function(e){
+                overlay.style.display = (overlay.style.display === 'none' || overlay.style.display === '') ? 'block' : 'none';
+            });
+            if(close) close.addEventListener('click', function(){ overlay.style.display = 'none'; });
+            if(selectAll) selectAll.addEventListener('click', function(){ overlay.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = true; }); });
+            if(clearAll) clearAll.addEventListener('click', function(){ overlay.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = false; }); });
+            if(apply){
+                apply.addEventListener('click', function(){
+                    var vals = [];
+                    overlay.querySelectorAll('input[type=checkbox]:checked').forEach(function(c){ vals.push(c.value); });
+                    if(hidden) hidden.value = vals.join(',');
+                    overlay.style.display = 'none';
+                });
+            }
+            // close overlay if clicked outside
+            document.addEventListener('click', function(e){
+                if(!overlay.contains(e.target) && !btn.contains(e.target)){
+                    overlay.style.display = 'none';
+                }
+            });
+        }
+
+        setupOverlay('openGenresBtn','genresOverlay','applyGenres','closeGenres','genreSelectAll','genreClearAll','genreInput');
+        setupOverlay('openStudiosBtn','studiosOverlay','applyStudios','closeStudios','studioSelectAll','studioClearAll','studioInput');
+
+        // overlay search: filters visible checkbox labels by text
+        function setupOverlaySearch(overlayId, searchId){
+            var overlay = document.getElementById(overlayId);
+            var input = document.getElementById(searchId);
+            if(!overlay || !input) return;
+            input.addEventListener('input', function(){
+                var q = input.value.trim().toLowerCase();
+                overlay.querySelectorAll('.overlay-checkbox').forEach(function(lb){
+                    var text = lb.textContent.trim().toLowerCase();
+                    lb.style.display = q === '' || text.indexOf(q) !== -1 ? 'block' : 'none';
+                });
+            });
+        }
+        setupOverlaySearch('genresOverlay','genreSearch');
+        setupOverlaySearch('studiosOverlay','studioSearch');
 
         // year dual-range
         var yFromRange = document.getElementById('yearFromRange');
@@ -160,24 +215,31 @@
         var yToHidden = document.getElementById('yearTo');
         var yFromDisplay = document.getElementById('yearFromDisplay');
         var yToDisplay = document.getElementById('yearToDisplay');
+        var track = document.querySelector('.range-track');
 
         function syncYears(){
+            var min = parseInt(yFromRange.min,10);
+            var max = parseInt(yFromRange.max,10);
             var from = parseInt(yFromRange.value,10);
             var to = parseInt(yToRange.value,10);
-            if(from > to){
-                // keep difference minimal: swap
-                var tmp = from; from = to; to = tmp;
-            }
+            if(from > to){ var tmp = from; from = to; to = tmp; }
             yFromHidden.value = from;
             yToHidden.value = to;
             yFromDisplay.textContent = from;
             yToDisplay.textContent = to;
-            yFromRange.value = from;
-            yToRange.value = to;
+            // update track
+            if(track){
+                var left = ((from - min) / (max - min)) * 100;
+                var right = ((to - min) / (max - min)) * 100;
+                track.style.left = left + '%';
+                track.style.width = Math.max(0, right - left) + '%';
+            }
         }
-        yFromRange.addEventListener('input', syncYears);
-        yToRange.addEventListener('input', syncYears);
-        // initialize
-        syncYears();
+        if(yFromRange && yToRange){
+            yFromRange.addEventListener('input', syncYears);
+            yToRange.addEventListener('input', syncYears);
+            syncYears();
+        }
+
     })();
 </script>

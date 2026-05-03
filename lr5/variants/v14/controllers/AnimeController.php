@@ -15,6 +15,7 @@ class AnimeController extends PageController
         // Filtering params
         $q = trim($this->request->get('q', ''));
         $studioId = (int)($this->request->get('studioId', 0));
+        $studiosParam = trim($this->request->get('studios', ''));
         $type = trim($this->request->get('type', ''));
         $status = trim($this->request->get('status', ''));
         $yearFrom = (int)($this->request->get('yearFrom', 0));
@@ -38,7 +39,24 @@ class AnimeController extends PageController
             $params[':q'] = '%' . $q . '%';
         }
 
-        if ($studioId > 0) {
+        // support multiple studios via comma-separated 'studios' param, fall back to single studioId
+        $studioIds = [];
+        if ($studiosParam !== '') {
+            $parts = array_filter(array_map('trim', explode(',', $studiosParam)));
+            foreach ($parts as $p) {
+                $id = (int)$p;
+                if ($id > 0) $studioIds[] = $id;
+            }
+        }
+        if (!empty($studioIds)) {
+            $placeholders = [];
+            foreach ($studioIds as $i => $s) {
+                $ph = ':s' . $i;
+                $placeholders[] = $ph;
+                $params[$ph] = $s;
+            }
+            $where[] = 'a.studio_id IN (' . implode(',', $placeholders) . ')';
+        } elseif ($studioId > 0) {
             $where[] = 'a.studio_id = :studioId';
             $params[':studioId'] = $studioId;
         }
@@ -140,7 +158,7 @@ class AnimeController extends PageController
         $this->render('anime/list', [
             'anime' => $items,
             'pagination' => ['page' => $page, 'pageSize' => $pageSize, 'total' => $total, 'totalPages' => $totalPages],
-            'filters' => ['q'=>$q,'studioId'=>$studioId,'type'=>$type,'status'=>$status,'yearFrom'=>$yearFrom,'yearTo'=>$yearTo,'genre'=>$genre,'sort'=>$sort],
+            'filters' => ['q'=>$q,'studioId'=>$studioId,'studios'=>$studiosParam,'type'=>$type,'status'=>$status,'yearFrom'=>$yearFrom,'yearTo'=>$yearTo,'genre'=>$genre,'sort'=>$sort],
             'genres' => $genres,
             'studios' => $studios
         ], 'Каталог аніме');

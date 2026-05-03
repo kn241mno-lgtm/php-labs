@@ -17,6 +17,8 @@ class MangaController extends PageController
         $type = trim($this->request->get('type', ''));
         $author = (int)($this->request->get('author', 0));
         $genre = trim($this->request->get('genres', ''));
+        $yearFrom = (int)($this->request->get('yearFrom', 0));
+        $yearTo = (int)($this->request->get('yearTo', 0));
         $minRating = (float)($this->request->get('minRating', 0));
         $page = max(1, (int)($this->request->get('page', 1)));
         $pageSize = max(6, min(48, (int)($this->request->get('pageSize', 24))));
@@ -39,6 +41,16 @@ class MangaController extends PageController
         if ($type !== '') {
             $where[] = 'm.type = :type';
             $params[':type'] = $type;
+        }
+
+        if ($yearFrom > 0) {
+            $where[] = 'm.year >= :yearFrom';
+            $params[':yearFrom'] = $yearFrom;
+        }
+
+        if ($yearTo > 0) {
+            $where[] = 'm.year <= :yearTo';
+            $params[':yearTo'] = $yearTo;
         }
 
         if ($author > 0) {
@@ -98,7 +110,10 @@ class MangaController extends PageController
         $selectStmt->execute($selectParams);
         $items = $selectStmt->fetchAll();
 
-        $this->render('manga/list', ['manga' => $items, 'pagination'=>['page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'totalPages'=>$totalPages], 'filters'=>['q'=>$q,'status'=>$status,'type'=>$type,'author'=>$author,'genre'=>$genre,'sort'=>$sort]], 'Каталог манги');
+        // fetch genres for UI
+        $genres = $this->db->query('SELECT id, name FROM genre ORDER BY name')->fetchAll();
+
+        $this->render('manga/list', ['manga' => $items, 'pagination'=>['page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'totalPages'=>$totalPages], 'filters'=>['q'=>$q,'status'=>$status,'type'=>$type,'author'=>$author,'genre'=>$genre,'yearFrom'=>$this->request->get('yearFrom', ''),'yearTo'=>$this->request->get('yearTo', ''),'sort'=>$sort], 'genres'=>$genres], 'Каталог манги');
     }
 
     public function action_view(): void
