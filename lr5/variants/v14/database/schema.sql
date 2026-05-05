@@ -182,6 +182,21 @@ CREATE TABLE IF NOT EXISTS manga_character (
     FOREIGN KEY (character_id) REFERENCES character(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS author (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    bio TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS manga_author (
+    manga_id INTEGER,
+    author_id INTEGER,
+    PRIMARY KEY (manga_id, author_id),
+    FOREIGN KEY (manga_id) REFERENCES manga(id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES author(id) ON DELETE CASCADE
+);
+
 -- =============================================
 -- ІНДЕКСИ
 -- =============================================
@@ -343,6 +358,26 @@ INSERT INTO manga (id, title, title_ua, year, status, volumes, chapters, type, d
 (28, 'Dr. Stone', 'Доктор Стоун', 2017, 'Completed', 26, 232, 'Manga', 'Shounen', 'Відродження цивілізації в кам''яному віці.', 'https://cdn.myanimelist.net/images/manga/2/199887.jpg', 135000, 22000),
 (29, 'Komi Can''t Communicate', 'Комі не може спілкуватися', 2016, 'Ongoing', 30, 430, 'Manga', 'Shounen', 'Дівчина з комунікаційним розладом.', 'https://cdn.myanimelist.net/images/manga/3/211225.jpg', 100000, 16000),
 (30, 'Rent-A-Girlfriend', 'Орендована дівчина', 2017, 'Ongoing', 30, 300, 'Manga', 'Shounen', 'Студент орендує дівчину.', 'https://cdn.myanimelist.net/images/manga/3/214785.jpg', 95000, 15000);
+
+-- ---------- Автори (seed) ----------
+INSERT INTO author (id, name, bio) VALUES
+(1, 'Kentaro Miura', 'Автор Berserk'),
+(2, 'Takehiko Inoue', 'Автор Vagabond'),
+(3, 'ONE', 'Автор One Punch Man'),
+(4, 'Tatsuki Fujimoto', 'Автор Chainsaw Man'),
+(5, 'Chugong', 'Автор Solo Leveling'),
+(6, 'Eiichiro Oda', 'Автор One Piece'),
+(7, 'Hajime Isayama', 'Автор Attack on Titan');
+
+-- ---------- Зв'язки: Манга-Автори (seed) ----------
+INSERT INTO manga_author (manga_id, author_id) VALUES
+(1,1),
+(2,2),
+(3,3),
+(4,4),
+(5,5),
+(6,6),
+(7,7);
 
 -- ---------- Персонажі (60+ персонажів) ----------
 INSERT INTO character (id, name, full_name, gender, age, description, image_url, favorites) VALUES

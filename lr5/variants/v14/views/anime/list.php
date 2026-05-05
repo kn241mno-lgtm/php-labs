@@ -21,18 +21,19 @@
         <a href="index.php?route=anime/create" class="btn btn-primary">Додати аніме</a>
     <?php endif; ?>
 
-    <form method="get" action="index.php">
+    <form id="filterForm" method="get" action="index.php">
         <input type="hidden" name="route" value="anime/list">
         <div class="list-toolbar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <div></div>
-            <div style="display:flex;gap:12px;align-items:center">
-                <input type="text" name="q" placeholder="Пошук..." value="<?= htmlspecialchars($filters['q'] ?? '') ?>" style="min-width:280px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit">
-                <select name="sort" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit">
+            <div style="display:flex;gap:12px;align-items:center;width:100%">
+                <input type="text" name="q" placeholder="Пошук..." value="<?= htmlspecialchars($filters['q'] ?? '') ?>" class="form__input" style="flex:1;min-width:220px;">
+                <select name="sort" class="sort-select">
                     <option value="rating" <?= (isset($filters['sort']) && $filters['sort']=='rating')?'selected':'' ?>>Рейтинг</option>
                     <option value="year" <?= (isset($filters['sort']) && $filters['sort']=='year')?'selected':'' ?>>Рік</option>
                     <option value="title" <?= (isset($filters['sort']) && $filters['sort']=='title')?'selected':'' ?>>Заголовок</option>
                     <option value="views" <?= (isset($filters['sort']) && $filters['sort']=='views')?'selected':'' ?>>Перегляди</option>
                 </select>
+                <input type="hidden" name="order" id="orderInput" value="<?= htmlspecialchars(strtoupper($filters['order'] ?? 'DESC')) ?>">
+                <button type="button" id="orderToggle" class="btn btn--small" title="Порядок сортування" style="margin-left:8px"><?= (isset($filters['order']) && strtoupper($filters['order'])==='ASC')? '↑':'↓' ?></button>
             </div>
         </div>
 
@@ -54,8 +55,8 @@
                     <label>Оцінка</label>
                     <div class="rating-range range-wrap" style="padding-top:12px;padding-bottom:8px">
                         <div class="range-track"></div>
-                        <input type="range" id="ratingFromRange" min="0" max="10" step="0.1" value="<?= htmlspecialchars($filters['ratingFrom'] ?? 0) ?>">
-                        <input type="range" id="ratingToRange" min="0" max="10" step="0.1" value="<?= htmlspecialchars($filters['ratingTo'] ?? 10) ?>">
+                            <input type="range" id="ratingFromRange" min="0" max="10" step="0.1" value="<?= ($filters['ratingFrom'] !== '' ? htmlspecialchars($filters['ratingFrom']) : '0') ?>">
+                            <input type="range" id="ratingToRange" min="0" max="10" step="0.1" value="<?= ($filters['ratingTo'] !== '' ? htmlspecialchars($filters['ratingTo']) : '10') ?>">
                         <div class="year-values">Від <span id="ratingFromDisplay"></span> до <span id="ratingToDisplay"></span></div>
                         <input type="hidden" name="ratingFrom" id="ratingFrom" value="<?= htmlspecialchars($filters['ratingFrom'] ?? '') ?>">
                         <input type="hidden" name="ratingTo" id="ratingTo" value="<?= htmlspecialchars($filters['ratingTo'] ?? '') ?>">
@@ -112,6 +113,8 @@
                         <div class="filter-chip <?= (isset($filters['type']) && $filters['type']=='TV') ? 'active' : '' ?>" data-val="TV">TV Серіал</div>
                         <div class="filter-chip <?= (isset($filters['type']) && $filters['type']=='Movie') ? 'active' : '' ?>" data-val="Movie">Фільм</div>
                         <div class="filter-chip <?= (isset($filters['type']) && $filters['type']=='OVA') ? 'active' : '' ?>" data-val="OVA">OVA</div>
+                        <div class="filter-chip <?= (isset($filters['type']) && $filters['type']=='ONA') ? 'active' : '' ?>" data-val="ONA">ONA</div>
+                        <div class="filter-chip <?= (isset($filters['type']) && $filters['type']=='Special') ? 'active' : '' ?>" data-val="Special">Спешл</div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -121,26 +124,21 @@
                         <div class="filter-chip <?= empty($filters['status']) ? 'active' : '' ?>" data-val="">Всі</div>
                         <div class="filter-chip <?= (isset($filters['status']) && $filters['status']=='Ongoing') ? 'active' : '' ?>" data-val="Ongoing">Виходить</div>
                         <div class="filter-chip <?= (isset($filters['status']) && $filters['status']=='Completed') ? 'active' : '' ?>" data-val="Completed">Завершено</div>
+                        <div class="filter-chip <?= (isset($filters['status']) && $filters['status']=='Hiatus') ? 'active' : '' ?>" data-val="Hiatus">Припинено</div>
+                        <div class="filter-chip <?= (isset($filters['status']) && $filters['status']=='Announced') ? 'active' : '' ?>" data-val="Announced">Анонс</div>
+                        <div class="filter-chip <?= (isset($filters['status']) && $filters['status']=='Stopped') ? 'active' : '' ?>" data-val="Stopped">Зупинено</div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Сортувати за</label>
-                    <select name="sort">
-                        <option value="rating" <?= (isset($filters['sort']) && $filters['sort']=='rating')?'selected':'' ?>>Рейтинг</option>
-                        <option value="year" <?= (isset($filters['sort']) && $filters['sort']=='year')?'selected':'' ?>>Рік</option>
-                        <option value="title" <?= (isset($filters['sort']) && $filters['sort']=='title')?'selected':'' ?>>Заголовок</option>
-                        <option value="views" <?= (isset($filters['sort']) && $filters['sort']=='views')?'selected':'' ?>>Перегляди</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button class="btn">Застосувати фільтри</button>
-                    <a href="index.php?route=anime/list" class="btn btn--secondary">Скинути</a>
+                <!-- removed duplicated sort control (kept only top toolbar sort) -->
+                <div class="form-actions" style="display:flex;gap:12px">
+                    <button class="btn" id="applyFiltersBtn" type="submit">Застосувати фільтри</button>
+                    <a href="index.php?route=anime/list" class="btn btn--secondary btn--large" id="resetFiltersBtn">Скинути фільтри</a>
                 </div>
             </form>
         </aside>
 
         <section class="content">
-            <div class="card-grid">
+            <div class="card-grid catalog-grid">
                 <?php foreach ($anime as $a): ?>
             <div class="card" style="position:relative">
                 <?php if (!empty($a['status']) && strtolower($a['status']) === 'ongoing'): ?>
@@ -157,6 +155,43 @@
                 <!-- admin controls are available on the anime detail page only -->
             </div>
         <?php endforeach; ?>
+            </div>
+
+            <?php if (!empty($pagination) && $pagination['totalPages'] > 1): ?>
+                <?php
+                    $curr = (int)$pagination['page'];
+                    $totalPages = (int)$pagination['totalPages'];
+                    $qsBase = $_GET;
+                    $qsBase['route'] = 'anime/list';
+                    $window = 2;
+                    $start = max(1, $curr - $window);
+                    $end = min($totalPages, $curr + $window);
+                ?>
+                <div class="pagination">
+                    <?php if ($curr > 1): $qsBase['page'] = $curr - 1; ?>
+                        <a class="page-link" href="index.php?<?= http_build_query($qsBase) ?>">←</a>
+                    <?php endif; ?>
+
+                    <?php if ($start > 1): $qsBase['page'] = 1; ?>
+                        <a class="page-link" href="index.php?<?= http_build_query($qsBase) ?>">1</a>
+                        <?php if ($start > 2): ?><span class="page-ellipsis">…</span><?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php for ($i = $start; $i <= $end; $i++): $qsBase['page'] = $i; ?>
+                        <a class="page-link <?= $i === $curr ? 'active' : '' ?>" href="index.php?<?= http_build_query($qsBase) ?>"><?= $i ?></a>
+                    <?php endfor; ?>
+
+                    <?php if ($end < $totalPages): $qsBase['page'] = $totalPages; ?>
+                        <?php if ($end < $totalPages - 1): ?><span class="page-ellipsis">…</span><?php endif; ?>
+                        <a class="page-link" href="index.php?<?= http_build_query($qsBase) ?>"><?= $totalPages ?></a>
+                    <?php endif; ?>
+
+                    <?php if ($curr < $totalPages): $qsBase['page'] = $curr + 1; ?>
+                        <a class="page-link" href="index.php?<?= http_build_query($qsBase) ?>">→</a>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </section>
     </div>
 </div>
 
@@ -238,7 +273,7 @@
         var yToHidden = document.getElementById('yearTo');
         var yFromDisplay = document.getElementById('yearFromDisplay');
         var yToDisplay = document.getElementById('yearToDisplay');
-        var track = document.querySelector('.range-track');
+        var track = document.querySelector('.year-range .range-track');
 
         function syncYears(){
             var min = parseInt(yFromRange.min,10);
@@ -264,17 +299,84 @@
             syncYears();
         }
 
-        // minRating sync (slider -> hidden input)
-        var minRatingRange = document.getElementById('minRatingRange');
-        var minRatingHidden = document.getElementById('minRating');
-        var minRatingDisplay = document.getElementById('minRatingDisplay');
-        function syncMinRating(){
-            if(!minRatingRange || !minRatingHidden || !minRatingDisplay) return;
-            var v = parseFloat(minRatingRange.value) || 0;
-            minRatingHidden.value = v;
-            minRatingDisplay.textContent = v.toFixed(1);
+        // rating dual-range sync
+        var rFromRange = document.getElementById('ratingFromRange');
+        var rToRange = document.getElementById('ratingToRange');
+        var rFromHidden = document.getElementById('ratingFrom');
+        var rToHidden = document.getElementById('ratingTo');
+        var rFromDisplay = document.getElementById('ratingFromDisplay');
+        var rToDisplay = document.getElementById('ratingToDisplay');
+        var rtrack = document.querySelector('.rating-range .range-track');
+
+        function syncRatings(){
+            if(!rFromRange || !rToRange) return;
+            var min = parseFloat(rFromRange.min);
+            var max = parseFloat(rFromRange.max);
+            var from = parseFloat(rFromRange.value);
+            var to = parseFloat(rToRange.value);
+            if(from > to){ var tmp = from; from = to; to = tmp; }
+            rFromHidden.value = from;
+            rToHidden.value = to;
+            if(rFromDisplay) rFromDisplay.textContent = from.toFixed(1);
+            if(rToDisplay) rToDisplay.textContent = to.toFixed(1);
+            if(rtrack){
+                var left = ((from - min) / (max - min)) * 100;
+                var right = ((to - min) / (max - min)) * 100;
+                rtrack.style.left = left + '%';
+                rtrack.style.width = Math.max(0, right - left) + '%';
+            }
         }
-        if(minRatingRange){ minRatingRange.addEventListener('input', syncMinRating); syncMinRating(); }
+        if(rFromRange && rToRange){
+            rFromRange.addEventListener('input', syncRatings);
+            rToRange.addEventListener('input', syncRatings);
+            syncRatings();
+        }
+
+        // order toggle (asc/desc)
+        var orderInput = document.getElementById('orderInput');
+        var orderToggle = document.getElementById('orderToggle');
+        // submit helper (debounce)
+        var filterForm = document.getElementById('filterForm');
+        function submitFiltersDebounced(){
+            if(!filterForm) return;
+            if(window._filterTimeout) clearTimeout(window._filterTimeout);
+            window._filterTimeout = setTimeout(function(){ filterForm.submit(); }, 450);
+        }
+
+        if(orderToggle && orderInput){
+            orderToggle.addEventListener('click', function(){
+                var v = (orderInput.value || 'DESC').toUpperCase();
+                v = v === 'ASC' ? 'DESC' : 'ASC';
+                orderInput.value = v;
+                orderToggle.textContent = v === 'ASC' ? '↑' : '↓';
+                // submit immediately when toggling order
+                if(filterForm) filterForm.submit();
+            });
+        }
+
+        // auto-submit when sort selection changes
+        var sortSelect = document.querySelector('select[name="sort"]');
+        if(sortSelect){
+            sortSelect.addEventListener('change', function(){ if(filterForm) filterForm.submit(); });
+        }
+
+        // auto-submit when sliders change (debounced)
+        if(yFromRange && yToRange){
+            yFromRange.addEventListener('input', function(){ syncYears(); submitFiltersDebounced(); });
+            yToRange.addEventListener('input', function(){ syncYears(); submitFiltersDebounced(); });
+        }
+        if(rFromRange && rToRange){
+            rFromRange.addEventListener('input', function(){ syncRatings(); submitFiltersDebounced(); });
+            rToRange.addEventListener('input', function(){ syncRatings(); submitFiltersDebounced(); });
+        }
+
+        // when apply buttons in overlays are used, submit the form as well
+        var applyGenresBtn = document.getElementById('applyGenres');
+        var applyStudiosBtn = document.getElementById('applyStudios');
+        if(applyGenresBtn) applyGenresBtn.addEventListener('click', function(){ document.getElementById('genresOverlay').style.display='none'; if(filterForm) filterForm.submit(); });
+        if(applyStudiosBtn) applyStudiosBtn.addEventListener('click', function(){ document.getElementById('studiosOverlay').style.display='none'; if(filterForm) filterForm.submit(); });
+
+        // legacy minRating controls removed; rating dual-range above handles rating filters
 
     })();
 </script>

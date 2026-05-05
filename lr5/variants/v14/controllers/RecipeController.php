@@ -12,8 +12,9 @@ class RecipeController extends PageController
 
     public function action_list(): void
     {
-        // Now listing news/articles from `news` table instead of recipes
-        $stmt = $this->db->query('SELECT * FROM news ORDER BY id DESC');
+        // List only published news/articles and order by published date
+        $stmt = $this->db->prepare('SELECT * FROM news WHERE is_published = 1 ORDER BY published_at DESC LIMIT 12');
+        $stmt->execute();
         $items = $stmt->fetchAll();
 
         $this->render('recipe/list', [

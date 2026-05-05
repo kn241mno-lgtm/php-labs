@@ -25,7 +25,7 @@
 <?php if (empty($recipes)): ?>
     <p class="text-muted">Статей ще немає.</p>
 <?php else: ?>
-    <div class="card-grid">
+    <div class="card-grid news-grid">
         <?php foreach ($recipes as $r): ?>
             <?php $img = !empty($r['image_url']) ? htmlspecialchars($r['image_url']) : 'https://via.placeholder.com/420x240?text=No+Image'; ?>
             <div class="card" style="position:relative">

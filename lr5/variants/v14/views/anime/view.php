@@ -42,24 +42,19 @@
             <p style="color:var(--muted);line-height:1.5"><?= nl2br(htmlspecialchars($item['description'] ?? '')) ?></p>
 
             <div class="info-block" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
+                <?php
+                    $showActionButton = isset($_SESSION['user_id']);
+                ?>
+                <?php if ($showActionButton): ?>
                 <div style="min-width:160px">
                     <h3>Дії</h3>
-                    <?php
-                        $showActionButton = false;
-                        if (isset($_SESSION['user_id'])) {
-                            $showActionButton = true; // logged-in users can add favorites
-                        }
-                    ?>
-                    <?php if ($showActionButton): ?>
                         <form method="post" action="index.php?route=rating/toggle_favorite">
                             <input type="hidden" name="anime_id" value="<?= $item['id'] ?>">
                             <button class="btn" type="submit">Додати в улюблені</button>
                         </form>
-                    <?php else: ?>
-                        <div class="no-comments">Увійдіть, щоб додати улюблене.</div>
-                    <?php endif; ?>
                 </div>
-                <div style="flex:1">
+                <?php endif; ?>
+                <div style="<?= $showActionButton ? 'flex:1' : 'width:100%'; ?>">
                     <h3>Деталі</h3>
                     <table class="table" style="max-width:600px">
                         <tr><td>Джерело</td><td><?= htmlspecialchars($item['source'] ?? '') ?></td></tr>

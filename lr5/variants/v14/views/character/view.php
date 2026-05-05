@@ -11,7 +11,7 @@ $manga = $manga ?? [];
         <div class="modal-detail">
             <div class="left">
                 <?php $cimg = !empty($item['image_url']) ? htmlspecialchars($item['image_url']) : 'https://via.placeholder.com/300x420?text=No+Image'; ?>
-                <img src="<?= $cimg ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" style="width:220px;height:300px;object-fit:cover;border-radius:8px" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x420?text=No+Image'">
+                <img src="<?= $cimg ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" style="width:100%;max-width:260px;height:auto;object-fit:cover;border-radius:8px" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x420?text=No+Image'">
                 <div style="margin-top:12px;color:var(--muted)">
                     <div><strong>Ім'я:</strong> <?= htmlspecialchars($item['name_ua'] ?: $item['name']) ?></div>
                     <div><strong>Стать:</strong> <?= htmlspecialchars($item['gender'] ?? '') ?></div>

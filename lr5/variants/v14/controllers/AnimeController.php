@@ -29,6 +29,8 @@ class AnimeController extends PageController
         }
         $minRating = (float)($this->request->get('minRating', 0));
         $sort = trim($this->request->get('sort', 'rating'));
+        $orderDir = strtolower(trim($this->request->get('order', 'desc')));
+        $orderDir = $orderDir === 'asc' ? 'ASC' : 'DESC';
         $page = max(1, (int)($this->request->get('page', 1)));
         $pageSize = max(6, min(48, (int)($this->request->get('pageSize', 24))));
 
@@ -106,16 +108,16 @@ class AnimeController extends PageController
         }
 
         // build aggregate query: avg rating from rating table
-        $order = 'rating DESC, a.created_at DESC';
+        $order = 'rating ' . $orderDir . ', a.created_at ' . $orderDir;
         switch ($sort) {
             case 'year':
-                $order = 'a.year DESC';
+                $order = 'a.year ' . $orderDir;
                 break;
             case 'title':
-                $order = 'a.title ASC';
+                $order = 'a.title ' . ($orderDir === 'ASC' ? 'ASC' : 'DESC');
                 break;
             case 'views':
-                $order = 'a.views DESC';
+                $order = 'a.views ' . $orderDir;
                 break;
         }
 
@@ -167,7 +169,7 @@ class AnimeController extends PageController
         $this->render('anime/list', [
             'anime' => $items,
             'pagination' => ['page' => $page, 'pageSize' => $pageSize, 'total' => $total, 'totalPages' => $totalPages],
-            'filters' => ['q'=>$q,'studioId'=>$studioId,'studios'=>$studiosParam,'type'=>$type,'status'=>$status,'yearFrom'=>$yearFrom,'yearTo'=>$yearTo,'genre'=>$genre,'sort'=>$sort,'ratingFrom'=>$this->request->get('ratingFrom',''),'ratingTo'=>$this->request->get('ratingTo','')],
+            'filters' => ['q'=>$q,'studioId'=>$studioId,'studios'=>$studiosParam,'type'=>$type,'status'=>$status,'yearFrom'=>$yearFrom,'yearTo'=>$yearTo,'genre'=>$genre,'sort'=>$sort,'order'=>$orderDir,'ratingFrom'=>$this->request->get('ratingFrom',''),'ratingTo'=>$this->request->get('ratingTo','')],
             'genres' => $genres,
             'studios' => $studios
         ], 'Каталог аніме');

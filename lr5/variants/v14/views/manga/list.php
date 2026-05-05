@@ -3,10 +3,9 @@
     <form method="get" action="index.php">
         <input type="hidden" name="route" value="manga/list">
         <div class="list-toolbar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <div></div>
             <div style="display:flex;gap:12px;align-items:center">
-                <input type="text" name="q" placeholder="Пошук..." value="<?= htmlspecialchars($filters['q'] ?? '') ?>" style="min-width:280px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit">
-                <select name="sort" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit">
+                <input type="text" name="q" placeholder="Пошук..." value="<?= htmlspecialchars($filters['q'] ?? '') ?>" class="form__input" style="min-width:360px;">
+                <select name="sort" class="sort-select">
                     <option value="title" <?= (isset($filters['sort']) && $filters['sort']=='title')?'selected':'' ?>>Заголовок</option>
                     <option value="year" <?= (isset($filters['sort']) && $filters['sort']=='year')?'selected':'' ?>>Рік</option>
                     <option value="views" <?= (isset($filters['sort']) && $filters['sort']=='views')?'selected':'' ?>>Перегляди</option>
@@ -46,6 +45,9 @@
                         <option value="">Всі статуси</option>
                         <option value="Ongoing" <?= (isset($filters['status']) && $filters['status']=='Ongoing')?'selected':'' ?>>Ongoing</option>
                         <option value="Completed" <?= (isset($filters['status']) && $filters['status']=='Completed')?'selected':'' ?>>Completed</option>
+                        <option value="Hiatus" <?= (isset($filters['status']) && $filters['status']=='Hiatus')?'selected':'' ?>>Припинено</option>
+                        <option value="Announced" <?= (isset($filters['status']) && $filters['status']=='Announced')?'selected':'' ?>>Анонс</option>
+                        <option value="Stopped" <?= (isset($filters['status']) && $filters['status']=='Stopped')?'selected':'' ?>>Зупинено</option>
                     </select>
                 </div>
 
@@ -86,6 +88,8 @@
                         <option value="">Всі типи</option>
                         <option value="Manga" <?= (isset($filters['type']) && $filters['type']=='Manga')?'selected':'' ?>>Manga</option>
                         <option value="Manhwa" <?= (isset($filters['type']) && $filters['type']=='Manhwa')?'selected':'' ?>>Manhwa</option>
+                        <option value="Oneshot" <?= (isset($filters['type']) && $filters['type']=='Oneshot')?'selected':'' ?>>Ваншот</option>
+                        <option value="Doujinshi" <?= (isset($filters['type']) && $filters['type']=='Doujinshi')?'selected':'' ?>>Доджінші</option>
                     </select>
                 </div>
 
@@ -190,7 +194,7 @@
             </aside>
 
         <section class="content">
-            <div class="card-grid">
+            <div class="card-grid catalog-grid">
         <?php foreach ($manga as $m): ?>
             <div class="card" style="position:relative">
                 <?php $mcover = !empty($m['cover_url']) ? htmlspecialchars($m['cover_url']) : (!empty($m['poster_url']) ? htmlspecialchars($m['poster_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'); ?>
@@ -203,6 +207,42 @@
             </div>
         <?php endforeach; ?>
             </div> <!-- .card-grid -->
+
+            <?php if (!empty($pagination) && $pagination['totalPages'] > 1): ?>
+                <?php
+                    $curr = (int)$pagination['page'];
+                    $totalPages = (int)$pagination['totalPages'];
+                    $qsBase = $_GET;
+                    $qsBase['route'] = 'manga/list';
+                    $window = 2;
+                    $start = max(1, $curr - $window);
+                    $end = min($totalPages, $curr + $window);
+                ?>
+                <div class="pagination">
+                    <?php if ($curr > 1): $qsBase['page'] = $curr - 1; ?>
+                        <a class="page-link" href="index.php?<?= http_build_query($qsBase) ?>">←</a>
+                    <?php endif; ?>
+
+                    <?php if ($start > 1): $qsBase['page'] = 1; ?>
+                        <a class="page-link" href="index.php?<?= http_build_query($qsBase) ?>">1</a>
+                        <?php if ($start > 2): ?><span class="page-ellipsis">…</span><?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php for ($i = $start; $i <= $end; $i++): $qsBase['page'] = $i; ?>
+                        <a class="page-link <?= $i === $curr ? 'active' : '' ?>" href="index.php?<?= http_build_query($qsBase) ?>"><?= $i ?></a>
+                    <?php endfor; ?>
+
+                    <?php if ($end < $totalPages): $qsBase['page'] = $totalPages; ?>
+                        <?php if ($end < $totalPages - 1): ?><span class="page-ellipsis">…</span><?php endif; ?>
+                        <a class="page-link" href="index.php?<?= http_build_query($qsBase) ?>"><?= $totalPages ?></a>
+                    <?php endif; ?>
+
+                    <?php if ($curr < $totalPages): $qsBase['page'] = $curr + 1; ?>
+                        <a class="page-link" href="index.php?<?= http_build_query($qsBase) ?>">→</a>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
         </section>
     </div> <!-- .layout-row -->
     </form>
