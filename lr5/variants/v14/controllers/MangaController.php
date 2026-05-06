@@ -15,12 +15,22 @@ class MangaController extends PageController
         $q = trim($this->request->get('q', ''));
         $status = trim($this->request->get('status', ''));
         $type = trim($this->request->get('type', ''));
+        // support both single-author (legacy) and multi-author (comma-separated 'authors')
         $author = (int)($this->request->get('author', 0));
+        $authorsParam = trim($this->request->get('authors', ''));
         $genre = trim($this->request->get('genres', ''));
         $yearFrom = (int)($this->request->get('yearFrom', 0));
         $yearTo = (int)($this->request->get('yearTo', 0));
         $ratingFrom = $this->request->get('ratingFrom', '');
         $ratingTo = $this->request->get('ratingTo', '');
+
+        // normalize ranges so yearFrom <= yearTo and ratingFrom <= ratingTo
+        if ($yearFrom > 0 && $yearTo > 0 && $yearFrom > $yearTo) {
+            $tmp = $yearFrom; $yearFrom = $yearTo; $yearTo = $tmp;
+        }
+        if ($ratingFrom !== '' && $ratingTo !== '' && is_numeric($ratingFrom) && is_numeric($ratingTo) && (float)$ratingFrom > (float)$ratingTo) {
+            $tmp = $ratingFrom; $ratingFrom = $ratingTo; $ratingTo = $tmp;
+        }
         $page = max(1, (int)($this->request->get('page', 1)));
         $pageSize = max(6, min(48, (int)($this->request->get('pageSize', 24))));
         $sort = trim($this->request->get('sort', 'title'));
@@ -54,7 +64,18 @@ class MangaController extends PageController
             $params[':yearTo'] = $yearTo;
         }
 
-        if ($author > 0) {
+        // authors handling: multi-select preferred via 'authors' param
+        $authorIds = [];
+        if ($authorsParam !== '') {
+            $parts = array_filter(array_map('trim', explode(',', $authorsParam)));
+            foreach ($parts as $p) { $id = (int)$p; if ($id > 0) $authorIds[] = $id; }
+        }
+        if (!empty($authorIds)) {
+            $joins[] = 'JOIN manga_author ma ON ma.manga_id = m.id';
+            $placeholders = [];
+            foreach ($authorIds as $i => $aid) { $ph = ':a' . $i; $placeholders[] = $ph; $params[$ph] = $aid; }
+            $where[] = 'ma.author_id IN (' . implode(',', $placeholders) . ')';
+        } elseif ($author > 0) {
             $joins[] = 'JOIN manga_author ma ON ma.manga_id = m.id';
             $where[] = 'ma.author_id = :author';
             $params[':author'] = $author;
@@ -135,7 +156,8 @@ class MangaController extends PageController
             'filters' => [
                 'q'=>$q,'status'=>$status,'type'=>$type,'author'=>$author,'genre'=>$genre,
                 'yearFrom'=>$this->request->get('yearFrom', ''),'yearTo'=>$this->request->get('yearTo', ''),'sort'=>$sort,
-                'ratingFrom'=>$this->request->get('ratingFrom',''),'ratingTo'=>$this->request->get('ratingTo','')
+                'ratingFrom'=>$this->request->get('ratingFrom',''),'ratingTo'=>$this->request->get('ratingTo',''),
+                'authors' => $authorsParam
             ],
             'genres'=>$genres,
             'authors'=>$authors

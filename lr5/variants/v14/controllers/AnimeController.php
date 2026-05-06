@@ -22,6 +22,14 @@ class AnimeController extends PageController
         $yearTo = (int)($this->request->get('yearTo', 0));
         $ratingFrom = $this->request->get('ratingFrom', '');
         $ratingTo = $this->request->get('ratingTo', '');
+
+        // normalize ranges so yearFrom <= yearTo and ratingFrom <= ratingTo
+        if ($yearFrom > 0 && $yearTo > 0 && $yearFrom > $yearTo) {
+            $tmp = $yearFrom; $yearFrom = $yearTo; $yearTo = $tmp;
+        }
+        if ($ratingFrom !== '' && $ratingTo !== '' && is_numeric($ratingFrom) && is_numeric($ratingTo) && (float)$ratingFrom > (float)$ratingTo) {
+            $tmp = $ratingFrom; $ratingFrom = $ratingTo; $ratingTo = $tmp;
+        }
         $genre = trim($this->request->get('genres', ''));// comma-separated or single id
         if ($genre === '') {
             // support older view that used 'genre' param

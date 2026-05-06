@@ -41,25 +41,23 @@
             <aside class="filters">
                 <div class="form-group">
                     <label>Рік випуску</label>
-                    <div class="year-range range-wrap">
-                        <div class="range-track"></div>
-                        <input type="range" id="yearFromRange" min="1965" max="2026" value="<?= (int)($filters['yearFrom'] ?: 1965) ?>">
-                        <input type="range" id="yearToRange" min="1965" max="2026" value="<?= (int)($filters['yearTo'] ?: 2026) ?>">
+                    <div class="year-range">
+                        <div class="range-pair">
+                            <input type="number" id="yearFromInput" name="yearFrom" min="1965" max="2026" value="<?= (int)($filters['yearFrom'] ?: 1965) ?>">
+                            <input type="number" id="yearToInput" name="yearTo" min="1965" max="2026" value="<?= (int)($filters['yearTo'] ?: 2026) ?>">
+                        </div>
                         <div class="year-values">Від <span id="yearFromDisplay"></span> до <span id="yearToDisplay"></span></div>
-                        <input type="hidden" name="yearFrom" id="yearFrom" value="<?= htmlspecialchars($filters['yearFrom'] ?? '') ?>">
-                        <input type="hidden" name="yearTo" id="yearTo" value="<?= htmlspecialchars($filters['yearTo'] ?? '') ?>">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Оцінка</label>
-                    <div class="rating-range range-wrap" style="padding-top:12px;padding-bottom:8px">
-                        <div class="range-track"></div>
-                            <input type="range" id="ratingFromRange" min="0" max="10" step="0.1" value="<?= ($filters['ratingFrom'] !== '' ? htmlspecialchars($filters['ratingFrom']) : '0') ?>">
-                            <input type="range" id="ratingToRange" min="0" max="10" step="0.1" value="<?= ($filters['ratingTo'] !== '' ? htmlspecialchars($filters['ratingTo']) : '10') ?>">
+                    <div class="rating-range" style="padding-top:8px;padding-bottom:8px">
+                        <div class="range-pair">
+                            <input type="number" id="ratingFromInput" name="ratingFrom" min="0" max="10" step="0.1" value="<?= ($filters['ratingFrom'] !== '' ? htmlspecialchars($filters['ratingFrom']) : '0') ?>">
+                            <input type="number" id="ratingToInput" name="ratingTo" min="0" max="10" step="0.1" value="<?= ($filters['ratingTo'] !== '' ? htmlspecialchars($filters['ratingTo']) : '10') ?>">
+                        </div>
                         <div class="year-values">Від <span id="ratingFromDisplay"></span> до <span id="ratingToDisplay"></span></div>
-                        <input type="hidden" name="ratingFrom" id="ratingFrom" value="<?= htmlspecialchars($filters['ratingFrom'] ?? '') ?>">
-                        <input type="hidden" name="ratingTo" id="ratingTo" value="<?= htmlspecialchars($filters['ratingTo'] ?? '') ?>">
                     </div>
                 </div>
 
@@ -197,7 +195,9 @@
 
 <script>
     (function(){
-        // chips (type/status) single-select behavior remains
+        var filterForm = document.getElementById('filterForm');
+
+        // chips (type/status) single-select behavior
         function wire(chipsId, inputId, attr){
             var container = document.getElementById(chipsId);
             if(!container) return;
@@ -209,6 +209,7 @@
                 chip.classList.add('active');
                 var val = chip.getAttribute(attr) || chip.getAttribute('data-val') || chip.getAttribute('data-id') || '';
                 if(input) input.value = val;
+                if(filterForm) filterForm.submit();
             });
         }
         wire('typeChips','typeInput','data-val');
@@ -226,31 +227,18 @@
             if(!btn || !overlay) return;
 
             btn.addEventListener('click', function(e){
+                e.stopPropagation();
                 overlay.style.display = (overlay.style.display === 'none' || overlay.style.display === '') ? 'block' : 'none';
             });
             if(close) close.addEventListener('click', function(){ overlay.style.display = 'none'; });
             if(selectAll) selectAll.addEventListener('click', function(){ overlay.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = true; }); });
             if(clearAll) clearAll.addEventListener('click', function(){ overlay.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = false; }); });
-            if(apply){
-                apply.addEventListener('click', function(){
-                    var vals = [];
-                    overlay.querySelectorAll('input[type=checkbox]:checked').forEach(function(c){ vals.push(c.value); });
-                    if(hidden) hidden.value = vals.join(',');
-                    overlay.style.display = 'none';
-                });
-            }
-            // close overlay if clicked outside
-            document.addEventListener('click', function(e){
-                if(!overlay.contains(e.target) && !btn.contains(e.target)){
-                    overlay.style.display = 'none';
-                }
-            });
+            if(apply) apply.addEventListener('click', function(){ var vals=[]; overlay.querySelectorAll('input[type=checkbox]:checked').forEach(function(c){ vals.push(c.value); }); if(hidden) hidden.value = vals.join(','); overlay.style.display = 'none'; });
+            document.addEventListener('click', function(e){ if(!overlay.contains(e.target) && !btn.contains(e.target)){ overlay.style.display = 'none'; } });
         }
-
         setupOverlay('openGenresBtn','genresOverlay','applyGenres','closeGenres','genreSelectAll','genreClearAll','genreInput');
         setupOverlay('openStudiosBtn','studiosOverlay','applyStudios','closeStudios','studioSelectAll','studioClearAll','studioInput');
 
-        // overlay search: filters visible checkbox labels by text
         function setupOverlaySearch(overlayId, searchId){
             var overlay = document.getElementById(overlayId);
             var input = document.getElementById(searchId);
@@ -266,117 +254,80 @@
         setupOverlaySearch('genresOverlay','genreSearch');
         setupOverlaySearch('studiosOverlay','studioSearch');
 
-        // year dual-range
-        var yFromRange = document.getElementById('yearFromRange');
-        var yToRange = document.getElementById('yearToRange');
-        var yFromHidden = document.getElementById('yearFrom');
-        var yToHidden = document.getElementById('yearTo');
+        // Year inputs (number fields)
+        var yFromInput = document.getElementById('yearFromInput');
+        var yToInput = document.getElementById('yearToInput');
         var yFromDisplay = document.getElementById('yearFromDisplay');
         var yToDisplay = document.getElementById('yearToDisplay');
-        var track = document.querySelector('.year-range .range-track');
-
         function syncYears(){
-            var min = parseInt(yFromRange.min,10);
-            var max = parseInt(yFromRange.max,10);
-            var from = parseInt(yFromRange.value,10);
-            var to = parseInt(yToRange.value,10);
-            if(from > to){ var tmp = from; from = to; to = tmp; }
-            yFromHidden.value = from;
-            yToHidden.value = to;
-            yFromDisplay.textContent = from;
-            yToDisplay.textContent = to;
-            // update track
-            if(track){
-                var left = ((from - min) / (max - min)) * 100;
-                var right = ((to - min) / (max - min)) * 100;
-                track.style.left = left + '%';
-                track.style.width = Math.max(0, right - left) + '%';
-            }
+            if(!yFromInput || !yToInput) return;
+            var min = parseInt(yFromInput.min,10) || 1965;
+            var max = parseInt(yFromInput.max,10) || 2026;
+            var rawFrom = parseInt(yFromInput.value,10) || min;
+            var rawTo = parseInt(yToInput.value,10) || max;
+            var displayFrom = Math.min(rawFrom, rawTo);
+            var displayTo = Math.max(rawFrom, rawTo);
+            if(yFromDisplay) yFromDisplay.textContent = displayFrom;
+            if(yToDisplay) yToDisplay.textContent = displayTo;
         }
-        if(yFromRange && yToRange){
-            yFromRange.addEventListener('input', syncYears);
-            yToRange.addEventListener('input', syncYears);
-            syncYears();
-        }
+        if(yFromInput && yToInput){ yFromInput.addEventListener('input', function(){ syncYears(); debounceSubmit(); }); yToInput.addEventListener('input', function(){ syncYears(); debounceSubmit(); }); syncYears(); }
 
-        // rating dual-range sync
-        var rFromRange = document.getElementById('ratingFromRange');
-        var rToRange = document.getElementById('ratingToRange');
-        var rFromHidden = document.getElementById('ratingFrom');
-        var rToHidden = document.getElementById('ratingTo');
+        // Rating inputs
+        var rFromInput = document.getElementById('ratingFromInput');
+        var rToInput = document.getElementById('ratingToInput');
         var rFromDisplay = document.getElementById('ratingFromDisplay');
         var rToDisplay = document.getElementById('ratingToDisplay');
-        var rtrack = document.querySelector('.rating-range .range-track');
+        function syncRating(){
+            if(!rFromInput || !rToInput) return;
+            var rawFrom = parseFloat(rFromInput.value) || 0;
+            var rawTo = parseFloat(rToInput.value) || 10;
+            var displayFrom = Math.min(rawFrom, rawTo);
+            var displayTo = Math.max(rawFrom, rawTo);
+            if(rFromDisplay) rFromDisplay.textContent = displayFrom.toFixed(1);
+            if(rToDisplay) rToDisplay.textContent = displayTo.toFixed(1);
+        }
+        if(rFromInput && rToInput){ rFromInput.addEventListener('input', function(){ syncRating(); debounceSubmit(); }); rToInput.addEventListener('input', function(){ syncRating(); debounceSubmit(); }); syncRating(); }
 
-        function syncRatings(){
-            if(!rFromRange || !rToRange) return;
-            var min = parseFloat(rFromRange.min);
-            var max = parseFloat(rFromRange.max);
-            var from = parseFloat(rFromRange.value);
-            var to = parseFloat(rToRange.value);
-            if(from > to){ var tmp = from; from = to; to = tmp; }
-            rFromHidden.value = from;
-            rToHidden.value = to;
-            if(rFromDisplay) rFromDisplay.textContent = from.toFixed(1);
-            if(rToDisplay) rToDisplay.textContent = to.toFixed(1);
-            if(rtrack){
-                var left = ((from - min) / (max - min)) * 100;
-                var right = ((to - min) / (max - min)) * 100;
-                rtrack.style.left = left + '%';
-                rtrack.style.width = Math.max(0, right - left) + '%';
-            }
+        // selected chips rendering
+        function renderSelectedChips(hiddenInputId, overlayId, btnId){
+            var hidden = document.getElementById(hiddenInputId);
+            var overlay = document.getElementById(overlayId);
+            var btn = document.getElementById(btnId);
+            if(!hidden || !overlay || !btn) return;
+            var parent = btn.parentElement;
+            var container = parent.querySelector('.selected-chips');
+            if(!container){ container = document.createElement('div'); container.className = 'selected-chips'; parent.appendChild(container); }
+            container.innerHTML = '';
+            var ids = (hidden.value||'').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+            ids.forEach(function(id){
+                var checkbox = overlay.querySelector('input[type=checkbox][value="'+id+'"]');
+                var labelText = checkbox ? checkbox.parentElement.textContent.trim() : id;
+                var chip = document.createElement('span'); chip.className='selected-chip'; chip.textContent = labelText;
+                var rem = document.createElement('button'); rem.type='button'; rem.textContent='×';
+                rem.addEventListener('click', function(){ if(checkbox) checkbox.checked=false; var newIds = ids.filter(function(x){ return x!==id; }); hidden.value = newIds.join(','); if(filterForm) filterForm.submit(); });
+                chip.appendChild(rem);
+                container.appendChild(chip);
+            });
         }
-        if(rFromRange && rToRange){
-            rFromRange.addEventListener('input', syncRatings);
-            rToRange.addEventListener('input', syncRatings);
-            syncRatings();
-        }
+
+        var applyGenresBtn = document.getElementById('applyGenres');
+        var applyStudiosBtn = document.getElementById('applyStudios');
+        if(applyGenresBtn) applyGenresBtn.addEventListener('click', function(){ document.getElementById('genresOverlay').style.display='none'; renderSelectedChips('genreInput','genresOverlay','openGenresBtn'); if(filterForm) filterForm.submit(); });
+        if(applyStudiosBtn) applyStudiosBtn.addEventListener('click', function(){ document.getElementById('studiosOverlay').style.display='none'; renderSelectedChips('studioInput','studiosOverlay','openStudiosBtn'); if(filterForm) filterForm.submit(); });
+
+        // initial render
+        renderSelectedChips('genreInput','genresOverlay','openGenresBtn');
+        renderSelectedChips('studioInput','studiosOverlay','openStudiosBtn');
+
+        // debounce submit helper
+        var _deb; function debounceSubmit(){ if(_deb) clearTimeout(_deb); _deb = setTimeout(function(){ if(filterForm) filterForm.submit(); }, 450); }
 
         // order toggle (asc/desc)
         var orderInput = document.getElementById('orderInput');
         var orderToggle = document.getElementById('orderToggle');
-        // submit helper (debounce)
-        var filterForm = document.getElementById('filterForm');
-        function submitFiltersDebounced(){
-            if(!filterForm) return;
-            if(window._filterTimeout) clearTimeout(window._filterTimeout);
-            window._filterTimeout = setTimeout(function(){ filterForm.submit(); }, 450);
-        }
-
-        if(orderToggle && orderInput){
-            orderToggle.addEventListener('click', function(){
-                var v = (orderInput.value || 'DESC').toUpperCase();
-                v = v === 'ASC' ? 'DESC' : 'ASC';
-                orderInput.value = v;
-                orderToggle.textContent = v === 'ASC' ? '↑' : '↓';
-                // submit immediately when toggling order
-                if(filterForm) filterForm.submit();
-            });
-        }
-
-        // auto-submit when sort selection changes
         var sortSelect = document.querySelector('select[name="sort"]');
-        if(sortSelect){
-            sortSelect.addEventListener('change', function(){ if(filterForm) filterForm.submit(); });
-        }
-
-        // auto-submit when sliders change (debounced)
-        if(yFromRange && yToRange){
-            yFromRange.addEventListener('input', function(){ syncYears(); submitFiltersDebounced(); });
-            yToRange.addEventListener('input', function(){ syncYears(); submitFiltersDebounced(); });
-        }
-        if(rFromRange && rToRange){
-            rFromRange.addEventListener('input', function(){ syncRatings(); submitFiltersDebounced(); });
-            rToRange.addEventListener('input', function(){ syncRatings(); submitFiltersDebounced(); });
-        }
-
-        // when apply buttons in overlays are used, submit the form as well
-        var applyGenresBtn = document.getElementById('applyGenres');
-        var applyStudiosBtn = document.getElementById('applyStudios');
-        if(applyGenresBtn) applyGenresBtn.addEventListener('click', function(){ document.getElementById('genresOverlay').style.display='none'; if(filterForm) filterForm.submit(); });
-        if(applyStudiosBtn) applyStudiosBtn.addEventListener('click', function(){ document.getElementById('studiosOverlay').style.display='none'; if(filterForm) filterForm.submit(); });
-
-        // legacy minRating controls removed; rating dual-range above handles rating filters
+        if(orderToggle && orderInput){ orderToggle.addEventListener('click', function(){ var v = (orderInput.value || 'DESC').toUpperCase(); v = v === 'ASC' ? 'DESC' : 'ASC'; orderInput.value = v; orderToggle.textContent = v === 'ASC' ? '↑' : '↓'; if(filterForm) filterForm.submit(); }); }
+        if(sortSelect){ sortSelect.addEventListener('change', function(){ if(filterForm) filterForm.submit(); }); }
 
     })();
 </script>

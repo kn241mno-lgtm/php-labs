@@ -197,6 +197,20 @@ code {
   top: 96px;
   height: fit-content;
 }
+.layout-row .filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 12px;
+}
+.layout-row .filters .form-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
+}
+.layout-row .filters .form-actions .btn {
+  flex: 1;
+}
 .filters .form-group {
   margin-bottom: 14px;
 }
@@ -404,6 +418,30 @@ h3 {
   gap: 8px;
   justify-content: flex-end;
 }
+
+/* selected chips (shows chosen filters like genres/authors) */
+.selected-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.selected-chips .selected-chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb, #1e40af);
+  color: #fff;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.selected-chips .selected-chip button {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
 .overlay-checkbox {
   display: block;
   padding: 8px 10px;
@@ -516,6 +554,24 @@ h3 {
   border-radius: 8px;
 }
 
+/* comment box used on detail pages */
+.comment {
+  background: #071028;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.comment-meta {
+  color: #9fb0c9;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+.comment-body {
+  color: #e6eef8;
+  line-height: 1.5;
+}
+
 @media (max-width: 800px) {
   .modal-detail {
     padding: 12px;
@@ -609,10 +665,21 @@ h3 {
   background: linear-gradient(180deg, #051026, #081127);
 }
 
+/* Homepage: unify poster heights across ongoing / news / top sections */
+.page-home .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.page-home .card__img {
+  height: 320px !important;
+  object-fit: cover !important;
+}
+
 /* news grid specifically uses 4 columns on wide screens */
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
   gap: 24px;
 }
 

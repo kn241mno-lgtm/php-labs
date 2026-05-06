@@ -11,7 +11,7 @@
                 <a href="index.php?route=anime/view&id=<?= $a['id'] ?>" style="text-decoration:none;color:inherit">
                 <div class="card">
                     <?php if (!empty($a['cover_url'])): ?>
-                        <img src="<?= htmlspecialchars($a['cover_url']) ?>" alt="<?= htmlspecialchars($a['title']) ?>" style="width:100%;height:320px;object-fit:cover;border-radius:6px;margin-bottom:8px">
+                        <img src="<?= htmlspecialchars($a['cover_url']) ?>" alt="<?= htmlspecialchars($a['title']) ?>" class="card__img" style="margin-bottom:8px">
                     <?php endif; ?>
                     <h3 class="card__title"><?= htmlspecialchars($a['title_ua'] ?: $a['title']) ?></h3>
                     <div class="card__text"><?= htmlspecialchars(mb_substr($a['description'] ?? $a['title'],0,120)) ?></div>
@@ -32,7 +32,7 @@
                 <a href="index.php?route=recipe/view&id=<?= $n['id'] ?>" style="text-decoration:none;color:inherit">
                 <div class="card">
                     <?php if (!empty($n['image_url'])): ?>
-                        <img src="<?= htmlspecialchars($n['image_url']) ?>" alt="<?= htmlspecialchars($n['title']) ?>" style="width:100%;height:160px;object-fit:cover;border-radius:6px;margin-bottom:8px">
+                        <img src="<?= htmlspecialchars($n['image_url']) ?>" alt="<?= htmlspecialchars($n['title']) ?>" class="card__img" style="margin-bottom:8px">
                     <?php endif; ?>
                     <h3 class="card__title"><?= htmlspecialchars($n['title']) ?></h3>
                     <div class="card__text"><?= htmlspecialchars(mb_substr($n['summary'] ?? $n['content'] ?? '',0,140)) ?></div>
@@ -53,7 +53,7 @@
                 <a href="index.php?route=anime/view&id=<?= $t['id'] ?>" style="text-decoration:none;color:inherit">
                     <div class="card">
                         <?php if (!empty($t['cover_url'])): ?>
-                            <img src="<?= htmlspecialchars($t['cover_url']) ?>" alt="<?= htmlspecialchars($t['title']) ?>" class="card__img" style="height:260px;" />
+                            <img src="<?= htmlspecialchars($t['cover_url']) ?>" alt="<?= htmlspecialchars($t['title']) ?>" class="card__img" />
                         <?php endif; ?>
                         <h3 class="card__title"><?= htmlspecialchars($t['title_ua'] ?: $t['title']) ?></h3>
                         <div class="card__text" style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--muted)"><?= htmlspecialchars($t['studio_name'] ?? '') ?></span><span style="background:#1f2937;padding:6px 8px;border-radius:8px;color:#ffd166;font-weight:600"><?= round($t['rating'],1) ?></span></div>

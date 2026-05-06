@@ -18,15 +18,13 @@
     <?php if ($canManageNews): ?>
         <a href="index.php?route=recipe/create" class="btn">Додати статтю</a>
     <?php endif; ?>
-    <a href="index.php?route=anime/list" class="btn btn--secondary">Перейти до каталогу аніме</a>
-    <a href="index.php?route=manga/list" class="btn btn--secondary">Перейти до каталогу манги</a>
 </div>
 
 <?php if (empty($recipes)): ?>
     <p class="text-muted">Статей ще немає.</p>
 <?php else: ?>
     <div class="card-grid news-grid">
-        <?php foreach ($recipes as $r): ?>
+        <?php $count = 0; foreach ($recipes as $r): if($count++ >= 12) break; ?>
             <?php $img = !empty($r['image_url']) ? htmlspecialchars($r['image_url']) : 'https://via.placeholder.com/420x240?text=No+Image'; ?>
             <div class="card" style="position:relative">
                 <a href="index.php?route=recipe/view&id=<?= (int)$r['id'] ?>">
