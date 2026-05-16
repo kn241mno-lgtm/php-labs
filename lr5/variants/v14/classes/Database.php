@@ -66,6 +66,28 @@ class Database
                         } catch (Exception $e) {
                             error_log('DB rating columns check failed: ' . $e->getMessage());
                         }
+                        
+                        // Ensure users table has expected profile columns used by controllers/views
+                        try {
+                            $ucols = [];
+                            $ures = self::$instance->query("PRAGMA table_info('users')");
+                            if ($ures) {
+                                foreach ($ures->fetchAll() as $r) { $ucols[] = $r['name']; }
+                            }
+                            $needed = ['first_name','last_name','phone','city','gender','about','display_name','bio','password','avatar_url','ui_color'];
+                            foreach ($needed as $col) {
+                                if (!in_array($col, $ucols)) {
+                                    try {
+                                        // default to TEXT for profile fields, leave password TEXT
+                                        self::$instance->exec("ALTER TABLE users ADD COLUMN $col TEXT");
+                                    } catch (Exception $e) {
+                                        error_log('Could not add users column '.$col.': '.$e->getMessage());
+                                    }
+                                }
+                            }
+                        } catch (Exception $e) {
+                            error_log('DB users columns check failed: ' . $e->getMessage());
+                        }
                     
                     } catch (Exception $e) {
                         error_log('DB init check failed: ' . $e->getMessage());

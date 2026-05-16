@@ -44,6 +44,8 @@ class AuthController extends PageController
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $this->db->lastInsertId();
                 $_SESSION['user_login'] = trim($old['login']);
+                // set default UI color for new user (can be changed in profile)
+                $_SESSION['bg_color'] = '#0b1b2c';
                 $this->redirect('auth/profile');
                 return;
             }
@@ -75,15 +77,40 @@ class AuthController extends PageController
                 $stmt->execute([':login' => $login]);
                 $user = $stmt->fetch();
 
-                if ($user && password_verify($password, $user['password'])) {
-                    session_regenerate_id(true);
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['user_login'] = $user['login'];
-                    $this->redirect('auth/profile');
-                    return;
-                }
+                    if ($user) {
+                        $stored = $user['password'] ?? '';
+                        $ok = false;
+                        // if stored is a modern hash, use password_verify
+                        if ($stored !== '' && (strpos($stored, '$') === 0 ? password_verify($password, $stored) : false)) {
+                            $ok = true;
+                        }
+                        // fallback: allow plain-text seed passwords (dev only) and upgrade to hashed
+                        if (!$ok && $stored !== '' && hash_equals($stored, $password)) {
+                            $ok = true;
+                            // upgrade to secure hash
+                            try {
+                                $newHash = password_hash($password, PASSWORD_DEFAULT);
+                                $ust = $this->db->prepare('UPDATE users SET password = :pw WHERE id = :id');
+                                $ust->execute([':pw' => $newHash, ':id' => $user['id']]);
+                            } catch (Exception $e) {
+                                // ignore upgrade failure
+                            }
+                        }
 
-                $error = 'Невірний логін або пароль.';
+                        if ($ok) {
+                            session_regenerate_id(true);
+                            $_SESSION['user_id'] = $user['id'];
+                            $_SESSION['user_login'] = $user['login'];
+                                // apply user's saved UI color (if any)
+                                if (!empty($user['ui_color'])) {
+                                    $_SESSION['bg_color'] = $user['ui_color'];
+                                }
+                            $this->redirect('auth/profile');
+                            return;
+                        }
+                    }
+
+                    $error = 'Невірний логін або пароль.';
             }
         }
 
@@ -106,6 +133,57 @@ class AuthController extends PageController
         if (!$user) {
             $this->action_logout();
             return;
+        }
+
+        // Handle profile settings update (avatar, display name, ui color)
+        if ($this->request->isPost()) {
+            $data = $this->request->allPost();
+            $fields = [];
+            $params = [':id' => $user['id']];
+
+            if (isset($data['display_name'])) {
+                $fields[] = 'display_name = :display_name';
+                $params[':display_name'] = trim($data['display_name']);
+            }
+            if (isset($data['avatar_url'])) {
+                $fields[] = 'avatar_url = :avatar_url';
+                $params[':avatar_url'] = trim($data['avatar_url']);
+            }
+            if (isset($data['ui_color'])) {
+                $color = trim($data['ui_color']);
+                if (preg_match('/^#?[0-9a-fA-F]{6}$/', $color)) {
+                    if ($color[0] !== '#') $color = '#' . $color;
+                    $fields[] = 'ui_color = :ui_color';
+                    $params[':ui_color'] = $color;
+                }
+            }
+
+            if (!empty($fields)) {
+                try {
+                    $sql = 'UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id';
+                    $ust = $this->db->prepare($sql);
+                    $ust->execute($params);
+                    // refresh user data
+                    $stmt = $this->db->prepare('SELECT * FROM users WHERE id = :id');
+                    $stmt->execute([':id' => $user['id']]);
+                    $user = $stmt->fetch();
+                    // apply ui color to session so header updates
+                    if (!empty($user['ui_color'])) {
+                        $_SESSION['bg_color'] = $user['ui_color'];
+                    }
+                    $_SESSION['flash_success'] = 'Налаштування збережено.';
+                    $this->redirect('auth/profile');
+                    return;
+                } catch (Exception $e) {
+                    // ignore update error but show form again
+                    error_log('Profile update failed: ' . $e->getMessage());
+                }
+            }
+        } else {
+            // ensure session background color matches stored preference
+            if (!empty($user['ui_color'])) {
+                $_SESSION['bg_color'] = $user['ui_color'];
+            }
         }
 
         $this->render('auth/profile', [

@@ -9,8 +9,14 @@ CREATE TABLE IF NOT EXISTS users (
     login TEXT NOT NULL UNIQUE,
     email TEXT,
     password TEXT,
+    first_name TEXT,
+    last_name TEXT,
     display_name TEXT,
     avatar_url TEXT,
+    phone TEXT,
+    city TEXT,
+    gender TEXT,
+    about TEXT,
     bio TEXT,
     role TEXT DEFAULT 'user',
     status TEXT DEFAULT 'active',
@@ -266,12 +272,12 @@ INSERT INTO studio (id, name, country, founded, description, website) VALUES
 (12, 'Sunrise', 'Japan', 1972, 'Студія, відома франшизою Gundam', 'https://sunrise-inc.co.jp');
 
 -- ---------- Користувачі ----------
-INSERT INTO users (id, login, email, display_name, avatar_url, role, bio) VALUES
-(1, 'admin', 'admin@anime-site.com', 'Адміністратор', 'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png', 'admin', 'Головний адміністратор сайту. Люблю аніме та мангу.'),
-(2, 'animefan', 'fan@example.com', 'Аніме Фан', 'https://cdn.pixabay.com/photo/2016/03/31/20/27/avatar-1295773_1280.png', 'user', 'Дивлюсь аніме щодня. Люблю бойовики та пригоди.'),
-(3, 'mangalover', 'manga@example.com', 'Манга Любитель', 'https://cdn.pixabay.com/photo/2016/03/31/20/31/avatar-1295775_1280.png', 'user', 'Колекціоную мангу вже 10 років.'),
-(4, 'reviewer', 'review@example.com', 'Оглядач', 'https://cdn.pixabay.com/photo/2016/03/31/20/27/avatar-1295770_1280.png', 'user', 'Пишу огляди на новинки аніме.'),
-(5, 'moderator', 'mod@example.com', 'Модератор', 'https://cdn.pixabay.com/photo/2016/03/31/20/27/avatar-1295772_1280.png', 'moderator', 'Слідкую за порядком на сайті.');
+INSERT INTO users (id, login, password, email, first_name, last_name, display_name, avatar_url, phone, city, gender, about, bio, role) VALUES
+(1, 'admin', 'Admin123!', 'admin@anime-site.com', 'Головний', 'Адміністратор', 'Адміністратор', 'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png', NULL, NULL, '', 'Головний адміністратор сайту. Люблю аніме та мангу.', 'Головний адміністратор сайту. Люблю аніме та мангу.', 'admin'),
+(2, 'animefan', 'Fan12345', 'fan@example.com', 'Аніме', 'Фан', 'Аніме Фан', 'https://cdn.pixabay.com/photo/2016/03/31/20/27/avatar-1295773_1280.png', NULL, NULL, '', 'Дивлюсь аніме щодня. Люблю бойовики та пригоди.', 'Дивлюсь аніме щодня. Люблю бойовики та пригоди.', 'user'),
+(3, 'mangalover', 'Manga123', 'manga@example.com', 'Манга', 'Любитель', 'Манга Любитель', 'https://cdn.pixabay.com/photo/2016/03/31/20/31/avatar-1295775_1280.png', NULL, NULL, '', 'Колекціоную мангу вже 10 років.', 'Колекціоную мангу вже 10 років.', 'user'),
+(4, 'reviewer', 'Review123', 'review@example.com', 'Оглядач', '', 'Оглядач', 'https://cdn.pixabay.com/photo/2016/03/31/20/27/avatar-1295770_1280.png', NULL, NULL, '', 'Пишу огляди на новинки аніме.', 'Пишу огляди на новинки аніме.', 'user'),
+(5, 'moderator', 'Mod12345', 'mod@example.com', 'Модератор', '', 'Модератор', 'https://cdn.pixabay.com/photo/2016/03/31/20/27/avatar-1295772_1280.png', NULL, NULL, '', 'Слідкую за порядком на сайті.', 'Слідкую за порядком на сайті.', 'moderator');
 
 -- ---------- Аніме (50+ тайтлів) ----------
 INSERT INTO anime (id, title, title_ua, year, season, episodes, type, status, source, rating_mpaa, description, studio_id, cover_url, views, favorites) VALUES

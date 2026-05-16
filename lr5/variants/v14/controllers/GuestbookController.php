@@ -103,7 +103,7 @@ class GuestbookController extends PageController
         // If DB available and comments table exists, load from DB
         if ($this->db) {
             try {
-                $stmt = $this->db->prepare('SELECT c.*, u.login FROM comments c LEFT JOIN users u ON u.id = c.user_id ORDER BY c.created_at DESC');
+                $stmt = $this->db->prepare('SELECT c.*, u.login, u.avatar_url, u.display_name FROM comments c LEFT JOIN users u ON u.id = c.user_id ORDER BY c.created_at DESC');
                 $stmt->execute();
                 return $stmt->fetchAll();
             } catch (Exception $e) {

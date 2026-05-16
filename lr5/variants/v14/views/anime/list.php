@@ -67,7 +67,7 @@
                     <div class="chips-toggle">
                         <button type="button" class="filter-pill" id="openStudiosBtn">Студії ▾</button>
                     </div>
-                    <div class="overlay-panel" id="studiosOverlay" style="display:none;">
+                    <div class="overlay-panel overlay-panel--right" id="studiosOverlay" style="display:none;">
                         <div class="overlay-header"><span>Студії</span><input type="search" id="studioSearch" class="overlay-search" placeholder="Пошук..."></div>
                         <div class="overlay-body">
                             <div style="margin-bottom:8px"><button type="button" class="btn" id="studioSelectAll">Позначити всі</button> <button type="button" class="btn" id="studioClearAll">Зняти всі</button></div>
@@ -89,7 +89,7 @@
                     <div class="chips-toggle">
                         <button type="button" class="filter-pill" id="openGenresBtn">Жанри ▾</button>
                     </div>
-                    <div class="overlay-panel" id="genresOverlay" style="display:none;">
+                    <div class="overlay-panel overlay-panel--right" id="genresOverlay" style="display:none;">
                         <div class="overlay-header"><span>Жанри</span><input type="search" id="genreSearch" class="overlay-search" placeholder="Пошук..."></div>
                         <div class="overlay-body">
                             <div style="margin-bottom:8px"><button type="button" class="btn" id="genreSelectAll">Позначити всі</button> <button type="button" class="btn" id="genreClearAll">Зняти всі</button></div>

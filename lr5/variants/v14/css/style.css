@@ -218,12 +218,12 @@ code {
   flex: 1;
 }
 
-/* Related lists and character cards */
 .related-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 320px));
   gap: 16px;
   margin-top: 12px;
+  justify-content: start;
 }
 .character-card {
   background: #071028;
@@ -467,8 +467,13 @@ h3 {
 .layout-row.filters-right .filters {
   position: relative;
 }
-/* Keep overlays opening to the right of the control for consistency */
+/* When filters are placed on the right, open overlays to the left */
 .layout-row.filters-right .filters .overlay-panel {
+  left: auto;
+  right: calc(100% + 12px);
+}
+/* Allow forcing an overlay to open to the right even when filters are on the right */
+.layout-row.filters-right .filters .overlay-panel.overlay-panel--right {
   left: calc(100% + 12px);
   right: auto;
 }
@@ -490,6 +495,203 @@ h3 {
     top: 12vh;
     width: calc(100% - 40px);
     max-height: 70vh;
+  }
+}
+
+/* ===== Profile page ===== */
+.profile-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.profile-header {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6);
+}
+.profile-info h1 {
+  margin: 0 0 6px 0;
+  font-size: 1.5rem;
+}
+.profile-login {
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.profile-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.profile-about {
+  color: var(--muted);
+  max-width: 800px;
+  margin-bottom: 8px;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+}
+.card {
+  background: linear-gradient(180deg, #071028, #081127);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 16px;
+  border-radius: 10px;
+}
+.profile-settings-form label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+}
+.profile-settings-form input[type="text"],
+.profile-settings-form input[type="url"],
+.profile-settings-form input[type="color"] {
+  display: inline-block;
+  margin-left: 8px;
+}
+.dev-accounts summary {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.01);
+}
+.dev-accounts ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 8px;
+}
+.dev-accounts li {
+  padding: 6px 0;
+  color: var(--muted);
+}
+
+/* ===== Comments: compact, card-like ===== */
+.comment {
+  /* default card styling; width adjusted when inside side-column */
+  margin: 12px 0;
+  background: linear-gradient(180deg, #061022, #0c1724);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.comment .avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 48px;
+}
+.comment .comment-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.comment .comment-body {
+  color: var(--color-base);
+  line-height: 1.4;
+}
+
+/* comment form align with content */
+form[action*="guestbook"] {
+  max-width: 1100px;
+  margin: 12px auto;
+}
+
+/* Two-column content (main + right side with characters and comments) */
+.content-columns {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  margin-top: 20px;
+  align-items: start;
+}
+.main-column {
+}
+.side-column {
+}
+.side-column .comment {
+  width: 100%;
+  margin: 12px 0;
+}
+.side-related-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.related-grid.side-related-grid .character-card {
+  height: 110px;
+  padding: 8px;
+}
+.related-grid.side-related-grid .character-card img {
+  height: 68px;
+}
+
+/* comment form inside side column */
+.comment-form {
+  margin-top: 12px;
+}
+.comment-form textarea {
+  width: 100%;
+  min-height: 64px;
+  max-width: 100%;
+}
+
+@media (max-width: 880px) {
+  .content-columns {
+    grid-template-columns: 1fr;
+  }
+  .side-column {
+    order: 2;
+  }
+  .main-column {
+    order: 1;
+  }
+}
+
+/* Align detail block and side column next to each other */
+.detail-and-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+  max-width: 1300px;
+  margin: 0 auto 18px auto;
+}
+.detail-and-side .modal-detail {
+  max-width: none;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .detail-and-side {
+    grid-template-columns: 1fr;
+  }
+  .detail-and-side .modal-detail {
+    order: 1;
+  }
+  .detail-and-side .side-column {
+    order: 2;
+  }
+}
+
+@media (max-width: 880px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -690,8 +892,16 @@ h3 {
 
 /* Catalog grid: responsive columns */
 .catalog-grid {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 320px));
   gap: 20px;
+  justify-content: start;
+}
+
+/* On wide screens, show 4 columns for catalog lists */
+@media (min-width: 1200px) {
+  .catalog-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 /* Ensure catalog cards have consistent layout */

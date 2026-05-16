@@ -204,7 +204,7 @@ class AnimeController extends PageController
         }
 
         // load comments
-        $cstmt = $this->db->prepare('SELECT c.*, u.login FROM comments c JOIN users u ON u.id = c.user_id WHERE c.anime_id = :id ORDER BY c.created_at DESC');
+        $cstmt = $this->db->prepare('SELECT c.*, u.login, u.avatar_url, u.display_name FROM comments c JOIN users u ON u.id = c.user_id WHERE c.anime_id = :id ORDER BY c.created_at DESC');
         $cstmt->execute([':id' => $id]);
         $comments = $cstmt->fetchAll();
 

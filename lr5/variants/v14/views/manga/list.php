@@ -15,13 +15,25 @@
             </div>
         </div>
 
-                    <div class="form-group">
-                        <label>Автори</label>
+                <div class="layout-row filters-right">
+            <aside class="filters">
+                <div class="form-group">
+                    <label>Рік випуску</label>
+                    <div class="year-range">
+                        <div class="range-pair">
+                            <input type="number" id="m_yearFromInput" name="yearFrom" min="1965" max="2026" value="<?= htmlspecialchars((isset($filters['yearFrom']) && $filters['yearFrom'] > 0) ? $filters['yearFrom'] : 1965) ?>">
+                            <input type="number" id="m_yearToInput" name="yearTo" min="1965" max="2026" value="<?= htmlspecialchars((isset($filters['yearTo']) && $filters['yearTo'] > 0) ? $filters['yearTo'] : 2026) ?>">
+                        </div>
+                        <div class="year-values">Від <span id="m_yearFromDisplay"></span> до <span id="m_yearToDisplay"></span></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Автори</label>
                         <input type="hidden" name="authors" id="m_authorsInput" value="<?= htmlspecialchars($filters['authors'] ?? '') ?>" />
                         <div class="chips-toggle">
                             <button type="button" class="filter-pill" id="openAuthorsBtn">Автори ▾</button>
                         </div>
-                        <div class="overlay-panel" id="mAuthorsOverlay" style="display:none;">
+                        <div class="overlay-panel overlay-panel--right" id="mAuthorsOverlay" style="display:none;">
                             <div class="overlay-header"><span>Автори</span><input type="search" id="m_authorSearch" class="overlay-search" placeholder="Пошук..."></div>
                             <div class="overlay-body">
                                 <div style="margin-bottom:8px"><button type="button" class="btn" id="mAuthorSelectAll">Позначити всі</button> <button type="button" class="btn" id="mAuthorClearAll">Зняти всі</button></div>
@@ -42,7 +54,7 @@
                     <div class="chips-toggle">
                         <button type="button" class="filter-pill" id="openMGenresBtn">Жанри ▾</button>
                     </div>
-                    <div class="overlay-panel" id="mGenresOverlay" style="display:none;">
+                    <div class="overlay-panel overlay-panel--right" id="mGenresOverlay" style="display:none;">
                         <div class="overlay-header"><span>Жанри</span><input type="search" id="m_genreSearch" class="overlay-search" placeholder="Пошук..."></div>
                         <div class="overlay-body">
                             <div style="margin-bottom:8px"><button type="button" class="btn" id="mGenreSelectAll">Позначити всі</button> <button type="button" class="btn" id="mGenreClearAll">Зняти всі</button></div>
