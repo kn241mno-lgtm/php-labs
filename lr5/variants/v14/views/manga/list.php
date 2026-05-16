@@ -15,52 +15,26 @@
             </div>
         </div>
 
-        <div class="layout-row filters-right">
-            <aside class="filters">
-                <div class="form-group">
-                    <label>Рік випуску</label>
-                    <div class="year-range">
-                        <div class="range-pair">
-                            <input type="number" id="m_yearFromInput" name="yearFrom" min="1965" max="2026" value="<?= (int)($filters['yearFrom'] !== '' ? $filters['yearFrom'] : 1965) ?>">
-                            <input type="number" id="m_yearToInput" name="yearTo" min="1965" max="2026" value="<?= (int)($filters['yearTo'] !== '' ? $filters['yearTo'] : 2026) ?>">
+                    <div class="form-group">
+                        <label>Автори</label>
+                        <input type="hidden" name="authors" id="m_authorsInput" value="<?= htmlspecialchars($filters['authors'] ?? '') ?>" />
+                        <div class="chips-toggle">
+                            <button type="button" class="filter-pill" id="openAuthorsBtn">Автори ▾</button>
                         </div>
-                        <div class="year-values">Від <span id="m_yearFromDisplay"></span> до <span id="m_yearToDisplay"></span></div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Оцінка</label>
-                    <div class="rating-range" style="padding-top:8px;padding-bottom:8px">
-                        <div class="range-pair">
-                            <input type="number" id="m_ratingFromInput" name="ratingFrom" min="0" max="10" step="0.1" value="<?= htmlspecialchars($filters['ratingFrom'] !== '' ? $filters['ratingFrom'] : 0) ?>">
-                            <input type="number" id="m_ratingToInput" name="ratingTo" min="0" max="10" step="0.1" value="<?= htmlspecialchars($filters['ratingTo'] !== '' ? $filters['ratingTo'] : 10) ?>">
-                        </div>
-                        <div class="year-values">Від <span id="m_ratingFromDisplay"></span> до <span id="m_ratingToDisplay"></span></div>
-                    </div>
-                </div>
-
-                <!-- top status select removed; status chips are at the bottom -->
-
-                <div class="form-group">
-                    <label>Автори</label>
-                    <input type="hidden" name="authors" id="m_authorsInput" value="<?= htmlspecialchars($filters['authors'] ?? ($filters['author'] ?? '')) ?>" />
-                    <div class="chips-toggle">
-                        <button type="button" class="filter-pill" id="openAuthorsBtn">Автори ▾</button>
-                    </div>
-                    <div class="overlay-panel" id="mAuthorsOverlay" style="display:none;">
-                        <div class="overlay-header"><span>Автори</span><input type="search" id="m_authorSearch" class="overlay-search" placeholder="Пошук..."></div>
-                        <div class="overlay-body">
-                            <div style="margin-bottom:8px"><button type="button" class="btn" id="mAuthorSelectAll">Позначити всі</button> <button type="button" class="btn" id="mAuthorClearAll">Зняти всі</button></div>
-                            <?php if(!empty($authors)): foreach($authors as $au): ?>
-                                <label class="overlay-checkbox"><input type="checkbox" value="<?= $au['id'] ?>" <?php if(isset($filters['authors']) && $filters['authors']!=='' && in_array($au['id'], array_filter(array_map('intval', explode(',', $filters['authors']))))): ?>checked<?php endif; ?>> <?= htmlspecialchars($au['name']) ?></label>
-                            <?php endforeach; endif; ?>
-                        </div>
-                        <div class="overlay-actions">
-                            <button type="button" class="btn" id="mApplyAuthors">Застосувати</button>
-                            <button type="button" class="btn btn--secondary" id="mCloseAuthors">Закрити</button>
+                        <div class="overlay-panel" id="mAuthorsOverlay" style="display:none;">
+                            <div class="overlay-header"><span>Автори</span><input type="search" id="m_authorSearch" class="overlay-search" placeholder="Пошук..."></div>
+                            <div class="overlay-body">
+                                <div style="margin-bottom:8px"><button type="button" class="btn" id="mAuthorSelectAll">Позначити всі</button> <button type="button" class="btn" id="mAuthorClearAll">Зняти всі</button></div>
+                                <?php if(!empty($authors)): foreach($authors as $au): ?>
+                                    <label class="overlay-checkbox"><input type="checkbox" value="<?= $au['id'] ?>" <?php if(isset($filters['authors']) && $filters['authors']!=='' && in_array($au['id'], array_filter(array_map('intval', explode(',', $filters['authors']))))): ?>checked<?php endif; ?>> <?= htmlspecialchars($au['name']) ?></label>
+                                <?php endforeach; endif; ?>
+                            </div>
+                            <div class="overlay-actions">
+                                <button type="button" class="btn" id="mApplyAuthors">Застосувати</button>
+                                <button type="button" class="btn btn--secondary" id="mCloseAuthors">Закрити</button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
                 <div class="form-group">
                     <label>Жанри</label>
@@ -129,17 +103,24 @@
                         function syncYears(){
                             if(!yFromInput || !yToInput) return;
                             var min = parseInt(yFromInput.min,10) || 1965;
-                            var max = parseInt(yFromInput.max,10) || 2026;
-                            var rawFrom = parseInt(yFromInput.value,10) || min;
-                            var rawTo = parseInt(yToInput.value,10) || max;
+                            var max = parseInt(yToInput.max,10) || 2026;
+                            var rawFrom = yFromInput.value ? parseInt(yFromInput.value,10) : null;
+                            var rawTo = yToInput.value ? parseInt(yToInput.value,10) : null;
+                            if(rawFrom === null && rawTo === null){
+                                if(yFromDisplay) yFromDisplay.textContent = min;
+                                if(yToDisplay) yToDisplay.textContent = max;
+                                return;
+                            }
+                            if(rawFrom === null) rawFrom = min;
+                            if(rawTo === null) rawTo = max;
                             var displayFrom = Math.min(rawFrom, rawTo);
                             var displayTo = Math.max(rawFrom, rawTo);
                             if(yFromDisplay) yFromDisplay.textContent = displayFrom;
                             if(yToDisplay) yToDisplay.textContent = displayTo;
                         }
                         if(yFromInput && yToInput){
-                            yFromInput.addEventListener('input', function(){ syncYears(); debounceSubmit(); });
-                            yToInput.addEventListener('input', function(){ syncYears(); debounceSubmit(); });
+                            yFromInput.addEventListener('input', function(){ syncYears(); });
+                            yToInput.addEventListener('input', function(){ syncYears(); });
                             syncYears();
                         }
 
@@ -150,16 +131,25 @@
                         var rToDisplay = document.getElementById('m_ratingToDisplay');
                         function syncRating(){
                             if(!rFromInput || !rToInput) return;
-                            var rawFrom = parseFloat(rFromInput.value) || 0;
-                            var rawTo = parseFloat(rToInput.value) || 10;
+                            var min = parseFloat(rFromInput.min) || 0;
+                            var max = parseFloat(rToInput.max) || 10;
+                            var rawFrom = rFromInput.value ? parseFloat(rFromInput.value) : null;
+                            var rawTo = rToInput.value ? parseFloat(rToInput.value) : null;
+                            if(rawFrom === null && rawTo === null){
+                                if(rFromDisplay) rFromDisplay.textContent = min.toFixed(1);
+                                if(rToDisplay) rToDisplay.textContent = max.toFixed(1);
+                                return;
+                            }
+                            if(rawFrom === null) rawFrom = min;
+                            if(rawTo === null) rawTo = max;
                             var displayFrom = Math.min(rawFrom, rawTo);
                             var displayTo = Math.max(rawFrom, rawTo);
                             if(rFromDisplay) rFromDisplay.textContent = displayFrom.toFixed(1);
                             if(rToDisplay) rToDisplay.textContent = displayTo.toFixed(1);
                         }
                         if(rFromInput && rToInput){
-                            rFromInput.addEventListener('input', function(){ syncRating(); debounceSubmit(); });
-                            rToInput.addEventListener('input', function(){ syncRating(); debounceSubmit(); });
+                            rFromInput.addEventListener('input', function(){ syncRating(); });
+                            rToInput.addEventListener('input', function(){ syncRating(); });
                             syncRating();
                         }
 
@@ -216,7 +206,7 @@
                                 var chip = document.createElement('span'); chip.className='selected-chip';
                                 chip.textContent = labelText;
                                 var rem = document.createElement('button'); rem.type='button'; rem.textContent='×';
-                                rem.addEventListener('click', function(){ if(checkbox) checkbox.checked=false; var newIds = ids.filter(function(x){ return x!==id; }); hidden.value = newIds.join(','); if(filterForm) filterForm.submit(); });
+                                rem.addEventListener('click', function(){ if(checkbox) checkbox.checked=false; var newIds = ids.filter(function(x){ return x!==id; }); hidden.value = newIds.join(','); });
                                 chip.appendChild(rem);
                                 container.appendChild(chip);
                             });
@@ -224,15 +214,14 @@
 
                         var mApplyGenresBtn = document.getElementById('mApplyGenres');
                         var mApplyAuthorsBtn = document.getElementById('mApplyAuthors');
-                        if(mApplyGenresBtn) mApplyGenresBtn.addEventListener('click', function(){ document.getElementById('mGenresOverlay').style.display='none'; renderSelectedChips('m_genreInput','mGenresOverlay','openMGenresBtn'); if(filterForm) filterForm.submit(); });
-                        if(mApplyAuthorsBtn) mApplyAuthorsBtn.addEventListener('click', function(){ document.getElementById('mAuthorsOverlay').style.display='none'; renderSelectedChips('m_authorsInput','mAuthorsOverlay','openAuthorsBtn'); if(filterForm) filterForm.submit(); });
+                        if(mApplyGenresBtn) mApplyGenresBtn.addEventListener('click', function(){ document.getElementById('mGenresOverlay').style.display='none'; renderSelectedChips('m_genreInput','mGenresOverlay','openMGenresBtn'); });
+                        if(mApplyAuthorsBtn) mApplyAuthorsBtn.addEventListener('click', function(){ document.getElementById('mAuthorsOverlay').style.display='none'; renderSelectedChips('m_authorsInput','mAuthorsOverlay','openAuthorsBtn'); });
 
                         // initial render of selected chips
                         renderSelectedChips('m_genreInput','mGenresOverlay','openMGenresBtn');
                         renderSelectedChips('m_authorsInput','mAuthorsOverlay','openAuthorsBtn');
 
-                        // debounce submit helper
-                        var _deb; function debounceSubmit(){ if(_deb) clearTimeout(_deb); _deb = setTimeout(function(){ if(filterForm) filterForm.submit(); }, 450); }
+                        // debounce submit helper removed — use Apply button to submit
 
                         // wire type/status chips (single-select behavior)
                         function wireChips(containerId, inputId){
@@ -246,7 +235,6 @@
                                 chip.classList.add('active');
                                 var val = chip.getAttribute('data-val') || '';
                                 if(input) input.value = val;
-                                if(filterForm) filterForm.submit();
                             });
                         }
                         wireChips('m_typeChips','m_typeInput');
@@ -261,7 +249,6 @@
                                 v = v === 'ASC' ? 'DESC' : 'ASC';
                                 mOrderInput.value = v;
                                 mOrderToggle.textContent = v === 'ASC' ? '↑' : '↓';
-                                if(filterForm) filterForm.submit();
                             });
                         }
 

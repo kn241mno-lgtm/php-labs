@@ -72,7 +72,7 @@
             <div class="related-grid">
                 <?php foreach ($characters as $ch): ?>
                     <a class="character-card" href="index.php?route=character/view&id=<?= $ch['id'] ?>">
-                        <?php if (!empty($ch['image_url'])): ?><img src="<?= htmlspecialchars($ch['image_url']) ?>" alt=""><?php endif; ?>
+                        <?php if (!empty($ch['image_url'])): ?><img src="<?= htmlspecialchars($ch['image_url']) ?>" alt="<?= htmlspecialchars($ch['name'] ?? '') ?>" class="related-thumb" onerror="this.onerror=null;this.src='https://via.placeholder.com/240x160?text=No+Image'" /><?php endif; ?>
                         <div class="name"><?= htmlspecialchars($ch['name_ua'] ?: $ch['name']) ?></div>
                     </a>
                 <?php endforeach; ?>

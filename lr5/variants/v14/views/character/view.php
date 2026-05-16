@@ -11,7 +11,7 @@ $manga = $manga ?? [];
         <div class="modal-detail">
             <div class="left">
                 <?php $cimg = !empty($item['image_url']) ? htmlspecialchars($item['image_url']) : 'https://via.placeholder.com/300x420?text=No+Image'; ?>
-                <img src="<?= $cimg ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" style="width:100%;max-width:260px;height:auto;object-fit:cover;border-radius:8px" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x420?text=No+Image'">
+                <img src="<?= $cimg ?>" alt="<?= htmlspecialchars($item['name'] ?? '') ?>" class="character-main-img" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x420?text=No+Image'">
                 <div style="margin-top:12px;color:var(--muted)">
                     <div><strong>Ім'я:</strong> <?= htmlspecialchars($item['name_ua'] ?: $item['name']) ?></div>
                     <div><strong>Стать:</strong> <?= htmlspecialchars($item['gender'] ?? '') ?></div>
@@ -45,7 +45,7 @@ $manga = $manga ?? [];
                         <?php foreach ($anime as $a): ?>
                             <a class="character-card" href="index.php?route=anime/view&id=<?= $a['id'] ?>">
                                 <?php $ac = !empty($a['cover_url']) ? htmlspecialchars($a['cover_url']) : 'https://via.placeholder.com/240x160?text=No+Cover'; ?>
-                                <img src="<?= $ac ?>" alt="" style="width:120px;height:140px;object-fit:cover;border-radius:6px" onerror="this.onerror=null;this.src='https://via.placeholder.com/240x160?text=No+Cover'">
+                                <img src="<?= $ac ?>" alt="" class="related-thumb" onerror="this.onerror=null;this.src='https://via.placeholder.com/240x160?text=No+Cover'">
                                 <div class="name"><?= htmlspecialchars($a['title_ua'] ?: $a['title']) ?></div>
                             </a>
                         <?php endforeach; ?>
@@ -58,7 +58,7 @@ $manga = $manga ?? [];
                         <?php foreach ($manga as $m): ?>
                             <a class="character-card" href="index.php?route=manga/view&id=<?= $m['id'] ?>">
                                 <?php $mc = !empty($m['cover_url']) ? htmlspecialchars($m['cover_url']) : 'https://via.placeholder.com/240x160?text=No+Cover'; ?>
-                                <img src="<?= $mc ?>" alt="" style="width:120px;height:140px;object-fit:cover;border-radius:6px" onerror="this.onerror=null;this.src='https://via.placeholder.com/240x160?text=No+Cover'">
+                                <img src="<?= $mc ?>" alt="" class="related-thumb" onerror="this.onerror=null;this.src='https://via.placeholder.com/240x160?text=No+Cover'">
                                 <div class="name"><?= htmlspecialchars($m['title_ua'] ?: $m['title']) ?></div>
                             </a>
                         <?php endforeach; ?>

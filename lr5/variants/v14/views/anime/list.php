@@ -43,8 +43,8 @@
                     <label>Рік випуску</label>
                     <div class="year-range">
                         <div class="range-pair">
-                            <input type="number" id="yearFromInput" name="yearFrom" min="1965" max="2026" value="<?= (int)($filters['yearFrom'] ?: 1965) ?>">
-                            <input type="number" id="yearToInput" name="yearTo" min="1965" max="2026" value="<?= (int)($filters['yearTo'] ?: 2026) ?>">
+                            <input type="number" id="yearFromInput" name="yearFrom" min="1965" max="2026" value="<?= htmlspecialchars((isset($filters['yearFrom']) && $filters['yearFrom'] > 0) ? $filters['yearFrom'] : 1965) ?>">
+                            <input type="number" id="yearToInput" name="yearTo" min="1965" max="2026" value="<?= htmlspecialchars((isset($filters['yearTo']) && $filters['yearTo'] > 0) ? $filters['yearTo'] : 2026) ?>">
                         </div>
                         <div class="year-values">Від <span id="yearFromDisplay"></span> до <span id="yearToDisplay"></span></div>
                     </div>
@@ -54,8 +54,8 @@
                     <label>Оцінка</label>
                     <div class="rating-range" style="padding-top:8px;padding-bottom:8px">
                         <div class="range-pair">
-                            <input type="number" id="ratingFromInput" name="ratingFrom" min="0" max="10" step="0.1" value="<?= ($filters['ratingFrom'] !== '' ? htmlspecialchars($filters['ratingFrom']) : '0') ?>">
-                            <input type="number" id="ratingToInput" name="ratingTo" min="0" max="10" step="0.1" value="<?= ($filters['ratingTo'] !== '' ? htmlspecialchars($filters['ratingTo']) : '10') ?>">
+                            <input type="number" id="ratingFromInput" name="ratingFrom" min="1" max="10" step="0.1" value="<?= htmlspecialchars(($filters['ratingFrom'] !== '' && is_numeric($filters['ratingFrom'])) ? $filters['ratingFrom'] : 1) ?>">
+                            <input type="number" id="ratingToInput" name="ratingTo" min="1" max="10" step="0.1" value="<?= htmlspecialchars(($filters['ratingTo'] !== '' && is_numeric($filters['ratingTo'])) ? $filters['ratingTo'] : 10) ?>">
                         </div>
                         <div class="year-values">Від <span id="ratingFromDisplay"></span> до <span id="ratingToDisplay"></span></div>
                     </div>
@@ -132,8 +132,7 @@
                     <button class="btn" id="applyFiltersBtn" type="submit">Застосувати фільтри</button>
                     <a href="index.php?route=anime/list" class="btn btn--secondary btn--large" id="resetFiltersBtn">Скинути фільтри</a>
                 </div>
-            </form>
-        </aside>
+            </aside>
 
         <section class="content">
             <div class="card-grid catalog-grid">
@@ -190,7 +189,8 @@
                 </div>
             <?php endif; ?>
         </section>
-    </div>
+    </div> <!-- .layout-row -->
+    </form>
 </div>
 
 <script>
@@ -209,7 +209,7 @@
                 chip.classList.add('active');
                 var val = chip.getAttribute(attr) || chip.getAttribute('data-val') || chip.getAttribute('data-id') || '';
                 if(input) input.value = val;
-                if(filterForm) filterForm.submit();
+                // Removed auto-submit on chip click
             });
         }
         wire('typeChips','typeInput','data-val');
@@ -262,15 +262,26 @@
         function syncYears(){
             if(!yFromInput || !yToInput) return;
             var min = parseInt(yFromInput.min,10) || 1965;
-            var max = parseInt(yFromInput.max,10) || 2026;
-            var rawFrom = parseInt(yFromInput.value,10) || min;
-            var rawTo = parseInt(yToInput.value,10) || max;
+            var max = parseInt(yToInput.max,10) || 2026;
+            var rawFrom = yFromInput.value ? parseInt(yFromInput.value,10) : null;
+            var rawTo = yToInput.value ? parseInt(yToInput.value,10) : null;
+            if(rawFrom === null && rawTo === null){
+                if(yFromDisplay) yFromDisplay.textContent = min;
+                if(yToDisplay) yToDisplay.textContent = max;
+                return;
+            }
+            if(rawFrom === null) rawFrom = min;
+            if(rawTo === null) rawTo = max;
             var displayFrom = Math.min(rawFrom, rawTo);
             var displayTo = Math.max(rawFrom, rawTo);
             if(yFromDisplay) yFromDisplay.textContent = displayFrom;
             if(yToDisplay) yToDisplay.textContent = displayTo;
         }
-        if(yFromInput && yToInput){ yFromInput.addEventListener('input', function(){ syncYears(); debounceSubmit(); }); yToInput.addEventListener('input', function(){ syncYears(); debounceSubmit(); }); syncYears(); }
+            if (yFromInput && yToInput) {
+                yFromInput.addEventListener('input', syncYears);
+                yToInput.addEventListener('input', syncYears);
+                syncYears();
+            }
 
         // Rating inputs
         var rFromInput = document.getElementById('ratingFromInput');
@@ -279,14 +290,27 @@
         var rToDisplay = document.getElementById('ratingToDisplay');
         function syncRating(){
             if(!rFromInput || !rToInput) return;
-            var rawFrom = parseFloat(rFromInput.value) || 0;
-            var rawTo = parseFloat(rToInput.value) || 10;
+            var min = parseFloat(rFromInput.min) || 0;
+            var max = parseFloat(rToInput.max) || 10;
+            var rawFrom = rFromInput.value ? parseFloat(rFromInput.value) : null;
+            var rawTo = rToInput.value ? parseFloat(rToInput.value) : null;
+            if(rawFrom === null && rawTo === null){
+                if(rFromDisplay) rFromDisplay.textContent = min.toFixed(1);
+                if(rToDisplay) rToDisplay.textContent = max.toFixed(1);
+                return;
+            }
+            if(rawFrom === null) rawFrom = min;
+            if(rawTo === null) rawTo = max;
             var displayFrom = Math.min(rawFrom, rawTo);
             var displayTo = Math.max(rawFrom, rawTo);
             if(rFromDisplay) rFromDisplay.textContent = displayFrom.toFixed(1);
             if(rToDisplay) rToDisplay.textContent = displayTo.toFixed(1);
         }
-        if(rFromInput && rToInput){ rFromInput.addEventListener('input', function(){ syncRating(); debounceSubmit(); }); rToInput.addEventListener('input', function(){ syncRating(); debounceSubmit(); }); syncRating(); }
+            if (rFromInput && rToInput) {
+                rFromInput.addEventListener('input', syncRating);
+                rToInput.addEventListener('input', syncRating);
+                syncRating();
+            }
 
         // selected chips rendering
         function renderSelectedChips(hiddenInputId, overlayId, btnId){
@@ -304,7 +328,7 @@
                 var labelText = checkbox ? checkbox.parentElement.textContent.trim() : id;
                 var chip = document.createElement('span'); chip.className='selected-chip'; chip.textContent = labelText;
                 var rem = document.createElement('button'); rem.type='button'; rem.textContent='×';
-                rem.addEventListener('click', function(){ if(checkbox) checkbox.checked=false; var newIds = ids.filter(function(x){ return x!==id; }); hidden.value = newIds.join(','); if(filterForm) filterForm.submit(); });
+                rem.addEventListener('click', function(){ if(checkbox) checkbox.checked=false; var newIds = ids.filter(function(x){ return x!==id; }); hidden.value = newIds.join(','); });
                 chip.appendChild(rem);
                 container.appendChild(chip);
             });
@@ -312,22 +336,19 @@
 
         var applyGenresBtn = document.getElementById('applyGenres');
         var applyStudiosBtn = document.getElementById('applyStudios');
-        if(applyGenresBtn) applyGenresBtn.addEventListener('click', function(){ document.getElementById('genresOverlay').style.display='none'; renderSelectedChips('genreInput','genresOverlay','openGenresBtn'); if(filterForm) filterForm.submit(); });
-        if(applyStudiosBtn) applyStudiosBtn.addEventListener('click', function(){ document.getElementById('studiosOverlay').style.display='none'; renderSelectedChips('studioInput','studiosOverlay','openStudiosBtn'); if(filterForm) filterForm.submit(); });
+        if(applyGenresBtn) applyGenresBtn.addEventListener('click', function(){ document.getElementById('genresOverlay').style.display='none'; renderSelectedChips('genreInput','genresOverlay','openGenresBtn'); });
+        if(applyStudiosBtn) applyStudiosBtn.addEventListener('click', function(){ document.getElementById('studiosOverlay').style.display='none'; renderSelectedChips('studioInput','studiosOverlay','openStudiosBtn'); });
 
         // initial render
         renderSelectedChips('genreInput','genresOverlay','openGenresBtn');
         renderSelectedChips('studioInput','studiosOverlay','openStudiosBtn');
 
-        // debounce submit helper
-        var _deb; function debounceSubmit(){ if(_deb) clearTimeout(_deb); _deb = setTimeout(function(){ if(filterForm) filterForm.submit(); }, 450); }
-
         // order toggle (asc/desc)
         var orderInput = document.getElementById('orderInput');
         var orderToggle = document.getElementById('orderToggle');
         var sortSelect = document.querySelector('select[name="sort"]');
-        if(orderToggle && orderInput){ orderToggle.addEventListener('click', function(){ var v = (orderInput.value || 'DESC').toUpperCase(); v = v === 'ASC' ? 'DESC' : 'ASC'; orderInput.value = v; orderToggle.textContent = v === 'ASC' ? '↑' : '↓'; if(filterForm) filterForm.submit(); }); }
-        if(sortSelect){ sortSelect.addEventListener('change', function(){ if(filterForm) filterForm.submit(); }); }
+        if(orderToggle && orderInput){ orderToggle.addEventListener('click', function(){ var v = (orderInput.value || 'DESC').toUpperCase(); v = v === 'ASC' ? 'DESC' : 'ASC'; orderInput.value = v; orderToggle.textContent = v === 'ASC' ? '↑' : '↓'; }); }
+        if(sortSelect){ sortSelect.addEventListener('change', function(){ /* no auto-submit; use Apply button */ }); }
 
     })();
 </script>

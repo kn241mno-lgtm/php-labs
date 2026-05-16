@@ -109,35 +109,23 @@ class MangaController extends PageController
 
         $baseSql = 'FROM manga m LEFT JOIN rating r2 ON r2.manga_id = m.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where);
 
-        // build HAVING clause for rating range (if provided)
-        $havingParts = [];
-        if ($ratingFrom !== '' && is_numeric($ratingFrom)) {
-            $havingParts[] = 'AVG(r2.score) >= :ratingFrom';
-        }
-        if ($ratingTo !== '' && is_numeric($ratingTo)) {
-            $havingParts[] = 'AVG(r2.score) <= :ratingTo';
-        }
+        // rating filter intentionally omitted for manga (UI removed)
+        $ratingFromVal = (is_numeric($ratingFrom) ? (float)$ratingFrom : null);
+        $ratingToVal = (is_numeric($ratingTo) ? (float)$ratingTo : null);
         $having = '';
-        if (!empty($havingParts)) {
-            $having = ' HAVING ' . implode(' AND ', $havingParts);
-        }
 
-        $countSql = 'SELECT COUNT(DISTINCT m.id) ' . $baseSql . $having;
+        $countSql = 'SELECT COUNT(DISTINCT m.id) ' . $baseSql;
         $countStmt = $this->db->prepare($countSql);
         $countParams = $params;
-        if ($ratingFrom !== '' && is_numeric($ratingFrom)) $countParams[':ratingFrom'] = (float)$ratingFrom;
-        if ($ratingTo !== '' && is_numeric($ratingTo)) $countParams[':ratingTo'] = (float)$ratingTo;
         $countStmt->execute($countParams);
         $total = (int)$countStmt->fetchColumn();
 
         $totalPages = (int)ceil($total / $pageSize);
         $offset = ($page - 1) * $pageSize;
 
-        $selectSql = 'SELECT m.*, IFNULL(AVG(r2.score),0) AS rating ' . $baseSql . ' GROUP BY m.id' . $having . ' ORDER BY ' . $order . ' LIMIT :limit OFFSET :offset';
+        $selectSql = 'SELECT m.*, IFNULL(AVG(r2.score),0) AS rating ' . $baseSql . ' GROUP BY m.id ORDER BY ' . $order . ' LIMIT :limit OFFSET :offset';
         $selectStmt = $this->db->prepare($selectSql);
         $selectParams = $params;
-        if ($ratingFrom !== '' && is_numeric($ratingFrom)) $selectParams[':ratingFrom'] = (float)$ratingFrom;
-        if ($ratingTo !== '' && is_numeric($ratingTo)) $selectParams[':ratingTo'] = (float)$ratingTo;
         $selectParams[':limit'] = $pageSize;
         $selectParams[':offset'] = $offset;
         $selectStmt->execute($selectParams);
@@ -148,6 +136,24 @@ class MangaController extends PageController
         $authors = [];
         try {
             $authors = $this->db->query('SELECT id, name FROM author ORDER BY name')->fetchAll();
+            // if no authors present, seed a small set so UI shows options
+            if (empty($authors)) {
+                $seed = [
+                    [1, 'Kentaro Miura', 'Автор Berserk'],
+                    [2, 'Takehiko Inoue', 'Автор Vagabond'],
+                    [3, 'ONE', 'Автор One Punch Man'],
+                    [4, 'Tatsuki Fujimoto', 'Автор Chainsaw Man'],
+                    [5, 'Chugong', 'Автор Solo Leveling'],
+                    [6, 'Eiichiro Oda', 'Автор One Piece'],
+                    [7, 'Hajime Isayama', 'Автор Attack on Titan']
+                ];
+                $ist = $this->db->prepare('INSERT OR IGNORE INTO author (id, name, bio) VALUES (:id, :name, :bio)');
+                foreach ($seed as $a) { $ist->execute([':id'=>$a[0], ':name'=>$a[1], ':bio'=>$a[2]]); }
+                $mappings = [[1,1],[2,2],[3,3],[4,4],[5,5],[6,6],[7,7]];
+                $mst = $this->db->prepare('INSERT OR IGNORE INTO manga_author (manga_id, author_id) VALUES (:m, :a)');
+                foreach ($mappings as $m) { $mst->execute([':m'=>$m[0], ':a'=>$m[1]]); }
+                $authors = $this->db->query('SELECT id, name FROM author ORDER BY name')->fetchAll();
+            }
         } catch (Exception $e) { $authors = []; }
 
         $this->render('manga/list', [

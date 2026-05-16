@@ -133,12 +133,16 @@ class AnimeController extends PageController
         $baseSql = 'FROM anime a LEFT JOIN studio s ON a.studio_id = s.id LEFT JOIN rating r2 ON r2.anime_id = a.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where);
 
         // build HAVING clause for rating range (if provided)
+        // Only apply rating filter when user specified a narrower range than defaults (0..10)
         $havingParts = [];
-        if ($ratingFrom !== '' && is_numeric($ratingFrom)) {
-            $havingParts[] = 'AVG(r2.score) >= :ratingFrom';
+        $ratingFromVal = (is_numeric($ratingFrom) ? (float)$ratingFrom : null);
+        $ratingToVal = (is_numeric($ratingTo) ? (float)$ratingTo : null);
+        // only apply rating HAVING when user chooses a narrower lower-bound than default 1
+        if ($ratingFromVal !== null && $ratingFromVal > 1) {
+            $havingParts[] = 'COALESCE(AVG(r2.score),0) >= :ratingFrom';
         }
-        if ($ratingTo !== '' && is_numeric($ratingTo)) {
-            $havingParts[] = 'AVG(r2.score) <= :ratingTo';
+        if ($ratingToVal !== null && $ratingToVal < 10) {
+            $havingParts[] = 'COALESCE(AVG(r2.score),0) <= :ratingTo';
         }
         $having = '';
         if (!empty($havingParts)) {
@@ -149,8 +153,8 @@ class AnimeController extends PageController
         $countSql = 'SELECT COUNT(DISTINCT a.id) ' . $baseSql . $having;
         $countStmt = $this->db->prepare($countSql);
         $countParams = $params;
-        if ($ratingFrom !== '' && is_numeric($ratingFrom)) $countParams[':ratingFrom'] = (float)$ratingFrom;
-        if ($ratingTo !== '' && is_numeric($ratingTo)) $countParams[':ratingTo'] = (float)$ratingTo;
+        if ($ratingFromVal !== null && $ratingFromVal > 1) $countParams[':ratingFrom'] = $ratingFromVal;
+        if ($ratingToVal !== null && $ratingToVal < 10) $countParams[':ratingTo'] = $ratingToVal;
         $countStmt->execute($countParams);
         $total = (int)$countStmt->fetchColumn();
 
@@ -162,8 +166,8 @@ class AnimeController extends PageController
 
         $selectStmt = $this->db->prepare($selectSql);
         $selectParams = $params;
-        if ($ratingFrom !== '' && is_numeric($ratingFrom)) $selectParams[':ratingFrom'] = (float)$ratingFrom;
-        if ($ratingTo !== '' && is_numeric($ratingTo)) $selectParams[':ratingTo'] = (float)$ratingTo;
+        if ($ratingFromVal !== null && $ratingFromVal > 1) $selectParams[':ratingFrom'] = $ratingFromVal;
+        if ($ratingToVal !== null && $ratingToVal < 10) $selectParams[':ratingTo'] = $ratingToVal;
         $selectParams[':limit'] = $pageSize;
         $selectParams[':offset'] = $offset;
         $selectStmt->execute($selectParams);
