@@ -269,7 +269,7 @@ class AnimeController extends PageController
 
     public function action_edit(): void
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isEditor()) {
             $this->redirect('auth/login');
             return;
         }
@@ -345,5 +345,16 @@ class AnimeController extends PageController
         $stmt->execute([':id' => $_SESSION['user_id']]);
         $row = $stmt->fetch();
         return $row && ($row['role'] === 'admin');
+    }
+
+    private function isEditor(): bool
+    {
+        if (!isset($_SESSION['user_id'])) {
+            return false;
+        }
+        $stmt = $this->db->prepare('SELECT role FROM users WHERE id = :id');
+        $stmt->execute([':id' => $_SESSION['user_id']]);
+        $row = $stmt->fetch();
+        return $row && in_array($row['role'], ['admin', 'moderator']);
     }
 }

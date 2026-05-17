@@ -9,36 +9,36 @@ $comments = $comments ?? [];
     <?php else: ?>
         <div class="card">
             <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
-                <?php if (!empty($item['image_url'])): ?>
-                    <div style="flex:0 0 320px"><img src="<?= htmlspecialchars($item['image_url']) ?>" alt="" style="width:100%;border-radius:8px;margin-bottom:6px"></div>
-                <?php endif; ?>
-                <div style="flex:1">
-                    <h1 style="margin-top:0;margin-bottom:6px"><?= htmlspecialchars($item['title']) ?></h1>
-                    <div style="color:var(--muted);margin-bottom:8px"> Автор: <?= htmlspecialchars($item['author'] ?? 'Адмін') ?> • <?= htmlspecialchars($item['published_at'] ?? $item['created_at']) ?></div>
-                    <div class="news-content" style="margin-top:6px;color:var(--muted)"><?= nl2br(htmlspecialchars($item['content'] ?? '')) ?></div>
-                </div>
+                    <?php if (!empty($item['image_url'])): ?>
+                        <div style="flex:0 0 320px"><img src="<?= htmlspecialchars($item['image_url']) ?>" alt="" style="width:100%;border-radius:8px;margin-bottom:6px"></div>
+                    <?php endif; ?>
+                    <div style="flex:1">
+                        <?php
+                            $canEditNews = false;
+                            if (isset($_SESSION['user_id'])) {
+                                try {
+                                    $db = Database::getInstance();
+                                    $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
+                                    $rs->execute([':id' => $_SESSION['user_id']]);
+                                    $r = $rs->fetch();
+                                    if ($r && in_array($r['role'], ['admin','moderator'])) $canEditNews = true;
+                                } catch (Exception $e) { $canEditNews = false; }
+                            }
+                        ?>
+                        <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+                            <h1 style="margin-top:0;margin-bottom:6px"><?= htmlspecialchars($item['title']) ?></h1>
+                            <?php if ($canEditNews): ?>
+                                <a class="btn btn--small" href="index.php?route=recipe/edit&id=<?= $item['id'] ?>">Редагувати</a>
+                            <?php endif; ?>
+                        </div>
+                        <div style="color:var(--muted);margin-bottom:8px"> Автор: <?= htmlspecialchars($item['author'] ?? 'Адмін') ?> • <?= htmlspecialchars($item['published_at'] ?? $item['created_at']) ?></div>
+                        <div class="news-content" style="margin-top:6px;color:var(--muted)"><?= nl2br(htmlspecialchars($item['content'] ?? '')) ?></div>
+                    </div>
             </div>
         </div>
 
         <hr>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-            <h3>Коментарі</h3>
-            <?php
-                $canEditNews = false;
-                if (isset($_SESSION['user_id'])) {
-                    try {
-                        $db = Database::getInstance();
-                        $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
-                        $rs->execute([':id' => $_SESSION['user_id']]);
-                        $r = $rs->fetch();
-                        if ($r && in_array($r['role'], ['admin','helper'])) $canEditNews = true;
-                    } catch (Exception $e) { $canEditNews = false; }
-                }
-            ?>
-            <?php if ($canEditNews): ?>
-                <a class="btn btn--small" href="index.php?route=recipe/edit&id=<?= $item['id'] ?>">Редагувати новину</a>
-            <?php endif; ?>
-        </div>
+        <h3>Коментарі</h3>
         <?php if (!empty($comments)): ?>
             <?php foreach ($comments as $c): ?>
                     <div class="comment">
@@ -75,13 +75,14 @@ $comments = $comments ?? [];
         <?php endif; ?>
 
         <?php if (isset($_SESSION['user_id'])): ?>
-            <form action="index.php?route=guestbook/index" method="post">
+            <form action="index.php?route=guestbook/index" method="post" class="comment-form">
+                <div class="form-group">
+                    <label for="comment_news" class="form__label">Додати коментар</label>
+                    <textarea id="comment_news" name="comment" rows="4" required class="form__textarea"></textarea>
+                </div>
                 <input type="hidden" name="item_type" value="news">
                 <input type="hidden" name="item_id" value="<?= (int)$item['id'] ?>">
-                <div class="form-group">
-                    <textarea name="comment" rows="4" required></textarea>
-                </div>
-                <button class="btn btn-primary">Додати коментар</button>
+                <div class="form__actions"><button class="btn btn-primary">Додати коментар</button></div>
             </form>
         <?php else: ?>
             <p>Щоб залишити коментар, <a href="index.php?route=auth/login">увійдіть</a>.</p>

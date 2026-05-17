@@ -10,7 +10,7 @@
             $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
             $rs->execute([':id' => $_SESSION['user_id']]);
             $r = $rs->fetch();
-            if ($r && in_array($r['role'], ['admin','helper'])) $canManageNews = true;
+            if ($r && in_array($r['role'], ['admin','moderator'])) $canManageNews = true;
         } catch (Exception $e) { $canManageNews = false; }
     }
 ?>

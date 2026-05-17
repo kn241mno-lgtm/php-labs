@@ -157,6 +157,11 @@ class AuthController extends PageController
                     $params[':ui_color'] = $color;
                 }
             }
+            // simple boolean settings: show email and notify comments
+            $fields[] = 'show_email = :show_email';
+            $params[':show_email'] = isset($data['show_email']) ? '1' : '0';
+            $fields[] = 'notify_comments = :notify_comments';
+            $params[':notify_comments'] = isset($data['notify_comments']) ? '1' : '0';
 
             if (!empty($fields)) {
                 try {

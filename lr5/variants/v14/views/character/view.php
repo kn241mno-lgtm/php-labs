@@ -29,7 +29,7 @@ $manga = $manga ?? [];
                                 $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
                                 $rs->execute([':id' => $_SESSION['user_id']]);
                                 $r = $rs->fetch();
-                                $canEditChar = $r && ($r['role'] === 'admin');
+                                $canEditChar = $r && in_array($r['role'], ['admin','moderator']);
                             } catch (Exception $e) { $canEditChar = false; }
                         }
                     ?>

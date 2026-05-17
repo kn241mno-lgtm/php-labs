@@ -74,7 +74,7 @@ class Database
                             if ($ures) {
                                 foreach ($ures->fetchAll() as $r) { $ucols[] = $r['name']; }
                             }
-                            $needed = ['first_name','last_name','phone','city','gender','about','display_name','bio','password','avatar_url','ui_color'];
+                            $needed = ['first_name','last_name','phone','city','gender','about','display_name','bio','password','avatar_url','ui_color','show_email','notify_comments'];
                             foreach ($needed as $col) {
                                 if (!in_array($col, $ucols)) {
                                     try {
