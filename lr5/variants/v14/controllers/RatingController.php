@@ -71,4 +71,70 @@ class RatingController
         header('Location: ' . $referer);
         exit;
     }
+
+    public function action_set_status(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+        if (empty($_SESSION['user_id'])) {
+            header('Location: index.php?route=auth/login');
+            exit;
+        }
+
+        $userId = (int)$_SESSION['user_id'];
+        $db = Database::getInstance();
+
+        $animeId = isset($_POST['anime_id']) ? (int)$_POST['anime_id'] : null;
+        $mangaId = isset($_POST['manga_id']) ? (int)$_POST['manga_id'] : null;
+        $status = isset($_POST['status']) ? trim($_POST['status']) : null;
+
+        if (!$status || (!$animeId && !$mangaId)) {
+            $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+            header('Location: ' . $referer);
+            exit;
+        }
+
+        // Valid statuses
+        $validStatuses = ['planning', 'watching', 'watched'];
+        if (!in_array($status, $validStatuses)) {
+            $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+            header('Location: ' . $referer);
+            exit;
+        }
+
+        try {
+            if ($animeId) {
+                $stmt = $db->prepare('SELECT id FROM rating WHERE anime_id = :aid AND user_id = :uid');
+                $stmt->execute([':aid' => $animeId, ':uid' => $userId]);
+                $row = $stmt->fetch();
+
+                if ($row) {
+                    $u = $db->prepare('UPDATE rating SET status = :status WHERE anime_id = :aid AND user_id = :uid');
+                    $u->execute([':status' => $status, ':aid' => $animeId, ':uid' => $userId]);
+                } else {
+                    $i = $db->prepare('INSERT INTO rating (anime_id, user_id, status, created_at) VALUES (:aid, :uid, :status, CURRENT_TIMESTAMP)');
+                    $i->execute([':aid' => $animeId, ':uid' => $userId, ':status' => $status]);
+                }
+            }
+
+            if ($mangaId) {
+                $stmt = $db->prepare('SELECT id FROM rating WHERE manga_id = :mid AND user_id = :uid');
+                $stmt->execute([':mid' => $mangaId, ':uid' => $userId]);
+                $row = $stmt->fetch();
+
+                if ($row) {
+                    $u = $db->prepare('UPDATE rating SET status = :status WHERE manga_id = :mid AND user_id = :uid');
+                    $u->execute([':status' => $status, ':mid' => $mangaId, ':uid' => $userId]);
+                } else {
+                    $i = $db->prepare('INSERT INTO rating (manga_id, user_id, status, created_at) VALUES (:mid, :uid, :status, CURRENT_TIMESTAMP)');
+                    $i->execute([':mid' => $mangaId, ':uid' => $userId, ':status' => $status]);
+                }
+            }
+        } catch (Exception $e) {
+            // swallow DB errors for now and redirect back
+        }
+
+        $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+        header('Location: ' . $referer);
+        exit;
+    }
 }

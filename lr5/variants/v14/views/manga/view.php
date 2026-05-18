@@ -1,10 +1,12 @@
 <div class="page">
-    <div class="detail-and-side">
+    <div class="detail-and-side manga-detail-wrapper">
         <div class="modal-detail">
             <div class="left">
                 <?php $cover = !empty($item['cover_url']) ? htmlspecialchars($item['cover_url']) : (!empty($item['poster_url']) ? htmlspecialchars($item['poster_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'); ?>
                 <img src="<?= $cover ?>" alt="<?= htmlspecialchars($item['title']) ?>" style="width:100%;border-radius:8px" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'">
-                <div style="margin-top:12px;font-weight:700;color:#ffd166;font-size:20px">★ <?= round($item['rating'] ?? 0,1) ?>/10</div>
+                <div class="manga-rating-section">
+                    <div class="rating-display">★ <?= round($item['rating'] ?? 0,1) ?>/10</div>
+                </div>
             </div>
             <div class="right">
                 <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
@@ -37,25 +39,37 @@
                 <div class="info-block" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
                     <div style="min-width:160px">
                         <h3>Дії</h3>
-                        <?php
-                            $showActionButton = false;
-                            if (isset($_SESSION['user_id'])) {
-                                $showActionButton = true;
-                            }
-                        ?>
-                        <?php if ($showActionButton): ?>
-                            <form method="post" action="index.php?route=rating/toggle_favorite">
-                                <input type="hidden" name="manga_id" value="<?= $item['id'] ?>">
-                                <button class="btn" type="submit">Додати в улюблені</button>
-                            </form>
-                        <?php else: ?>
-                            <div class="no-comments">Увійдіть, щоб додати улюблене.</div>
-                        <?php endif; ?>
+                        <div class="action-buttons">
+                            <?php
+                                $showActionButton = false;
+                                if (isset($_SESSION['user_id'])) {
+                                    $showActionButton = true;
+                                }
+                            ?>
+                            <?php if ($showActionButton): ?>
+                                <form method="post" action="index.php?route=rating/toggle_favorite" style="display:inline-block">
+                                    <input type="hidden" name="manga_id" value="<?= $item['id'] ?>">
+                                    <button class="btn" type="submit">Додати в улюблені</button>
+                                </form>
+                                <form method="post" action="index.php?route=rating/set_status" style="display:inline-block">
+                                    <input type="hidden" name="manga_id" value="<?= $item['id'] ?>">
+                                    <select name="status" class="form__input">
+                                        <option value="">Статус</option>
+                                        <option value="planning">Планую читати</option>
+                                        <option value="watching">Читаю</option>
+                                        <option value="watched">Прочитав</option>
+                                    </select>
+                                    <button class="btn" type="submit" style="margin-left:8px">Зберегти</button>
+                                </form>
+                            <?php else: ?>
+                                <div class="no-comments">Увійдіть, щоб додати улюблене.</div>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     <div style="flex:1">
                         <h3>Деталі</h3>
                         <table class="table" style="max-width:600px">
-                            <tr><td>Голосування</td><td><?= htmlspecialchars($item['views'] ?? 0) ?></td></tr>
+                            <tr><td>Перегляди</td><td><?= htmlspecialchars($item['views'] ?? 0) ?></td></tr>
                             <tr><td>Кількість глав</td><td><?= htmlspecialchars($item['chapters'] ?? 0) ?></td></tr>
                             <tr><td>Улюблені</td><td><?= htmlspecialchars($item['favorites'] ?? 0) ?></td></tr>
                         </table>
@@ -87,20 +101,20 @@
         </div>
     </div>
 
-    <div class="detail-bottom" style="max-width:1100px;margin:16px auto">
+    <div class="detail-bottom">
         <?php if (!empty($characters)): ?>
             <h3>Головні Персонажі</h3>
-            <div class="related-grid">
+            <div class="characters-grid">
                 <?php foreach ($characters as $ch): ?>
                     <a class="character-card" href="index.php?route=character/view&id=<?= $ch['id'] ?>">
-                        <?php if (!empty($ch['image_url'])): ?><img src="<?= htmlspecialchars($ch['image_url']) ?>" alt="<?= htmlspecialchars($ch['name'] ?? '') ?>" class="related-thumb" onerror="this.onerror=null;this.src='https://via.placeholder.com/240x160?text=No+Image'" /><?php endif; ?>
-                        <div class="name"><?= htmlspecialchars($ch['name_ua'] ?: $ch['name']) ?></div>
+                        <?php if (!empty($ch['image_url'])): ?><img src="<?= htmlspecialchars($ch['image_url']) ?>" alt="<?= htmlspecialchars($ch['name'] ?? '') ?>" class="character-card-img" onerror="this.onerror=null;this.src='https://via.placeholder.com/180x240?text=No+Image'" /><?php endif; ?>
+                        <div class="character-card-name"><?= htmlspecialchars($ch['name_ua'] ?: $ch['name']) ?></div>
                     </a>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
 
-        <h2 style="margin-top:18px">Коментарі</h2>
+        <h2 style="margin-top:28px">Коментарі</h2>
         <?php if (!empty($comments)): ?>
             <?php foreach ($comments as $c): ?>
                 <div class="comment">

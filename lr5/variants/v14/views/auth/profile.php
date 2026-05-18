@@ -57,21 +57,86 @@ $displayName = $displayName !== '' ? $displayName : ($user['login'] ?? '');
         </div>
 
         <aside class="profile-settings card">
-            <h2>Налаштування</h2>
-            <form method="post" action="index.php?route=auth/profile" class="profile-settings-form">
-                <label>Колір сайту: <input type="color" name="ui_color" value="<?= htmlspecialchars($user['ui_color'] ?? '#2563eb') ?>"></label>
-                <label>Відображуване ім'я: <input type="text" name="display_name" value="<?= htmlspecialchars($user['display_name'] ?? '') ?>"></label>
-                <label>URL аватарки: <input type="url" name="avatar_url" value="<?= htmlspecialchars($user['avatar_url'] ?? '') ?>"></label>
-                <label>
-                    <input type="checkbox" name="show_email" value="1" <?= (!empty($user['show_email']) && $user['show_email'] == '1') ? 'checked' : '' ?>> Показувати E-mail в профілі
-                </label>
-                <label>
-                    <input type="checkbox" name="notify_comments" value="1" <?= (!empty($user['notify_comments']) && $user['notify_comments'] == '1') ? 'checked' : '' ?>> Отримувати сповіщення про відповіді/коментарі
-                </label>
-                <div class="form__actions"><button class="btn" type="submit">Зберегти</button></div>
-            </form>
-
-            <!-- DEV-акаунти видалено з інтерфейсу налаштувань -->
+            <h2>Список Аніме/Манг</h2>
+            <div class="watch-list-section">
+                <div class="watch-list-category">
+                    <h3>Планує дивитись (Аніме)</h3>
+                    <div class="watch-list-items">
+                        <?php 
+                            $db = Database::getInstance();
+                            $planning = $db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.status = :status LIMIT 10');
+                            $planning->execute([':uid' => $user['id'], ':status' => 'planning']);
+                            $items = $planning->fetchAll();
+                            if (!empty($items)):
+                                foreach ($items as $item):
+                        ?>
+                            <a href="index.php?route=anime/view&id=<?= $item['id'] ?>" class="list-item"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></a>
+                        <?php 
+                                endforeach;
+                            else:
+                        ?>
+                            <span class="muted">Ніяких</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="watch-list-category">
+                    <h3>Дивиться (Аніме)</h3>
+                    <div class="watch-list-items">
+                        <?php 
+                            $watching = $db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.status = :status LIMIT 10');
+                            $watching->execute([':uid' => $user['id'], ':status' => 'watching']);
+                            $items = $watching->fetchAll();
+                            if (!empty($items)):
+                                foreach ($items as $item):
+                        ?>
+                            <a href="index.php?route=anime/view&id=<?= $item['id'] ?>" class="list-item"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></a>
+                        <?php 
+                                endforeach;
+                            else:
+                        ?>
+                            <span class="muted">Ніяких</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="watch-list-category">
+                    <h3>Подивився (Аніме)</h3>
+                    <div class="watch-list-items">
+                        <?php 
+                            $watched = $db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.status = :status LIMIT 10');
+                            $watched->execute([':uid' => $user['id'], ':status' => 'watched']);
+                            $items = $watched->fetchAll();
+                            if (!empty($items)):
+                                foreach ($items as $item):
+                        ?>
+                            <a href="index.php?route=anime/view&id=<?= $item['id'] ?>" class="list-item"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></a>
+                        <?php 
+                                endforeach;
+                            else:
+                        ?>
+                            <span class="muted">Ніяких</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="watch-list-category">
+                    <h3>Улюблені</h3>
+                    <div class="watch-list-items">
+                        <?php 
+                            $favorites = $db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.is_favorite = 1 LIMIT 10');
+                            $favorites->execute([':uid' => $user['id']]);
+                            $items = $favorites->fetchAll();
+                            if (!empty($items)):
+                                foreach ($items as $item):
+                        ?>
+                            <a href="index.php?route=anime/view&id=<?= $item['id'] ?>" class="list-item"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></a>
+                        <?php 
+                                endforeach;
+                            else:
+                        ?>
+                            <span class="muted">Ніяких</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
         </aside>
     </div>
 </div>
