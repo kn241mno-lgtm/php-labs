@@ -112,20 +112,35 @@ class MangaController extends PageController
         // rating filter intentionally omitted for manga (UI removed)
         $ratingFromVal = (is_numeric($ratingFrom) ? (float)$ratingFrom : null);
         $ratingToVal = (is_numeric($ratingTo) ? (float)$ratingTo : null);
-        $having = '';
 
-        $countSql = 'SELECT COUNT(DISTINCT m.id) ' . $baseSql;
+        $havingParts = [];
+        if ($ratingFromVal !== null && $ratingFromVal > 1) {
+            $havingParts[] = 'COALESCE(AVG(r2.score),0) >= :ratingFrom';
+        }
+        if ($ratingToVal !== null && $ratingToVal < 10) {
+            $havingParts[] = 'COALESCE(AVG(r2.score),0) <= :ratingTo';
+        }
+        $having = '';
+        if (!empty($havingParts)) {
+            $having = ' HAVING ' . implode(' AND ', $havingParts);
+        }
+
+        $countSql = 'SELECT COUNT(DISTINCT m.id) ' . $baseSql . $having;
         $countStmt = $this->db->prepare($countSql);
         $countParams = $params;
+        if ($ratingFromVal !== null && $ratingFromVal > 1) $countParams[':ratingFrom'] = $ratingFromVal;
+        if ($ratingToVal !== null && $ratingToVal < 10) $countParams[':ratingTo'] = $ratingToVal;
         $countStmt->execute($countParams);
         $total = (int)$countStmt->fetchColumn();
 
         $totalPages = (int)ceil($total / $pageSize);
         $offset = ($page - 1) * $pageSize;
 
-        $selectSql = 'SELECT m.*, IFNULL(AVG(r2.score),0) AS rating ' . $baseSql . ' GROUP BY m.id ORDER BY ' . $order . ' LIMIT :limit OFFSET :offset';
+        $selectSql = 'SELECT m.*, IFNULL(AVG(r2.score),0) AS rating ' . $baseSql . ' GROUP BY m.id' . $having . ' ORDER BY ' . $order . ' LIMIT :limit OFFSET :offset';
         $selectStmt = $this->db->prepare($selectSql);
         $selectParams = $params;
+        if ($ratingFromVal !== null && $ratingFromVal > 1) $selectParams[':ratingFrom'] = $ratingFromVal;
+        if ($ratingToVal !== null && $ratingToVal < 10) $selectParams[':ratingTo'] = $ratingToVal;
         $selectParams[':limit'] = $pageSize;
         $selectParams[':offset'] = $offset;
         $selectStmt->execute($selectParams);
@@ -205,7 +220,21 @@ class MangaController extends PageController
             $relatedAnime = $astmt->fetchAll();
         }
 
-        $this->render('manga/view', ['item' => $item, 'comments' => $comments, 'characters' => $characters, 'relatedAnime' => $relatedAnime], $item['title']);
+        // compute aggregated rating and user-specific row
+        $ratingStmt = $this->db->prepare('SELECT IFNULL(AVG(score),0) AS avg_rating, COUNT(*) AS cnt FROM rating WHERE manga_id = :id');
+        $ratingStmt->execute([':id' => $id]);
+        $ratingRow = $ratingStmt->fetch();
+        $avgRating = isset($ratingRow['avg_rating']) ? (float)$ratingRow['avg_rating'] : 0.0;
+        $ratingCount = isset($ratingRow['cnt']) ? (int)$ratingRow['cnt'] : 0;
+
+        $userRow = null;
+        if (isset($_SESSION['user_id'])) {
+            $ur = $this->db->prepare('SELECT * FROM rating WHERE manga_id = :id AND user_id = :uid LIMIT 1');
+            $ur->execute([':id' => $id, ':uid' => $_SESSION['user_id']]);
+            $userRow = $ur->fetch();
+        }
+
+        $this->render('manga/view', ['item' => $item, 'comments' => $comments, 'characters' => $characters, 'relatedAnime' => $relatedAnime, 'avgRating' => $avgRating, 'ratingCount' => $ratingCount, 'userRow' => $userRow], $item['title']);
     }
 
     public function action_create(): void

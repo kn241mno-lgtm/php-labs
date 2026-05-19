@@ -4,9 +4,37 @@
             <div class="left">
                 <?php $cover = !empty($item['cover_url']) ? htmlspecialchars($item['cover_url']) : (!empty($item['poster_url']) ? htmlspecialchars($item['poster_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'); ?>
                 <img src="<?= $cover ?>" alt="<?= htmlspecialchars($item['title']) ?>" style="width:100%;border-radius:8px" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'">
-                <div class="manga-rating-section">
-                    <div class="rating-display">★ <?= round($item['rating'] ?? 0,1) ?>/10</div>
-                </div>
+
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <form method="post" action="index.php?route=rating/toggle_favorite" style="display:flex">
+                            <input type="hidden" name="manga_id" value="<?= $item['id'] ?>">
+                            <button class="btn" type="submit" style="flex:1"><?= (!empty($userRow) && !empty($userRow['is_favorite'])) ? '♥ В улюблених' : '♡ Додати' ?></button>
+                        </form>
+
+                        <form method="post" action="index.php?route=rating/set_status" style="display:flex;gap:4px;align-items:center">
+                            <input type="hidden" name="manga_id" value="<?= $item['id'] ?>">
+                            <select name="status" class="form__input" style="flex:1;font-size:0.9rem">
+                                <option value="">Статус</option>
+                                <option value="planning" <?= (!empty($userRow) && ($userRow['status'] ?? '') === 'planning') ? 'selected' : '' ?>>Заплановано</option>
+                                <option value="watching" <?= (!empty($userRow) && ($userRow['status'] ?? '') === 'watching') ? 'selected' : '' ?>>Читаю</option>
+                                <option value="watched" <?= (!empty($userRow) && ($userRow['status'] ?? '') === 'watched') ? 'selected' : '' ?>>Прочитав</option>
+                            </select>
+                            <button class="btn" type="submit" style="padding:8px 12px">✓</button>
+                        </form>
+
+                        <form method="post" action="index.php?route=rating/set_score" style="display:flex;gap:4px;align-items:center">
+                            <input type="hidden" name="manga_id" value="<?= $item['id'] ?>">
+                            <select name="score" class="form__input" style="flex:1;font-size:0.9rem">
+                                <option value="">★ Оцініть</option>
+                                <?php for ($s = 1; $s <= 10; $s++): ?>
+                                    <option value="<?= $s ?>" <?= (!empty($userRow) && ((float)($userRow['score'] ?? 0) == $s)) ? 'selected' : '' ?>>★ <?= $s ?></option>
+                                <?php endfor; ?>
+                            </select>
+                            <button class="btn" type="submit" style="padding:8px 12px">✓</button>
+                        </form>
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="right">
                 <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
@@ -36,42 +64,14 @@
                 <h3 style="margin-top:12px">Опис</h3>
                 <p style="color:var(--muted);line-height:1.5"><?= nl2br(htmlspecialchars($item['description'] ?? '')) ?></p>
 
-                <div class="info-block" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
-                    <div style="min-width:160px">
-                        <h3>Дії</h3>
-                        <div class="action-buttons">
-                            <?php
-                                $showActionButton = false;
-                                if (isset($_SESSION['user_id'])) {
-                                    $showActionButton = true;
-                                }
-                            ?>
-                            <?php if ($showActionButton): ?>
-                                <form method="post" action="index.php?route=rating/toggle_favorite" style="display:inline-block">
-                                    <input type="hidden" name="manga_id" value="<?= $item['id'] ?>">
-                                    <button class="btn" type="submit">Додати в улюблені</button>
-                                </form>
-                                <form method="post" action="index.php?route=rating/set_status" style="display:inline-block">
-                                    <input type="hidden" name="manga_id" value="<?= $item['id'] ?>">
-                                    <select name="status" class="form__input">
-                                        <option value="">Статус</option>
-                                        <option value="planning">Планую читати</option>
-                                        <option value="watching">Читаю</option>
-                                        <option value="watched">Прочитав</option>
-                                    </select>
-                                    <button class="btn" type="submit" style="margin-left:8px">Зберегти</button>
-                                </form>
-                            <?php else: ?>
-                                <div class="no-comments">Увійдіть, щоб додати улюблене.</div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                <div class="info-block" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:0">
                     <div style="flex:1">
                         <h3>Деталі</h3>
-                        <table class="table" style="max-width:600px">
+                        <table class="table" style="max-width:100%;font-size:0.95rem">
+                            <tr><td style="width:40%">Рейтинг</td><td><strong>★ <?= round($avgRating ?? 0,2) ?>/10</strong></td></tr>
                             <tr><td>Перегляди</td><td><?= htmlspecialchars($item['views'] ?? 0) ?></td></tr>
                             <tr><td>Кількість глав</td><td><?= htmlspecialchars($item['chapters'] ?? 0) ?></td></tr>
-                            <tr><td>Улюблені</td><td><?= htmlspecialchars($item['favorites'] ?? 0) ?></td></tr>
+                            <tr><td>Томи</td><td><?= htmlspecialchars($item['volumes'] ?? 0) ?></td></tr>
                         </table>
                     </div>
                 </div>

@@ -28,6 +28,16 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label>Оцінка</label>
+                    <div class="rating-range" style="padding-top:8px;padding-bottom:8px">
+                        <div class="range-pair">
+                            <input type="number" id="m_ratingFromInput" name="ratingFrom" min="1" max="10" step="0.1" value="<?= htmlspecialchars(($filters['ratingFrom'] !== '' && is_numeric($filters['ratingFrom'])) ? $filters['ratingFrom'] : 1) ?>">
+                            <input type="number" id="m_ratingToInput" name="ratingTo" min="1" max="10" step="0.1" value="<?= htmlspecialchars(($filters['ratingTo'] !== '' && is_numeric($filters['ratingTo'])) ? $filters['ratingTo'] : 10) ?>">
+                        </div>
+                        <div class="year-values">Від <span id="m_ratingFromDisplay"></span> до <span id="m_ratingToDisplay"></span></div>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label>Автори</label>
                         <input type="hidden" name="authors" id="m_authorsInput" value="<?= htmlspecialchars($filters['authors'] ?? '') ?>" />
                         <div class="chips-toggle">
@@ -276,8 +286,7 @@
                 <a href="index.php?route=manga/view&id=<?= $m['id'] ?>"><img src="<?= $mcover ?>" alt="<?= htmlspecialchars($m['title']) ?>" class="card__img" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'" /></a>
                 <div style="padding-top:6px">
                     <h3 class="card__title"><?= htmlspecialchars($m['title_ua'] ?: $m['title']) ?></h3>
-                    <p class="card__text"><?= htmlspecialchars(mb_substr($m['description'] ?? '',0,120)) ?></p>
-                    <!-- details by clicking cover/title -->
+                    <p class="card__text" style="font-size:0.85rem;color:var(--muted)"><?= htmlspecialchars($m['year'] ?? '') ?> • <?= htmlspecialchars($m['type'] ?? '') ?></p>
                 </div>
             </div>
         <?php endforeach; ?>

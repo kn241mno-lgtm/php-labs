@@ -145,8 +145,7 @@
                     <a href="index.php?route=anime/view&id=<?= $a['id'] ?>"><img src="<?= $cover ?>" alt="<?= htmlspecialchars($a['title']) ?>" class="card__img" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'" /></a>
                 <div style="padding-top:6px">
                     <h3 class="card__title"><?= htmlspecialchars($a['title_ua'] ?: $a['title']) ?></h3>
-                    <p class="card__text"><?= htmlspecialchars(mb_substr($a['description'] ?? '',0,120)) ?></p>
-                    <!-- details available by clicking the cover/title -->
+                    <p class="card__text" style="font-size:0.85rem;color:var(--muted)"><?= htmlspecialchars($a['year'] ?? '') ?> • <?= htmlspecialchars($a['type'] ?? '') ?></p>
                 </div>
                 <div class="rating-pill"><?= round($a['rating'] ?? 0,1) ?></div>
                 <!-- admin controls are available on the anime detail page only -->

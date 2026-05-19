@@ -137,4 +137,76 @@ class RatingController
         header('Location: ' . $referer);
         exit;
     }
+
+    public function action_set_score(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+        if (empty($_SESSION['user_id'])) {
+            header('Location: index.php?route=auth/login');
+            exit;
+        }
+
+        $userId = (int)$_SESSION['user_id'];
+        $db = Database::getInstance();
+
+        $animeId = isset($_POST['anime_id']) ? (int)$_POST['anime_id'] : null;
+        $mangaId = isset($_POST['manga_id']) ? (int)$_POST['manga_id'] : null;
+        $score = isset($_POST['score']) ? trim($_POST['score']) : null;
+
+        if (($animeId && !$animeId) && ($mangaId && !$mangaId)) {
+            $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+            header('Location: ' . $referer);
+            exit;
+        }
+
+        if ($score === null || !is_numeric($score)) {
+            $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+            header('Location: ' . $referer);
+            exit;
+        }
+
+        $scoreVal = (float)$score;
+        if ($scoreVal < 0) $scoreVal = 0;
+        if ($scoreVal > 10) $scoreVal = 10;
+
+        try {
+            if ($animeId) {
+                $stmt = $db->prepare('SELECT id FROM rating WHERE anime_id = :aid AND user_id = :uid');
+                $stmt->execute([':aid' => $animeId, ':uid' => $userId]);
+                $row = $stmt->fetch();
+                if ($row) {
+                    $u = $db->prepare('UPDATE rating SET score = :score WHERE id = :id');
+                    $u->execute([':score' => $scoreVal, ':id' => $row['id']]);
+                } else {
+                    $i = $db->prepare('INSERT INTO rating (anime_id, user_id, score, created_at) VALUES (:aid, :uid, :score, CURRENT_TIMESTAMP)');
+                    $i->execute([':aid' => $animeId, ':uid' => $userId, ':score' => $scoreVal]);
+                }
+                // update anime rating by adding 0.01 to the current average when user rates
+                $updateStmt = $db->prepare('UPDATE anime SET rating = ROUND(rating + 0.01, 2) WHERE id = :id');
+                $updateStmt->execute([':id' => $animeId]);
+            }
+
+            if ($mangaId) {
+                $stmt = $db->prepare('SELECT id FROM rating WHERE manga_id = :mid AND user_id = :uid');
+                $stmt->execute([':mid' => $mangaId, ':uid' => $userId]);
+                $row = $stmt->fetch();
+                if ($row) {
+                    $u = $db->prepare('UPDATE rating SET score = :score WHERE id = :id');
+                    $u->execute([':score' => $scoreVal, ':id' => $row['id']]);
+                } else {
+                    $i = $db->prepare('INSERT INTO rating (manga_id, user_id, score, created_at) VALUES (:mid, :uid, :score, CURRENT_TIMESTAMP)');
+                    $i->execute([':mid' => $mangaId, ':uid' => $userId, ':score' => $scoreVal]);
+                }
+                // update manga rating by adding 0.01 when user rates
+                $updateStmt = $db->prepare('UPDATE manga SET rating = ROUND(rating + 0.01, 2) WHERE id = :id');
+                $updateStmt->execute([':id' => $mangaId]);
+            }
+        } catch (Exception $e) {
+            // swallow DB errors
+        }
+
+        $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+        header('Location: ' . $referer);
+        exit;
+    }
 }

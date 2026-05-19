@@ -1,142 +1,73 @@
 <?php
 $user = $user ?? [];
+$items = $items ?? [];
+$type = $type ?? 'anime'; // anime | manga
+$status = $status ?? 'planning'; // planning | watching | watched
 
 $avatar = !empty($user['avatar_url']) ? htmlspecialchars($user['avatar_url']) : 'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png';
 $displayName = trim($user['display_name'] ?? '') ?: trim((($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')));
 $displayName = $displayName !== '' ? $displayName : ($user['login'] ?? '');
 ?>
 
-<div class="profile-page">
-    <div class="profile-header">
-        <img class="profile-avatar" src="<?= $avatar ?>" alt="Avatar" onerror="this.onerror=null;this.src='https://via.placeholder.com/160?text=No+Avatar'">
-        <div class="profile-info">
-            <h1><?= htmlspecialchars($displayName) ?></h1>
-            <div class="profile-login">@<?= htmlspecialchars($user['login'] ?? '') ?></div>
-            <div class="profile-meta"><span class="badge"><?= htmlspecialchars($user['role'] ?? 'user') ?></span>
-                <span class="muted">Зареєстровано: <?= htmlspecialchars($user['created_at'] ?? '-') ?></span>
+<div class="profile-page" style="max-width:1200px;margin:0 auto;display:flex;gap:32px;flex-wrap:wrap">
+    <div style="flex:0 0 300px">
+        <div class="profile-header" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px">
+            <img class="profile-avatar" src="<?= $avatar ?>" alt="Avatar" style="width:160px;height:160px;border-radius:8px;object-fit:cover" onerror="this.onerror=null;this.src='https://via.placeholder.com/160?text=No+Avatar'">
+            <div>
+                <h1 style="margin:0"><?= htmlspecialchars($displayName) ?></h1>
+                <div class="profile-login" style="color:var(--muted);font-size:0.9rem;margin-top:4px">@<?= htmlspecialchars($user['login'] ?? '') ?></div>
             </div>
-            <p class="profile-about"><?= nl2br(htmlspecialchars($user['about'] ?? '')) ?></p>
-            <div class="form__actions">
-                <a href="index.php?route=auth/edit" class="btn">Редагувати</a>
-                <a href="index.php?route=auth/logout" class="btn btn--secondary">Вийти</a>
+            <a href="index.php?route=settings/profile" class="btn" style="width:100%;text-align:center">Налаштування</a>
+        </div>
+
+        <div style="background:#0c1724;border:1px solid rgba(255,255,255,0.03);border-radius:8px;padding:16px">
+            <h3 style="margin:0 0 12px 0;font-size:1rem">Мої списки</h3>
+            <div style="display:flex;flex-direction:column;gap:12px">
+                <div>
+                    <label style="color:var(--muted);font-size:0.85rem;text-transform:uppercase">Тип</label>
+                    <div style="display:flex;gap:8px;margin-top:6px">
+                        <a href="index.php?route=auth/profile&type=anime&status=<?= $status ?>" class="btn" style="flex:1;text-align:center;<?= $type === 'anime' ? 'background:#2563eb' : 'background:#334155' ?>">Аніме</a>
+                        <a href="index.php?route=auth/profile&type=manga&status=<?= $status ?>" class="btn" style="flex:1;text-align:center;<?= $type === 'manga' ? 'background:#2563eb' : 'background:#334155' ?>">Манга</a>
+                    </div>
+                </div>
+                <div>
+                    <label style="color:var(--muted);font-size:0.85rem;text-transform:uppercase">Статус</label>
+                    <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+                        <a href="index.php?route=auth/profile&type=<?= $type ?>&status=planning" class="btn" style="text-align:left;padding:8px 12px;<?= $status === 'planning' ? 'background:#2563eb' : 'background:#334155' ?>">📋 Заплановано</a>
+                        <a href="index.php?route=auth/profile&type=<?= $type ?>&status=watching" class="btn" style="text-align:left;padding:8px 12px;<?= $status === 'watching' ? 'background:#2563eb' : 'background:#334155' ?>">👀 Дивлюсь / Читаю</a>
+                        <a href="index.php?route=auth/profile&type=<?= $type ?>&status=watched" class="btn" style="text-align:left;padding:8px 12px;<?= $status === 'watched' ? 'background:#2563eb' : 'background:#334155' ?>">✓ Завершено</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="profile-grid">
-        <div class="profile-details card">
-            <h2>Дані акаунту</h2>
-            <table class="table">
-                <tr><td><strong>Логін</strong></td><td><?= htmlspecialchars($user['login'] ?? '') ?></td></tr>
-                <tr><td><strong>Ім'я</strong></td><td><?= htmlspecialchars($user['first_name'] ?? '-') ?></td></tr>
-                <tr><td><strong>Прізвище</strong></td><td><?= htmlspecialchars($user['last_name'] ?? '-') ?></td></tr>
-                <?php
-                    $showEmail = false;
-                    if (!empty($user['show_email']) && $user['show_email'] == '1') {
-                        $showEmail = true;
-                    } elseif (isset($_SESSION['user_id']) && $_SESSION['user_id'] == ($user['id'] ?? 0)) {
-                        $showEmail = true;
-                    } else {
-                        try {
-                            if (isset($_SESSION['user_id'])) {
-                                $db = Database::getInstance();
-                                $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
-                                $rs->execute([':id' => $_SESSION['user_id']]);
-                                $rr = $rs->fetch();
-                                if ($rr && ($rr['role'] === 'admin')) $showEmail = true;
-                            }
-                        } catch (Exception $e) { /* ignore */ }
-                    }
-                ?>
-                <tr><td><strong>E-mail</strong></td><td><?= $showEmail ? htmlspecialchars($user['email'] ?? '-') : '<span class="muted">Приховано</span>' ?></td></tr>
-                <tr><td><strong>Телефон</strong></td><td><?= htmlspecialchars($user['phone'] ?? '-') ?></td></tr>
-                <tr><td><strong>Місто</strong></td><td><?= htmlspecialchars($user['city'] ?? '-') ?></td></tr>
-                <tr><td><strong>Стать</strong></td><td><?= ($user['gender'] ?? '') === 'female' ? 'Жіноча' : (($user['gender'] ?? '') === 'male' ? 'Чоловіча' : '-') ?></td></tr>
-                <tr><td><strong>Про себе</strong></td><td><?= htmlspecialchars($user['about'] ?? '-') ?></td></tr>
-            </table>
+    <div style="flex:1;min-width:300px">
+        <h2 style="margin-top:0"><?= ($type === 'manga' ? 'Манга' : 'Аніме') ?> — <?= $status === 'planning' ? 'Заплановано' : ($status === 'watching' ? 'Дивлюсь / Читаю' : 'Завершено') ?></h2>
+        
+        <div class="card-grid catalog-grid">
+            <?php 
+                if (!empty($items)):
+                    foreach ($items as $item):
+            ?>
+                <div class="card">
+                    <?php $cover = !empty($item['cover_url']) ? htmlspecialchars($item['cover_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'; ?>
+                    <?php if ($type === 'manga'): ?>
+                        <a href="index.php?route=manga/view&id=<?= $item['id'] ?>"><img src="<?= $cover ?>" alt="" class="card__img" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'" /></a>
+                    <?php else: ?>
+                        <a href="index.php?route=anime/view&id=<?= $item['id'] ?>"><img src="<?= $cover ?>" alt="" class="card__img" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'" /></a>
+                    <?php endif; ?>
+                    <div style="padding-top:6px">
+                        <h3 class="card__title"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></h3>
+                        <p class="card__text" style="font-size:0.85rem;color:var(--muted)"><?= htmlspecialchars($item['year'] ?? '') ?> • <?= htmlspecialchars($item['type'] ?? '') ?></p>
+                    </div>
+                </div>
+            <?php 
+                    endforeach;
+                else:
+            ?>
+                <p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0">Поки що нічого немає</p>
+            <?php endif; ?>
         </div>
-
-        <aside class="profile-settings card">
-            <h2>Список Аніме/Манг</h2>
-            <div class="watch-list-section">
-                <div class="watch-list-category">
-                    <h3>Планує дивитись (Аніме)</h3>
-                    <div class="watch-list-items">
-                        <?php 
-                            $db = Database::getInstance();
-                            $planning = $db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.status = :status LIMIT 10');
-                            $planning->execute([':uid' => $user['id'], ':status' => 'planning']);
-                            $items = $planning->fetchAll();
-                            if (!empty($items)):
-                                foreach ($items as $item):
-                        ?>
-                            <a href="index.php?route=anime/view&id=<?= $item['id'] ?>" class="list-item"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></a>
-                        <?php 
-                                endforeach;
-                            else:
-                        ?>
-                            <span class="muted">Ніяких</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="watch-list-category">
-                    <h3>Дивиться (Аніме)</h3>
-                    <div class="watch-list-items">
-                        <?php 
-                            $watching = $db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.status = :status LIMIT 10');
-                            $watching->execute([':uid' => $user['id'], ':status' => 'watching']);
-                            $items = $watching->fetchAll();
-                            if (!empty($items)):
-                                foreach ($items as $item):
-                        ?>
-                            <a href="index.php?route=anime/view&id=<?= $item['id'] ?>" class="list-item"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></a>
-                        <?php 
-                                endforeach;
-                            else:
-                        ?>
-                            <span class="muted">Ніяких</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="watch-list-category">
-                    <h3>Подивився (Аніме)</h3>
-                    <div class="watch-list-items">
-                        <?php 
-                            $watched = $db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.status = :status LIMIT 10');
-                            $watched->execute([':uid' => $user['id'], ':status' => 'watched']);
-                            $items = $watched->fetchAll();
-                            if (!empty($items)):
-                                foreach ($items as $item):
-                        ?>
-                            <a href="index.php?route=anime/view&id=<?= $item['id'] ?>" class="list-item"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></a>
-                        <?php 
-                                endforeach;
-                            else:
-                        ?>
-                            <span class="muted">Ніяких</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="watch-list-category">
-                    <h3>Улюблені</h3>
-                    <div class="watch-list-items">
-                        <?php 
-                            $favorites = $db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.is_favorite = 1 LIMIT 10');
-                            $favorites->execute([':uid' => $user['id']]);
-                            $items = $favorites->fetchAll();
-                            if (!empty($items)):
-                                foreach ($items as $item):
-                        ?>
-                            <a href="index.php?route=anime/view&id=<?= $item['id'] ?>" class="list-item"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></a>
-                        <?php 
-                                endforeach;
-                            else:
-                        ?>
-                            <span class="muted">Ніяких</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </aside>
     </div>
 </div>

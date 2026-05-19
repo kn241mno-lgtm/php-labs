@@ -191,9 +191,52 @@ class AuthController extends PageController
             }
         }
 
+        // Load profile list items based on type/status query params
+        $type = $this->request->get('type', 'anime'); // 'anime' or 'manga'
+        $status = $this->request->get('status', 'planning'); // planning|watching|watched
+        $items = [];
+        
+        if ($type === 'manga') {
+            $stmt = $this->db->prepare('SELECT m.* FROM manga m JOIN rating r ON m.id = r.manga_id WHERE r.user_id = :uid AND r.status = :status ORDER BY r.created_at DESC');
+            $stmt->execute([':uid' => $user['id'], ':status' => $status]);
+            $items = $stmt->fetchAll();
+        } else {
+            $stmt = $this->db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.status = :status ORDER BY r.created_at DESC');
+            $stmt->execute([':uid' => $user['id'], ':status' => $status]);
+            $items = $stmt->fetchAll();
+        }
+
         $this->render('auth/profile', [
             'user' => $user,
+            'items' => $items,
+            'type' => $type,
+            'status' => $status,
         ], 'Профіль');
+    }
+
+    public function action_mylist(): void
+    {
+        if (!$this->isLoggedIn()) {
+            $this->redirect('auth/login');
+            return;
+        }
+
+        $type = $this->request->get('type', 'anime'); // 'anime' or 'manga'
+        $status = $this->request->get('status', 'planning'); // planning|watching|watched
+
+        $db = Database::getInstance();
+        $items = [];
+        if ($type === 'manga') {
+            $stmt = $db->prepare('SELECT m.* FROM manga m JOIN rating r ON m.id = r.manga_id WHERE r.user_id = :uid AND r.status = :status ORDER BY r.created_at DESC');
+            $stmt->execute([':uid' => $_SESSION['user_id'], ':status' => $status]);
+            $items = $stmt->fetchAll();
+        } else {
+            $stmt = $db->prepare('SELECT a.* FROM anime a JOIN rating r ON a.id = r.anime_id WHERE r.user_id = :uid AND r.status = :status ORDER BY r.created_at DESC');
+            $stmt->execute([':uid' => $_SESSION['user_id'], ':status' => $status]);
+            $items = $stmt->fetchAll();
+        }
+
+        $this->render('auth/mylist', ['items' => $items, 'type' => $type, 'status' => $status], 'Мій список');
     }
 
     public function action_edit(): void

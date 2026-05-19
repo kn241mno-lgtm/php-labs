@@ -228,7 +228,21 @@ class AnimeController extends PageController
             $relatedManga = $mstmt->fetchAll();
         }
 
-        $this->render('anime/view', ['item' => $item, 'comments' => $comments, 'genres' => $genres, 'characters' => $characters, 'relatedManga' => $relatedManga], $item['title']);
+        // compute aggregated rating and user-specific rating/favorite/status if logged in
+        $ratingStmt = $this->db->prepare('SELECT IFNULL(AVG(score),0) AS avg_rating, COUNT(*) AS cnt FROM rating WHERE anime_id = :id');
+        $ratingStmt->execute([':id' => $id]);
+        $ratingRow = $ratingStmt->fetch();
+        $avgRating = isset($ratingRow['avg_rating']) ? (float)$ratingRow['avg_rating'] : 0.0;
+        $ratingCount = isset($ratingRow['cnt']) ? (int)$ratingRow['cnt'] : 0;
+
+        $userRow = null;
+        if (isset($_SESSION['user_id'])) {
+            $ur = $this->db->prepare('SELECT * FROM rating WHERE anime_id = :id AND user_id = :uid LIMIT 1');
+            $ur->execute([':id' => $id, ':uid' => $_SESSION['user_id']]);
+            $userRow = $ur->fetch();
+        }
+
+        $this->render('anime/view', ['item' => $item, 'comments' => $comments, 'genres' => $genres, 'characters' => $characters, 'relatedManga' => $relatedManga, 'avgRating' => $avgRating, 'ratingCount' => $ratingCount, 'userRow' => $userRow], $item['title']);
     }
 
     public function action_create(): void
