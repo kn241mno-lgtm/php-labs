@@ -220,6 +220,17 @@ class MangaController extends PageController
             $relatedAnime = $astmt->fetchAll();
         }
 
+        // fallback: if no related anime found via characters, try to find anime with the same title
+        if (empty($relatedAnime)) {
+            $t1 = trim($item['title'] ?? '');
+            $t2 = trim($item['title_ua'] ?? '');
+            if ($t1 !== '' || $t2 !== '') {
+                $searchStmt = $this->db->prepare('SELECT a.* FROM anime a WHERE a.title LIKE :t OR a.title_ua LIKE :tua LIMIT 8');
+                $searchStmt->execute([':t' => "%$t1%", ':tua' => "%$t2%"]);
+                $relatedAnime = $searchStmt->fetchAll();
+            }
+        }
+
         // compute aggregated rating and user-specific row
         $ratingStmt = $this->db->prepare('SELECT IFNULL(AVG(score),0) AS avg_rating, COUNT(*) AS cnt FROM rating WHERE manga_id = :id');
         $ratingStmt->execute([':id' => $id]);

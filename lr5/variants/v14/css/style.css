@@ -656,16 +656,17 @@ h3 {
   flex-direction: row;
   align-items: stretch;
   gap: 24px;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   background: #0c1724;
   border-radius: 8px;
-  padding: 24px;
+  padding: 28px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.03);
+  position: relative; /* allow absolute badges inside */
 }
 .modal-detail .left {
-  flex: 0 0 360px;
+  flex: 0 0 420px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -686,6 +687,41 @@ h3 {
   border-radius: 8px;
   display: block;
   aspect-ratio: 3 / 4;
+}
+
+/* Small status badge on detail card (top-left) */
+.modal-detail .detail-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: linear-gradient(90deg, #334155, #0f1724);
+  color: #e6eef8;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  z-index: 40;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Rating pill shown top-right on detail pages */
+.modal-detail .detail-rating {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: linear-gradient(90deg, #ffd166, #ffb703);
+  color: #06121a;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+  z-index: 40;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* small subtitle under the main title on detail pages */
+.detail-subtitle {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-top: 6px;
 }
 .modal-detail .genres {
   margin-top: 12px;

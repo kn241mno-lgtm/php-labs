@@ -116,4 +116,41 @@ class SettingsController extends PageController
 
         $this->render('settings/profile', ['user' => $user, 'errors' => $errors], 'Налаштування профілю');
     }
+
+    public function action_index(): void
+    {
+        // simple index with links to subpages
+        $this->render('settings/index', [], 'Налаштування');
+    }
+
+    public function action_security(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+        if (empty($_SESSION['user_id'])) {
+            $this->redirect('auth/login');
+            return;
+        }
+        // placeholder security settings
+        $this->render('settings/security', [], 'Безпека');
+    }
+
+    public function action_notifications(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+        if (empty($_SESSION['user_id'])) {
+            $this->redirect('auth/login');
+            return;
+        }
+        $this->render('settings/notifications', [], 'Сповіщення');
+    }
+
+    public function action_customization(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+        if (empty($_SESSION['user_id'])) {
+            $this->redirect('auth/login');
+            return;
+        }
+        $this->render('settings/customization', [], 'Кастомізація');
+    }
 }

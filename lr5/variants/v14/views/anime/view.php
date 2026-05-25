@@ -1,6 +1,12 @@
 <div class="page">
     <div class="detail-and-side anime-detail-wrapper">
         <div class="modal-detail">
+            <?php if (!empty($item['status'])): ?>
+                <div class="detail-badge"><?= htmlspecialchars($item['status']) ?></div>
+            <?php endif; ?>
+            <?php if (isset($avgRating)): ?>
+                <div class="detail-rating">★ <?= round($avgRating ?? 0,2) ?>/10</div>
+            <?php endif; ?>
             <div class="left">
                 <?php $cover = !empty($item['cover_url']) ? htmlspecialchars($item['cover_url']) : (!empty($item['poster_url']) ? htmlspecialchars($item['poster_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'); ?>
                 <img src="<?= $cover ?>" alt="<?= htmlspecialchars($item['title'] ?? '') ?>" style="width:100%;border-radius:8px" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'">
@@ -38,7 +44,10 @@
             </div>
             <div class="right">
                 <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
-                    <h2 style="margin-top:0"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></h2>
+                    <div>
+                        <h2 style="margin-top:0"><?= htmlspecialchars($item['title_ua'] ?: $item['title']) ?></h2>
+                        <div class="detail-subtitle"><?php echo htmlspecialchars($item['year'] ?? '') ?> &bull; <?php echo htmlspecialchars($item['type'] ?? '') ?></div>
+                    </div>
                     <?php
                         $canEdit = false;
                         if (isset($_SESSION['user_id'])) {
