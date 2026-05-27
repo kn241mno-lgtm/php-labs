@@ -21,3 +21,11 @@ spl_autoload_register(function (string $className): void {
         }
     }
 });
+
+// Development debug mode: set APP_DEBUG=1 in environment to enable error display
+$appDebug = getenv('APP_DEBUG');
+if ($appDebug === '1' || strtolower($appDebug) === 'true') {
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    error_reporting(E_ALL);
+}

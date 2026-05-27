@@ -1,47 +1,74 @@
 <div class="page-home">
-    <h1>Кулінарний блог</h1>
-    <p class="page-home__subtitle">Варіант 30 &mdash; Лабораторна робота №5</p>
-    <p class="text-muted">Збірка українських рецептів. Файлова гостьова книга, галерея фото страв, CRUD рецептів через PDO, авторизація.</p>
+    <h1>Головна</h1>
 
-    <h2>Файли</h2>
-    <div class="card-grid">
-        <div class="card">
-            <h3 class="card__title">Гостьова книга</h3>
-            <p class="card__text">Залишайте відгуки про рецепти. Коментарі зберігаються у текстовому файлі.</p>
-            <a href="index.php?route=guestbook/index" class="btn btn--small">Відгуки</a>
+    <section>
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:center">
+            <h2 style="margin:0">Онгойнги</h2>
+            <a class="section-link" href="index.php?route=anime/list" style="color:var(--muted);text-decoration:none">Переглянути каталог →</a>
         </div>
+        <div class="card-grid card-grid--big">
+            <?php foreach (($ongoings ?? []) as $a): ?>
+                <a href="index.php?route=anime/view&id=<?= $a['id'] ?>" style="text-decoration:none;color:inherit">
+                <div class="card">
+                    <?php if (!empty($a['cover_url'])): ?>
+                        <img src="<?= htmlspecialchars($a['cover_url']) ?>" alt="<?= htmlspecialchars($a['title']) ?>" class="card__img" style="margin-bottom:8px">
+                    <?php endif; ?>
+                    <h3 class="card__title"><?= htmlspecialchars($a['title_ua'] ?: $a['title']) ?></h3>
+                    <div class="card__text"><?= htmlspecialchars(mb_substr($a['description'] ?? $a['title'],0,120)) ?></div>
+                    <div style="margin-top:8px;color:var(--muted);font-size:13px"><?= htmlspecialchars($a['studio_name'] ?? '') ?> • <?= htmlspecialchars($a['year'] ?? '') ?></div>
+                </div>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </section>
 
-        <div class="card">
-            <h3 class="card__title">Фото страв</h3>
-            <p class="card__text">Завантажуйте фото приготовлених страв. Галерея кулінарних шедеврів.</p>
-            <a href="index.php?route=upload/index" class="btn btn--small">Галерея</a>
+    <section>
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:center">
+            <h2 style="margin:0">Останні новини</h2>
+            <a class="section-link" href="index.php?route=recipe/list" style="color:var(--muted);text-decoration:none">Всі новини →</a>
         </div>
+        <div class="card-grid">
+            <?php foreach (($news ?? []) as $n): ?>
+                <a href="index.php?route=recipe/view&id=<?= $n['id'] ?>" style="text-decoration:none;color:inherit">
+                <div class="card">
+                    <?php if (!empty($n['image_url'])): ?>
+                        <img src="<?= htmlspecialchars($n['image_url']) ?>" alt="<?= htmlspecialchars($n['title']) ?>" class="card__img" style="margin-bottom:8px">
+                    <?php endif; ?>
+                    <h3 class="card__title"><?= htmlspecialchars($n['title']) ?></h3>
+                    <div class="card__text"><?= htmlspecialchars(mb_substr($n['summary'] ?? $n['content'] ?? '',0,140)) ?></div>
+                    <div style="margin-top:8px;color:var(--muted);font-size:13px">Автор: <?= htmlspecialchars($n['author'] ?? 'Адмін') ?> • <?= htmlspecialchars($n['published_at'] ?? '') ?></div>
+                </div>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </section>
 
-        <div class="card">
-            <h3 class="card__title">Каталоги кухарів</h3>
-            <p class="card__text">Персональні папки для кухарів з колекціями відео, музики та фото.</p>
-            <a href="index.php?route=folder/create" class="btn btn--small">Каталоги</a>
+    <section>
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:center">
+            <h2 style="margin:0">Топ аніме</h2>
+            <a class="section-link" href="index.php?route=anime/list" style="color:var(--muted);text-decoration:none">Переглянути каталог</a>
         </div>
-    </div>
-
-    <h2>База даних</h2>
-    <div class="card-grid">
-        <div class="card">
-            <h3 class="card__title">Рецепти (CRUD)</h3>
-            <p class="card__text">Колекція рецептів з інгредієнтами, часом приготування та інструкціями. PDO + SQLite.</p>
-            <a href="index.php?route=recipe/list" class="btn btn--small">До рецептів</a>
+        <div class="card-grid" style="grid-template-columns:repeat(5, minmax(160px, 1fr));">
+            <?php foreach (($top ?? []) as $t): ?>
+                <a href="index.php?route=anime/view&id=<?= $t['id'] ?>" style="text-decoration:none;color:inherit">
+                    <div class="card card-with-frame">
+                        <?php if (!empty($t['cover_url'])): ?>
+                            <img src="<?= htmlspecialchars($t['cover_url']) ?>" alt="<?= htmlspecialchars($t['title']) ?>" class="card__img" />
+                        <?php endif; ?>
+                        <div class="card-content">
+                            <h3 class="card__title"><?= htmlspecialchars($t['title_ua'] ?: $t['title']) ?></h3>
+                            <div class="card-meta" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.85rem;color:var(--muted)">
+                                <span><?= htmlspecialchars($t['year'] ?? '') ?></span>
+                                <span><?= htmlspecialchars($t['type'] ?? '') ?></span>
+                            </div>
+                            <div class="card-footer" style="display:flex;justify-content:space-between;align-items:center">
+                                <span style="color:var(--muted)"><?= htmlspecialchars($t['studio_name'] ?? '') ?></span>
+                                <span class="rating-badge">★ <?= round($t['rating'],1) ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            <?php endforeach; ?>
         </div>
-
-        <div class="card">
-            <h3 class="card__title">Акаунт кухаря</h3>
-            <p class="card__text">Реєстрація, вхід, профіль. Хешування паролів, сесійна авторизація.</p>
-            <a href="index.php?route=auth/login" class="btn btn--small">Увійти</a>
-        </div>
-
-        <div class="card">
-            <h3 class="card__title">Налаштування</h3>
-            <p class="card__text">Колір фону (сесія) та привітання (cookie). Успадковано з ЛР4.</p>
-            <a href="index.php?route=settings/color" class="btn btn--small">Налаштування</a>
-        </div>
-    </div>
+    </section>
 </div>

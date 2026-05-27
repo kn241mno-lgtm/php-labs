@@ -1,8 +1,14 @@
         </div>
     </main>
     <footer class="footer">
-        <div class="container">
-            <p>&copy; <?= date('Y') ?> Кулінарний блог &mdash; Варіант 30, ЛР5</p>
+        <div class="container footer-inner">
+            <div class="footer-left">
+                <strong>Miks — Енциклопедія аніме й манги</strong>
+                <p>Каталог аніме та манги, рецензії, рейтинги та спільнота.</p>
+            </div>
+            <div class="footer-right">
+                <p class="muted">&copy; <?= date('Y') ?> Miks</p>
+            </div>
         </div>
     </footer>
 </body>

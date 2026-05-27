@@ -1,0 +1,377 @@
+<?php
+
+class MangaController extends PageController
+{
+    private PDO $db;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->db = Database::getInstance();
+    }
+
+    public function action_list(): void
+    {
+        $q = trim($this->request->get('q', ''));
+        $status = trim($this->request->get('status', ''));
+        $type = trim($this->request->get('type', ''));
+        // support both single-author (legacy) and multi-author (comma-separated 'authors')
+        $author = (int)($this->request->get('author', 0));
+        $authorsParam = trim($this->request->get('authors', ''));
+        $genre = trim($this->request->get('genres', ''));
+        $yearFrom = (int)($this->request->get('yearFrom', 0));
+        $yearTo = (int)($this->request->get('yearTo', 0));
+        $ratingFrom = $this->request->get('ratingFrom', '');
+        $ratingTo = $this->request->get('ratingTo', '');
+
+        // normalize ranges so yearFrom <= yearTo and ratingFrom <= ratingTo
+        if ($yearFrom > 0 && $yearTo > 0 && $yearFrom > $yearTo) {
+            $tmp = $yearFrom; $yearFrom = $yearTo; $yearTo = $tmp;
+        }
+        if ($ratingFrom !== '' && $ratingTo !== '' && is_numeric($ratingFrom) && is_numeric($ratingTo) && (float)$ratingFrom > (float)$ratingTo) {
+            $tmp = $ratingFrom; $ratingFrom = $ratingTo; $ratingTo = $tmp;
+        }
+        $page = max(1, (int)($this->request->get('page', 1)));
+        $pageSize = max(6, min(48, (int)($this->request->get('pageSize', 24))));
+        $sort = trim($this->request->get('sort', 'title'));
+
+        $params = [];
+        $where = ['1=1'];
+        $joins = [];
+
+        if ($q !== '') {
+            $where[] = '(m.title LIKE :q OR m.title_ua LIKE :q)';
+            $params[':q'] = '%' . $q . '%';
+        }
+
+        if ($status !== '') {
+            $where[] = 'm.status = :status';
+            $params[':status'] = $status;
+        }
+
+        if ($type !== '') {
+            $where[] = 'm.type = :type';
+            $params[':type'] = $type;
+        }
+
+        if ($yearFrom > 0) {
+            $where[] = 'm.year >= :yearFrom';
+            $params[':yearFrom'] = $yearFrom;
+        }
+
+        if ($yearTo > 0) {
+            $where[] = 'm.year <= :yearTo';
+            $params[':yearTo'] = $yearTo;
+        }
+
+        // authors handling: multi-select preferred via 'authors' param
+        $authorIds = [];
+        if ($authorsParam !== '') {
+            $parts = array_filter(array_map('trim', explode(',', $authorsParam)));
+            foreach ($parts as $p) { $id = (int)$p; if ($id > 0) $authorIds[] = $id; }
+        }
+        if (!empty($authorIds)) {
+            $joins[] = 'JOIN manga_author ma ON ma.manga_id = m.id';
+            $placeholders = [];
+            foreach ($authorIds as $i => $aid) { $ph = ':a' . $i; $placeholders[] = $ph; $params[$ph] = $aid; }
+            $where[] = 'ma.author_id IN (' . implode(',', $placeholders) . ')';
+        } elseif ($author > 0) {
+            $joins[] = 'JOIN manga_author ma ON ma.manga_id = m.id';
+            $where[] = 'ma.author_id = :author';
+            $params[':author'] = $author;
+        }
+
+        $genreIds = [];
+        if ($genre !== '') {
+            $parts = array_filter(array_map('trim', explode(',', $genre)));
+            foreach ($parts as $p) {
+                $id = (int)$p;
+                if ($id > 0) $genreIds[] = $id;
+            }
+        }
+
+        if (!empty($genreIds)) {
+            $joins[] = 'LEFT JOIN manga_genre mg ON mg.manga_id = m.id';
+            $placeholders = [];
+            foreach ($genreIds as $i => $g) {
+                $ph = ':g' . $i;
+                $placeholders[] = $ph;
+                $params[$ph] = $g;
+            }
+            $where[] = 'mg.genre_id IN (' . implode(',', $placeholders) . ')';
+        }
+
+        $order = 'm.title ASC';
+        switch ($sort) {
+            case 'year': $order = 'm.year DESC'; break;
+            case 'views': $order = 'm.views DESC'; break;
+        }
+
+        $baseSql = 'FROM manga m LEFT JOIN rating r2 ON r2.manga_id = m.id ' . (count($joins) ? ' ' . implode(' ', $joins) : '') . ' WHERE ' . implode(' AND ', $where);
+
+        // rating filter intentionally omitted for manga (UI removed)
+        $ratingFromVal = (is_numeric($ratingFrom) ? (float)$ratingFrom : null);
+        $ratingToVal = (is_numeric($ratingTo) ? (float)$ratingTo : null);
+
+        $havingParts = [];
+        if ($ratingFromVal !== null && $ratingFromVal > 1) {
+            $havingParts[] = 'COALESCE(AVG(r2.score),0) >= :ratingFrom';
+        }
+        if ($ratingToVal !== null && $ratingToVal < 10) {
+            $havingParts[] = 'COALESCE(AVG(r2.score),0) <= :ratingTo';
+        }
+        $having = '';
+        if (!empty($havingParts)) {
+            $having = ' HAVING ' . implode(' AND ', $havingParts);
+        }
+
+        $countSql = 'SELECT COUNT(DISTINCT m.id) ' . $baseSql . $having;
+        $countStmt = $this->db->prepare($countSql);
+        $countParams = $params;
+        if ($ratingFromVal !== null && $ratingFromVal > 1) $countParams[':ratingFrom'] = $ratingFromVal;
+        if ($ratingToVal !== null && $ratingToVal < 10) $countParams[':ratingTo'] = $ratingToVal;
+        $countStmt->execute($countParams);
+        $total = (int)$countStmt->fetchColumn();
+
+        $totalPages = (int)ceil($total / $pageSize);
+        $offset = ($page - 1) * $pageSize;
+
+        $selectSql = 'SELECT m.*, IFNULL(AVG(r2.score),0) AS rating ' . $baseSql . ' GROUP BY m.id' . $having . ' ORDER BY ' . $order . ' LIMIT :limit OFFSET :offset';
+        $selectStmt = $this->db->prepare($selectSql);
+        $selectParams = $params;
+        if ($ratingFromVal !== null && $ratingFromVal > 1) $selectParams[':ratingFrom'] = $ratingFromVal;
+        if ($ratingToVal !== null && $ratingToVal < 10) $selectParams[':ratingTo'] = $ratingToVal;
+        $selectParams[':limit'] = $pageSize;
+        $selectParams[':offset'] = $offset;
+        $selectStmt->execute($selectParams);
+        $items = $selectStmt->fetchAll();
+
+        // fetch genres and authors for UI
+        $genres = $this->db->query('SELECT id, name FROM genre ORDER BY name')->fetchAll();
+        $authors = [];
+        try {
+            $authors = $this->db->query('SELECT id, name FROM author ORDER BY name')->fetchAll();
+            // if no authors present, seed a small set so UI shows options
+            if (empty($authors)) {
+                $seed = [
+                    [1, 'Kentaro Miura', 'Автор Berserk'],
+                    [2, 'Takehiko Inoue', 'Автор Vagabond'],
+                    [3, 'ONE', 'Автор One Punch Man'],
+                    [4, 'Tatsuki Fujimoto', 'Автор Chainsaw Man'],
+                    [5, 'Chugong', 'Автор Solo Leveling'],
+                    [6, 'Eiichiro Oda', 'Автор One Piece'],
+                    [7, 'Hajime Isayama', 'Автор Attack on Titan']
+                ];
+                $ist = $this->db->prepare('INSERT OR IGNORE INTO author (id, name, bio) VALUES (:id, :name, :bio)');
+                foreach ($seed as $a) { $ist->execute([':id'=>$a[0], ':name'=>$a[1], ':bio'=>$a[2]]); }
+                $mappings = [[1,1],[2,2],[3,3],[4,4],[5,5],[6,6],[7,7]];
+                $mst = $this->db->prepare('INSERT OR IGNORE INTO manga_author (manga_id, author_id) VALUES (:m, :a)');
+                foreach ($mappings as $m) { $mst->execute([':m'=>$m[0], ':a'=>$m[1]]); }
+                $authors = $this->db->query('SELECT id, name FROM author ORDER BY name')->fetchAll();
+            }
+        } catch (Exception $e) { $authors = []; }
+
+        $this->render('manga/list', [
+            'manga' => $items,
+            'pagination' => ['page'=>$page,'pageSize'=>$pageSize,'total'=>$total,'totalPages'=>$totalPages],
+            'filters' => [
+                'q'=>$q,'status'=>$status,'type'=>$type,'author'=>$author,'genre'=>$genre,
+                'yearFrom'=>$this->request->get('yearFrom', ''),'yearTo'=>$this->request->get('yearTo', ''),'sort'=>$sort,
+                'ratingFrom'=>$this->request->get('ratingFrom',''),'ratingTo'=>$this->request->get('ratingTo',''),
+                'authors' => $authorsParam
+            ],
+            'genres'=>$genres,
+            'authors'=>$authors
+        ], 'Каталог манги');
+    }
+
+    public function action_view(): void
+    {
+        $id = (int)($this->request->get('id', 0));
+        if ($id <= 0) {
+            $this->redirect('manga/list');
+            return;
+        }
+
+        $stmt = $this->db->prepare('SELECT * FROM manga WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $item = $stmt->fetch();
+        if (!$item) {
+            $this->show404('Манга не знайдена');
+            return;
+        }
+
+        $cstmt = $this->db->prepare('SELECT c.*, u.login, u.avatar_url, u.display_name FROM comments c JOIN users u ON u.id = c.user_id WHERE c.manga_id = :id ORDER BY c.created_at DESC');
+        $cstmt->execute([':id' => $id]);
+        $comments = $cstmt->fetchAll();
+
+        // load characters for this manga (alias name -> name_ua for compatibility with views)
+        $c2 = $this->db->prepare('SELECT ch.id, ch.name AS name_ua, ch.name, ch.image_url FROM manga_character mc JOIN character ch ON mc.character_id = ch.id WHERE mc.manga_id = :id');
+        $c2->execute([':id' => $id]);
+        $characters = $c2->fetchAll();
+
+        // related anime via same characters
+        $relatedAnime = [];
+        if (!empty($characters)) {
+            $ids = array_map(function($r){ return (int)$r['id']; }, $characters);
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $astmt = $this->db->prepare("SELECT DISTINCT a.* FROM anime a JOIN anime_character ac ON ac.anime_id = a.id WHERE ac.character_id IN ($placeholders) LIMIT 8");
+            $astmt->execute($ids);
+            $relatedAnime = $astmt->fetchAll();
+        }
+
+        // fallback: if no related anime found via characters, try to find anime with the same title
+        if (empty($relatedAnime)) {
+            $t1 = trim($item['title'] ?? '');
+            $t2 = trim($item['title_ua'] ?? '');
+            if ($t1 !== '' || $t2 !== '') {
+                $searchStmt = $this->db->prepare('SELECT a.* FROM anime a WHERE a.title LIKE :t OR a.title_ua LIKE :tua LIMIT 8');
+                $searchStmt->execute([':t' => "%$t1%", ':tua' => "%$t2%"]);
+                $relatedAnime = $searchStmt->fetchAll();
+            }
+        }
+
+        // compute aggregated rating and user-specific row
+        $ratingStmt = $this->db->prepare('SELECT IFNULL(AVG(score),0) AS avg_rating, COUNT(*) AS cnt FROM rating WHERE manga_id = :id');
+        $ratingStmt->execute([':id' => $id]);
+        $ratingRow = $ratingStmt->fetch();
+        $avgRating = isset($ratingRow['avg_rating']) ? (float)$ratingRow['avg_rating'] : 0.0;
+        $ratingCount = isset($ratingRow['cnt']) ? (int)$ratingRow['cnt'] : 0;
+
+        $userRow = null;
+        if (isset($_SESSION['user_id'])) {
+            $ur = $this->db->prepare('SELECT * FROM rating WHERE manga_id = :id AND user_id = :uid LIMIT 1');
+            $ur->execute([':id' => $id, ':uid' => $_SESSION['user_id']]);
+            $userRow = $ur->fetch();
+        }
+
+        $this->render('manga/view', ['item' => $item, 'comments' => $comments, 'characters' => $characters, 'relatedAnime' => $relatedAnime, 'avgRating' => $avgRating, 'ratingCount' => $ratingCount, 'userRow' => $userRow], $item['title']);
+    }
+
+    public function action_create(): void
+    {
+        if (!$this->isAdmin()) {
+            $this->redirect('auth/login');
+            return;
+        }
+
+        $errors = [];
+        if ($this->request->isPost()) {
+            $data = $this->request->allPost();
+            if (trim($data['title'] ?? '') === '') {
+                $errors['title'] = 'Заголовок обов\'язковий.';
+            }
+
+            if (empty($errors)) {
+                $stmt = $this->db->prepare('INSERT INTO manga (title, title_ua, year, type, status, chapters, description, cover_url) VALUES (:title, :title_ua, :year, :type, :status, :chapters, :description, :cover_url)');
+                $stmt->execute([
+                    ':title' => $data['title'],
+                    ':title_ua' => $data['title_ua'] ?? '',
+                    ':year' => $data['year'] ?: null,
+                    ':type' => $data['type'] ?? '',
+                    ':status' => $data['status'] ?? '',
+                    ':chapters' => $data['chapters'] ?: 0,
+                    ':description' => $data['description'] ?? '',
+                    ':cover_url' => $data['cover_url'] ?? '',
+                ]);
+
+                $_SESSION['flash_success'] = 'Манга додана.';
+                $this->redirect('manga/list');
+                return;
+            }
+        }
+
+        $this->render('manga/create', ['errors' => $errors], 'Додати мангу');
+    }
+
+    public function action_edit(): void
+    {
+        if (!$this->isEditor()) {
+            $this->redirect('auth/login');
+            return;
+        }
+
+        $id = (int)($this->request->get('id', 0));
+        if ($id <= 0) {
+            $this->redirect('manga/list');
+            return;
+        }
+
+        $stmt = $this->db->prepare('SELECT * FROM manga WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $item = $stmt->fetch();
+        if (!$item) {
+            $this->show404('Манга не знайдена');
+            return;
+        }
+
+        $errors = [];
+        if ($this->request->isPost()) {
+            $data = $this->request->allPost();
+            if (trim($data['title'] ?? '') === '') {
+                $errors['title'] = 'Заголовок обов\'язковий.';
+            }
+
+            if (empty($errors)) {
+                $ustmt = $this->db->prepare('UPDATE manga SET title = :title, title_ua = :title_ua, year = :year, type = :type, status = :status, chapters = :chapters, description = :description, cover_url = :cover_url WHERE id = :id');
+                $ustmt->execute([
+                    ':title' => $data['title'],
+                    ':title_ua' => $data['title_ua'] ?? '',
+                    ':year' => $data['year'] ?: null,
+                    ':type' => $data['type'] ?? '',
+                    ':status' => $data['status'] ?? '',
+                    ':chapters' => $data['chapters'] ?: 0,
+                    ':description' => $data['description'] ?? '',
+                    ':cover_url' => $data['cover_url'] ?? '',
+                    ':id' => $id,
+                ]);
+
+                $_SESSION['flash_success'] = 'Манга оновлена.';
+                $this->redirect('manga/view&id=' . $id);
+                return;
+            }
+            $item = array_merge($item, $data);
+        }
+
+        $this->render('manga/edit', ['item' => $item, 'errors' => $errors], 'Редагувати мангу');
+    }
+
+    public function action_delete(): void
+    {
+        if (!$this->isAdmin()) {
+            $this->redirect('auth/login');
+            return;
+        }
+
+        $id = (int)($this->request->get('id', 0));
+        if ($id > 0 && $this->request->isPost()) {
+            $stmt = $this->db->prepare('DELETE FROM manga WHERE id = :id');
+            $stmt->execute([':id' => $id]);
+            $_SESSION['flash_success'] = 'Манга видалена.';
+        }
+
+        $this->redirect('manga/list');
+    }
+
+    private function isAdmin(): bool
+    {
+        if (!isset($_SESSION['user_id'])) {
+            return false;
+        }
+        $stmt = $this->db->prepare('SELECT role FROM users WHERE id = :id');
+        $stmt->execute([':id' => $_SESSION['user_id']]);
+        $row = $stmt->fetch();
+        return $row && ($row['role'] === 'admin');
+    }
+
+    private function isEditor(): bool
+    {
+        if (!isset($_SESSION['user_id'])) {
+            return false;
+        }
+        $stmt = $this->db->prepare('SELECT role FROM users WHERE id = :id');
+        $stmt->execute([':id' => $_SESSION['user_id']]);
+        $row = $stmt->fetch();
+        return $row && in_array($row['role'], ['admin', 'moderator']);
+    }
+}

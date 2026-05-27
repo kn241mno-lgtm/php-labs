@@ -81,6 +81,22 @@ $errors = $errors ?? [];
         <textarea id="edit_about" name="about" class="form__textarea"><?= htmlspecialchars($user['about'] ?? '') ?></textarea>
     </div>
 
+    <div class="form__group">
+        <label for="edit_avatar_url" class="form__label">URL аватарки</label>
+        <input type="url" id="edit_avatar_url" name="avatar_url" class="form__input"
+               value="<?= htmlspecialchars($user['avatar_url'] ?? '') ?>"
+               placeholder="https://example.com/avatar.jpg">
+        <span class="form__hint">Посилання на зображення для аватки профілю</span>
+    </div>
+
+    <div class="form__group">
+        <label for="edit_display_name" class="form__label">Відображуване ім'я</label>
+        <input type="text" id="edit_display_name" name="display_name" class="form__input"
+               value="<?= htmlspecialchars($user['display_name'] ?? '') ?>"
+               placeholder="Як ви хочете бути названі">
+        <span class="form__hint">Якщо не заповнено, буде використано ім'я та прізвище</span>
+    </div>
+
     <div class="form__actions">
         <button type="submit" class="btn">Зберегти</button>
         <a href="index.php?route=auth/profile" class="btn btn--secondary">Скасувати</a>

@@ -1,5 +1,5 @@
 <?php
-$bgColor = $_SESSION['bg_color'] ?? '#f9fafb';
+$bgColor = $_SESSION['bg_color'] ?? '#0b1b2c';
 $greetingName = $_COOKIE['greeting_name'] ?? '';
 $greetingGender = $_COOKIE['greeting_gender'] ?? '';
 
@@ -16,38 +16,52 @@ $currentRoute = $_GET['route'] ?? 'index/main';
 
 $navItems = [
     'index/main' => 'Головна',
-    'guestbook/index' => 'Гостьова книга',
-    'upload/index' => 'Завантаження',
-    'folder/create' => 'Каталоги',
-    'recipe/list' => 'Рецепти',
-    'settings/color' => 'Налаштування',
+    'anime/list' => 'Аніме',
+    'manga/list' => 'Манга',
+    'recipe/list' => 'Новини',
 ];
+// compute readable text color based on background
+$textColor = '#e6eef8';
+if (preg_match('/^#([0-9a-fA-F]{6})$/', $bgColor, $m)) {
+    [$r, $g, $b] = array_map('hexdec', str_split($m[1], 2));
+    $brightness = ($r * 0.299) + ($g * 0.587) + ($b * 0.114);
+    $textColor = $brightness > 186 ? '#06121a' : '#e6eef8';
+}
+// muted color (less prominent than main text)
+$mutedColor = ($textColor === '#06121a') ? '#6b7280' : '#9fb0c9';
+
 ?>
-<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'Кулінарний блог') ?> — Кулінарний блог (v30)</title>
+    <title><?= htmlspecialchars($pageTitle ?? 'Miks') ?></title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/new-styles.css">
+    <link rel="stylesheet" href="css/catalog-rating.css">
 </head>
-<body style="background-color: <?= htmlspecialchars($bgColor) ?>">
+<body style="background-color: <?= htmlspecialchars($bgColor) ?>; color: <?= htmlspecialchars($textColor) ?>; --color-base: <?= htmlspecialchars($textColor) ?>; --muted: <?= htmlspecialchars($mutedColor) ?>">
     <a href="#main-content" class="skip-link">Перейти до вмісту</a>
     <header class="header">
         <div class="container">
             <div class="header__inner">
-                <a href="index.php" class="header__logo">Кулінарний блог</a>
+                <a href="index.php" class="header__logo">
+                    <img src="assets/logo.svg" alt="Miks logo" class="header__logo-img">
+                </a>
                 <div class="header__right">
                     <?php if ($greetingText !== ''): ?>
                         <span class="header__greeting"><?= $greetingText ?></span>
                     <?php endif; ?>
+
                     <div class="header__auth">
                         <?php if ($isLoggedIn): ?>
                             <a href="index.php?route=auth/profile" class="header__auth-link"><?= htmlspecialchars($userLogin) ?></a>
+                            <a href="index.php?route=settings/index" class="header__auth-link">Налаштування</a>
                             <a href="index.php?route=auth/logout" class="header__auth-link header__auth-link--logout">Вийти</a>
                         <?php else: ?>
                             <a href="index.php?route=auth/login" class="header__auth-link">Увійти</a>
                             <a href="index.php?route=auth/register" class="header__auth-link">Реєстрація</a>
+                            <a href="index.php?route=settings/index" class="header__auth-link">Налаштування</a>
                         <?php endif; ?>
                     </div>
                 </div>

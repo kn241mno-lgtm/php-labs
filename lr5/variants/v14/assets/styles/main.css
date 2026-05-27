@@ -1,0 +1,135 @@
+/* Basic dark theme to match screenshots (adapt as needed) */
+:root {
+  --bg: #071025;
+  --card: #0f2230;
+  --muted: #9fb0c2;
+  --accent: #1f87ff;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+body {
+  background: var(--bg);
+  color: #dfeffb;
+  font-family:
+    Inter,
+    Segoe UI,
+    Arial,
+    Helvetica,
+    sans-serif;
+  margin: 0;
+  padding: 0;
+}
+.header {
+  background: #081728;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.page-home h1 {
+  font-size: 28px;
+  margin-bottom: 18px;
+}
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 14px;
+  flex: 1 1 220px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.card__title {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.card__text {
+  color: var(--muted);
+  font-size: 13px;
+}
+.btn {
+  display: inline-block;
+  padding: 8px 12px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+}
+.layout-row {
+  display: flex;
+  gap: 20px;
+}
+.filters {
+  width: 260px;
+  background: var(--glass);
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+/* filter chips styling (colored) */
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.filter-chip.active {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+.chips-toggle {
+  margin-bottom: 6px;
+}
+.year-range {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.year-range input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: linear-gradient(90deg, #2b3440, #1f2b3a);
+  border-radius: 6px;
+}
+.year-values {
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+.content {
+  flex: 1;
+}
+aside .form-group {
+  margin-bottom: 10px;
+}
+input[type="text"],
+select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  color: inherit;
+}
+.card-grid .card img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+.footer {
+  padding: 20px;
+  text-align: center;
+  color: var(--muted);
+}

@@ -20,4 +20,5 @@ class View
         extract($data);
         require $filePath;
     }
+    
 }
