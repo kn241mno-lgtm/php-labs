@@ -385,6 +385,10 @@ php-labs/
 │   │   ├── v1.md ... v30.md
 │   │   └── v30/     # Повністю розв'язаний варіант 30 (Кулінарний блог)
 │   └── assignment.md
+├── lr6/             # Laravel
+│   └── assignment.md
+└── coursework/      # Курсова робота (вимоги, критерії, терміни)
+    └── assignment.md
 ```
 
 ---
@@ -436,6 +440,7 @@ php-labs/
 - [Критерії прийняття](acceptance-criteria.md)
 - [Git довідник](git-guide.md)
 - [Запуск проєкту](running-project.md)
+- [Курсова робота — вимоги](../coursework/assignment.md)
 - [Проблеми на Windows](../troubleshooting/windows.md)
 
 ---

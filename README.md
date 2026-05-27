@@ -79,6 +79,10 @@ git push
 6. Laravel
 7. Laravel (продовження)
 
+## Курсова робота
+
+Вимоги, структура ПЗ, критерії оцінювання — [coursework/assignment.md](coursework/assignment.md).
+
 ## Відомість з оцінками
 
 [Google Таблиця](https://docs.google.com/spreadsheets/d/1M2Ufe3UGO_XIDvcZdrFz9lf5TwFHi6Ei/edit?gid=1868485203#gid=1868485203)
@@ -96,3 +100,4 @@ git push
 - [Запуск проєкту](docs/running-project.md)
 - [Інструкція з роботи з Git](docs/git-guide.md)
 - [Налаштування середовища](setup/README.md)
+- [Курсова робота — вимоги](coursework/assignment.md)
