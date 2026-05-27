@@ -51,12 +51,21 @@
         <div class="card-grid" style="grid-template-columns:repeat(5, minmax(160px, 1fr));">
             <?php foreach (($top ?? []) as $t): ?>
                 <a href="index.php?route=anime/view&id=<?= $t['id'] ?>" style="text-decoration:none;color:inherit">
-                    <div class="card">
+                    <div class="card card-with-frame">
                         <?php if (!empty($t['cover_url'])): ?>
                             <img src="<?= htmlspecialchars($t['cover_url']) ?>" alt="<?= htmlspecialchars($t['title']) ?>" class="card__img" />
                         <?php endif; ?>
-                        <h3 class="card__title"><?= htmlspecialchars($t['title_ua'] ?: $t['title']) ?></h3>
-                        <div class="card__text" style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--muted)"><?= htmlspecialchars($t['studio_name'] ?? '') ?></span><span style="background:#1f2937;padding:6px 8px;border-radius:8px;color:#ffd166;font-weight:600"><?= round($t['rating'],1) ?></span></div>
+                        <div class="card-content">
+                            <h3 class="card__title"><?= htmlspecialchars($t['title_ua'] ?: $t['title']) ?></h3>
+                            <div class="card-meta" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.85rem;color:var(--muted)">
+                                <span><?= htmlspecialchars($t['year'] ?? '') ?></span>
+                                <span><?= htmlspecialchars($t['type'] ?? '') ?></span>
+                            </div>
+                            <div class="card-footer" style="display:flex;justify-content:space-between;align-items:center">
+                                <span style="color:var(--muted)"><?= htmlspecialchars($t['studio_name'] ?? '') ?></span>
+                                <span class="rating-badge">★ <?= round($t['rating'],1) ?></span>
+                            </div>
+                        </div>
                     </div>
                 </a>
             <?php endforeach; ?>

@@ -137,17 +137,17 @@
         <section class="content">
             <div class="card-grid catalog-grid">
                 <?php foreach ($anime as $a): ?>
-            <div class="card" style="position:relative">
+            <div class="card card-catalog" style="position:relative">
                 <?php if (!empty($a['status']) && strtolower($a['status']) === 'ongoing'): ?>
                     <div class="badge">Виходить</div>
                 <?php endif; ?>
+                <div class="rating-badge-top-right">★ <?= round($a['rating'] ?? 0,1) ?></div>
                 <?php $cover = !empty($a['cover_url']) ? htmlspecialchars($a['cover_url']) : (!empty($a['poster_url']) ? htmlspecialchars($a['poster_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'); ?>
                     <a href="index.php?route=anime/view&id=<?= $a['id'] ?>"><img src="<?= $cover ?>" alt="<?= htmlspecialchars($a['title']) ?>" class="card__img" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'" /></a>
                 <div style="padding-top:6px">
                     <h3 class="card__title"><?= htmlspecialchars($a['title_ua'] ?: $a['title']) ?></h3>
                     <p class="card__text" style="font-size:0.85rem;color:var(--muted)"><?= htmlspecialchars($a['year'] ?? '') ?> • <?= htmlspecialchars($a['type'] ?? '') ?></p>
                 </div>
-                <div class="rating-pill"><?= round($a['rating'] ?? 0,1) ?></div>
                 <!-- admin controls are available on the anime detail page only -->
             </div>
         <?php endforeach; ?>

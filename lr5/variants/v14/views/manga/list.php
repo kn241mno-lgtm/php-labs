@@ -281,9 +281,10 @@
         <section class="content">
             <div class="card-grid catalog-grid">
         <?php foreach ($manga as $m): ?>
-            <div class="card" style="position:relative">
+            <div class="card card-catalog" style="position:relative">
                 <?php $mcover = !empty($m['cover_url']) ? htmlspecialchars($m['cover_url']) : (!empty($m['poster_url']) ? htmlspecialchars($m['poster_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'); ?>
                 <a href="index.php?route=manga/view&id=<?= $m['id'] ?>"><img src="<?= $mcover ?>" alt="<?= htmlspecialchars($m['title']) ?>" class="card__img" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'" /></a>
+                <div class="rating-badge-top-right">★ <?= round($m['rating'] ?? 0,1) ?></div>
                 <div style="padding-top:6px">
                     <h3 class="card__title"><?= htmlspecialchars($m['title_ua'] ?: $m['title']) ?></h3>
                     <p class="card__text" style="font-size:0.85rem;color:var(--muted)"><?= htmlspecialchars($m['year'] ?? '') ?> • <?= htmlspecialchars($m['type'] ?? '') ?></p>

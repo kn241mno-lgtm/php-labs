@@ -37,6 +37,8 @@ $mutedColor = ($textColor === '#06121a') ? '#6b7280' : '#9fb0c9';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? 'Miks') ?></title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/new-styles.css">
+    <link rel="stylesheet" href="css/catalog-rating.css">
 </head>
 <body style="background-color: <?= htmlspecialchars($bgColor) ?>; color: <?= htmlspecialchars($textColor) ?>; --color-base: <?= htmlspecialchars($textColor) ?>; --muted: <?= htmlspecialchars($mutedColor) ?>">
     <a href="#main-content" class="skip-link">Перейти до вмісту</a>
@@ -51,19 +53,11 @@ $mutedColor = ($textColor === '#06121a') ? '#6b7280' : '#9fb0c9';
                         <span class="header__greeting"><?= $greetingText ?></span>
                     <?php endif; ?>
 
-                    <form method="get" action="index.php" class="header__search" style="display:flex;align-items:center;gap:8px;margin-right:8px">
-                        <input type="hidden" name="route" value="search">
-                        <input type="search" name="q" placeholder="Пошук..." value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" class="form__input" style="padding:6px 8px;border-radius:6px;min-width:160px">
-                        <button class="btn btn--small" type="submit">🔍</button>
-                    </form>
-
                     <div class="header__auth">
                         <?php if ($isLoggedIn): ?>
                             <a href="index.php?route=auth/profile" class="header__auth-link"><?= htmlspecialchars($userLogin) ?></a>
                             <a href="index.php?route=settings/index" class="header__auth-link">Налаштування</a>
-                            <?php if (strpos($currentRoute, 'auth/profile') === false): ?>
-                                <a href="index.php?route=auth/logout" class="header__auth-link header__auth-link--logout">Вийти</a>
-                            <?php endif; ?>
+                            <a href="index.php?route=auth/logout" class="header__auth-link header__auth-link--logout">Вийти</a>
                         <?php else: ?>
                             <a href="index.php?route=auth/login" class="header__auth-link">Увійти</a>
                             <a href="index.php?route=auth/register" class="header__auth-link">Реєстрація</a>

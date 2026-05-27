@@ -4,9 +4,6 @@
             <?php if (!empty($item['status'])): ?>
                 <div class="detail-badge"><?= htmlspecialchars($item['status']) ?></div>
             <?php endif; ?>
-            <?php if (isset($avgRating)): ?>
-                <div class="detail-rating">★ <?= round($avgRating ?? 0,2) ?>/10</div>
-            <?php endif; ?>
             <div class="left">
                 <?php $cover = !empty($item['cover_url']) ? htmlspecialchars($item['cover_url']) : (!empty($item['poster_url']) ? htmlspecialchars($item['poster_url']) : 'https://via.placeholder.com/420x300?text=No+Cover'); ?>
                 <img src="<?= $cover ?>" alt="<?= htmlspecialchars($item['title'] ?? '') ?>" style="width:100%;border-radius:8px" onerror="this.onerror=null;this.src='https://via.placeholder.com/420x300?text=No+Cover'">
@@ -101,7 +98,6 @@
                                     ?>
                                 </td>
                             </tr>
-                            <tr><td>Рейтинг</td><td><strong>★ <?= round($avgRating ?? 0,2) ?>/10</strong></td></tr>
                             <tr><td>Перегляди</td><td><?= htmlspecialchars($item['views'] ?? 0) ?></td></tr>
                         </table>
                     </div>
@@ -113,85 +109,85 @@
 
     <div class="content-columns">
         <div class="main-column">
-            <?php if (!empty($relatedManga)): ?>
-                <h3>Пов'язані манга</h3>
-                <div class="card-grid">
-                    <?php foreach ($relatedManga as $rm): ?>
-                        <a href="index.php?route=manga/view&id=<?= $rm['id'] ?>" style="text-decoration:none;color:inherit">
-                            <div class="card">
-                                <?php if (!empty($rm['cover_url'])): ?>
-                                    <img src="<?= htmlspecialchars($rm['cover_url']) ?>" alt="" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px">
-                                <?php endif; ?>
-                                <h3 class="card__title"><?= htmlspecialchars($rm['title_ua'] ?: $rm['title']) ?></h3>
-                                <div class="card__text"><?= htmlspecialchars(mb_substr($rm['description'] ?? '',0,120)) ?></div>
-                            </div>
+            <?php if (!empty($characters)): ?>
+                <h3>Головні Персонажі</h3>
+                <div class="characters-grid">
+                    <?php foreach ($characters as $ch): ?>
+                        <a class="character-card" href="index.php?route=character/view&id=<?= $ch['id'] ?>">
+                            <?php if (!empty($ch['image_url'])): ?><img src="<?= htmlspecialchars($ch['image_url']) ?>" alt="<?= htmlspecialchars($ch['name'] ?? '') ?>" class="character-card-img" onerror="this.onerror=null;this.src='https://via.placeholder.com/180x240?text=No+Image'" /><?php endif; ?>
+                            <div class="character-card-name"><?= htmlspecialchars($ch['name_ua'] ?: $ch['name']) ?></div>
                         </a>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
-        </div>
-    </div>
 
-    <div class="detail-bottom">
-        <?php if (!empty($characters)): ?>
-            <h3>Головні Персонажі</h3>
-            <div class="characters-grid">
-                <?php foreach ($characters as $ch): ?>
-                    <a class="character-card" href="index.php?route=character/view&id=<?= $ch['id'] ?>">
-                        <?php if (!empty($ch['image_url'])): ?><img src="<?= htmlspecialchars($ch['image_url']) ?>" alt="<?= htmlspecialchars($ch['name'] ?? '') ?>" class="character-card-img" onerror="this.onerror=null;this.src='https://via.placeholder.com/180x240?text=No+Image'" /><?php endif; ?>
-                        <div class="character-card-name"><?= htmlspecialchars($ch['name_ua'] ?: $ch['name']) ?></div>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <h2 style="margin-top:28px">Коментарі</h2>
-        <?php if (!empty($comments)): ?>
-            <?php foreach ($comments as $c): ?>
-                <div class="comment">
-                    <img class="avatar" src="<?= htmlspecialchars($c['avatar_url'] ?? '') ?>" alt="avatar" onerror="this.onerror=null;this.src='https://via.placeholder.com/48?text=U'">
-                    <div class="comment-content">
-                        <div class="comment-meta"><strong><?= htmlspecialchars($c['display_name'] ?: $c['login']) ?></strong> <span class="muted">— <?= htmlspecialchars($c['created_at']) ?></span></div>
-                        <div class="comment-body"><?= nl2br(htmlspecialchars($c['content'])) ?></div>
-                        <?php if (isset($_SESSION['user_id'])): ?>
-                            <?php
-                                $isAdmin = false;
-                                try {
-                                    $db = Database::getInstance();
-                                    $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
-                                    $rs->execute([':id' => $_SESSION['user_id']]);
-                                    $r = $rs->fetch();
-                                    $isAdmin = $r && ($r['role'] === 'admin');
-                                } catch (Exception $e) {
+            <h2 style="margin-top:28px">Коментарі</h2>
+            <?php if (!empty($comments)): ?>
+                <?php foreach ($comments as $c): ?>
+                    <div class="comment">
+                        <img class="avatar" src="<?= htmlspecialchars($c['avatar_url'] ?? '') ?>" alt="avatar" onerror="this.onerror=null;this.src='https://via.placeholder.com/48?text=U'">
+                        <div class="comment-content">
+                            <div class="comment-meta"><strong><?= htmlspecialchars($c['display_name'] ?: $c['login']) ?></strong> <span class="muted">— <?= htmlspecialchars($c['created_at']) ?></span></div>
+                            <div class="comment-body"><?= nl2br(htmlspecialchars($c['content'])) ?></div>
+                            <?php if (isset($_SESSION['user_id'])): ?>
+                                <?php
                                     $isAdmin = false;
-                                }
-                            ?>
-                            <?php if ($isAdmin): ?>
-                                <form method="post" action="index.php?route=guestbook/delete&id=<?= $c['id'] ?>" style="display:inline">
-                                    <button class="btn btn-small" onclick="return confirm('Видалити коментар?')">Видалити</button>
-                                </form>
+                                    try {
+                                        $db = Database::getInstance();
+                                        $rs = $db->prepare('SELECT role FROM users WHERE id = :id');
+                                        $rs->execute([':id' => $_SESSION['user_id']]);
+                                        $r = $rs->fetch();
+                                        $isAdmin = $r && ($r['role'] === 'admin');
+                                    } catch (Exception $e) {
+                                        $isAdmin = false;
+                                    }
+                                ?>
+                                <?php if ($isAdmin): ?>
+                                    <form method="post" action="index.php?route=guestbook/delete&id=<?= $c['id'] ?>" style="display:inline">
+                                        <button class="btn btn-small" onclick="return confirm('Видалити коментар?')">Видалити</button>
+                                    </form>
+                                <?php endif; ?>
                             <?php endif; ?>
-                        <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="no-comments">Поки що немає коментарів.</div>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <form action="index.php?route=guestbook/index" method="post" class="comment-form">
+                    <div class="form-group">
+                        <label for="comment_anime" class="form__label">Додати коментар</label>
+                        <textarea id="comment_anime" name="comment" rows="4" required class="form__textarea"></textarea>
+                    </div>
+                    <input type="hidden" name="item_type" value="anime">
+                    <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
+                    <div class="form__actions"><button class="btn btn-primary">Відправити</button></div>
+                </form>
+            <?php else: ?>
+                <p>Щоб залишити коментар, <a href="index.php?route=auth/login">увійдіть</a>.</p>
+            <?php endif; ?>
+        </div>
+
+        <div class="side-column">
+            <?php if (!empty($relatedManga)): ?>
+                <div class="card">
+                    <h3 style="margin-top: 0;">Пов'язані манга</h3>
+                    <div class="side-related-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                        <?php foreach ($relatedManga as $rm): ?>
+                            <a href="index.php?route=manga/view&id=<?= $rm['id'] ?>" style="text-decoration:none;color:inherit">
+                                <div style="background: linear-gradient(180deg, #071028, #081127); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 8px; text-align: center; transition: all 0.2s ease;">
+                                    <?php if (!empty($rm['cover_url'])): ?>
+                                        <img src="<?= htmlspecialchars($rm['cover_url']) ?>" alt="" style="width:100%;height:100px;object-fit:cover;border-radius:4px;margin-bottom:6px;display:block">
+                                    <?php endif; ?>
+                                    <h4 style="font-size: 0.8rem; margin: 0; color: #e6eef8; line-height: 1.2;"><?= htmlspecialchars(mb_substr($rm['title_ua'] ?: $rm['title'], 0, 30)) ?></h4>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="no-comments">Поки що немає коментарів.</div>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <form action="index.php?route=guestbook/index" method="post" class="comment-form">
-                <div class="form-group">
-                    <label for="comment_anime" class="form__label">Додати коментар</label>
-                    <textarea id="comment_anime" name="comment" rows="4" required class="form__textarea"></textarea>
-                </div>
-                <input type="hidden" name="item_type" value="anime">
-                <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
-                <div class="form__actions"><button class="btn btn-primary">Відправити</button></div>
-            </form>
-        <?php else: ?>
-            <p>Щоб залишити коментар, <a href="index.php?route=auth/login">увійдіть</a>.</p>
-        <?php endif; ?>
-
+            <?php endif; ?>
+        </div>
     </div>
 </div>

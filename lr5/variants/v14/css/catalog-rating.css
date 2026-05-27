@@ -1,0 +1,39 @@
+/* ===== Catalog Card Rating Badge ===== */
+.card-catalog {
+  position: relative;
+}
+
+.rating-badge-top-right {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ffd166, #ffb703);
+  color: #06121a;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(255, 209, 102, 0.3);
+  border: 1px solid rgba(255, 209, 102, 0.5);
+}
+
+/* ===== Manga List Cards ===== */
+.manga-card {
+  position: relative;
+}
+
+.manga-card .rating-badge-top-right {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ffd166, #ffb703);
+  color: #06121a;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(255, 209, 102, 0.3);
+  border: 1px solid rgba(255, 209, 102, 0.5);
+}
